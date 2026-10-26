@@ -326,9 +326,13 @@ mod tests {
         // Still require the accented first word, the French word and the number.
         let recognized = result.text().to_lowercase();
         assert!(
-            ["été français 2026", "été francais 2026", "été frangais 2026"]
-                .iter()
-                .any(|expected| recognized.contains(*expected)),
+            [
+                "été français 2026",
+                "été francais 2026",
+                "été frangais 2026"
+            ]
+            .iter()
+            .any(|expected| recognized.contains(*expected)),
             "baseline: {}, enhanced: {}",
             baseline.text(),
             result.text()
