@@ -1,7 +1,7 @@
 {
   "target": "x86_64-pc-windows-msvc",
-  "executable_sha256": "f7a07b2a827cb609abb4fe7d559d0cf88465b2767f029ff45d2b5f00a9ca93ec",
-  "cargo_lock_sha256": "6507a9b2555342cc33ddca61cd4828cbac89b20807f09cebf5ff13e8aa268f32",
+  "executable_sha256": "09b317bcc6812b76c8affd8866338040e3da772bddcb580a1714761744c5ed02",
+  "cargo_lock_sha256": "8bf73571752ce21d4c27d91b44177846b18578a6ade1e22e8973cf69fa4e1043",
   "normal_packages": 261,
   "unique_documents": 154,
   "embedded_fonts": [
@@ -1124,7 +1124,7 @@
     },
     {
       "package": "pdfinator",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "declared": "MIT OR Apache-2.0",
       "documents": [
         "c15ea0a2ad3d6bb4c1ab6e79914fcbb4b931252b30c3a408062ba4a4e4aaac34"
@@ -2183,32 +2183,32 @@
         "zmij 1.0.23"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\adler2-2.0.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fastrand-2.5.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glow-0.17.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\itoa-1.0.18\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\once_cell-1.21.4\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\pin-project-lite-0.2.17\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\proc-macro-crate-3.5.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\proc-macro2-1.0.107\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\quote-1.0.47\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rustc-hash-2.1.3\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde-1.0.229\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde_core-1.0.229\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde_derive-1.0.229\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde_json-1.0.154\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\siphasher-1.0.4\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\smol_str-0.2.2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\syn-1.0.109\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\syn-2.0.119\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\syn-3.0.9\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\thiserror-2.0.21\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\thiserror-impl-2.0.21\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tinyvec-1.13.3\\LICENSE-MIT.md",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-ident-1.0.27\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\winnow-1.0.4\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zmij-1.0.23\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\licenses\\extra\\accesskit-MIT.txt"
+        "cargo-registry/adler2-2.0.1/LICENSE-MIT",
+        "cargo-registry/fastrand-2.5.0/LICENSE-MIT",
+        "cargo-registry/glow-0.17.0/LICENSE-MIT",
+        "cargo-registry/itoa-1.0.18/LICENSE-MIT",
+        "cargo-registry/once_cell-1.21.4/LICENSE-MIT",
+        "cargo-registry/pin-project-lite-0.2.17/LICENSE-MIT",
+        "cargo-registry/proc-macro-crate-3.5.0/LICENSE-MIT",
+        "cargo-registry/proc-macro2-1.0.107/LICENSE-MIT",
+        "cargo-registry/quote-1.0.47/LICENSE-MIT",
+        "cargo-registry/rustc-hash-2.1.3/LICENSE-MIT",
+        "cargo-registry/serde-1.0.229/LICENSE-MIT",
+        "cargo-registry/serde_core-1.0.229/LICENSE-MIT",
+        "cargo-registry/serde_derive-1.0.229/LICENSE-MIT",
+        "cargo-registry/serde_json-1.0.154/LICENSE-MIT",
+        "cargo-registry/siphasher-1.0.4/LICENSE-MIT",
+        "cargo-registry/smol_str-0.2.2/LICENSE-MIT",
+        "cargo-registry/syn-1.0.109/LICENSE-MIT",
+        "cargo-registry/syn-2.0.119/LICENSE-MIT",
+        "cargo-registry/syn-3.0.9/LICENSE-MIT",
+        "cargo-registry/thiserror-2.0.21/LICENSE-MIT",
+        "cargo-registry/thiserror-impl-2.0.21/LICENSE-MIT",
+        "cargo-registry/tinyvec-1.13.3/LICENSE-MIT.md",
+        "cargo-registry/unicode-ident-1.0.27/LICENSE-MIT",
+        "cargo-registry/winnow-1.0.4/LICENSE-MIT",
+        "cargo-registry/zmij-1.0.23/LICENSE-MIT",
+        "licenses/extra/accesskit-MIT.txt"
       ]
     },
     "72cf46627d56bf00099fcf6c3cc1e1ce1901e8da2c21ee54d7fbc65ac8c8a730": {
@@ -2218,9 +2218,9 @@
         "accesskit_windows 0.32.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\accesskit-0.24.1\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\accesskit_consumer-0.35.0\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\accesskit_windows-0.32.1\\Cargo.toml"
+        "cargo-registry/accesskit-0.24.1/Cargo.toml",
+        "cargo-registry/accesskit_consumer-0.35.0/Cargo.toml",
+        "cargo-registry/accesskit_windows-0.32.1/Cargo.toml"
       ]
     },
     "59d8f0ba87ad9a2f1a431123c8d16646e5b89ba53653e818f16d136d77263c99": {
@@ -2228,7 +2228,7 @@
         "accesskit_winit 0.32.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\licenses\\LICENSE-APACHE"
+        "licenses/LICENSE-APACHE"
       ]
     },
     "41aafba04a8ef7be3f1090e85bde368eda270fd469cb44c4945b762f7da0af90": {
@@ -2236,7 +2236,7 @@
         "adler2 2.0.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\adler2-2.0.1\\Cargo.toml"
+        "cargo-registry/adler2-2.0.1/Cargo.toml"
       ]
     },
     "13baf4b02a284f141262a67226e074b9ac0467fa38cc6598e1b4d3c33aa60e57": {
@@ -2244,7 +2244,7 @@
         "aes 0.9.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\aes-0.9.3\\LICENSE-MIT"
+        "cargo-registry/aes-0.9.3/LICENSE-MIT"
       ]
     },
     "3dd40de851a53a99142cffde7b5cfe6a6b09fe8ba60f5f7ae0e249001432def4": {
@@ -2252,7 +2252,7 @@
         "ahash 0.8.12"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\ahash-0.8.12\\LICENSE-MIT"
+        "cargo-registry/ahash-0.8.12/LICENSE-MIT"
       ]
     },
     "c71815ab9e6bf8bd8523f5ffb8c4c7c5fb84cfd8b9a7906995a6ba25ef2ff9d6": {
@@ -2263,10 +2263,10 @@
         "brotli-decompressor 5.0.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\alloc-no-stdlib-2.0.4\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\brotli-8.0.4\\LICENSE.BSD-3-Clause",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\brotli-decompressor-5.0.3\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\licenses\\extra\\alloc-stdlib-BSD.txt"
+        "cargo-registry/alloc-no-stdlib-2.0.4/LICENSE",
+        "cargo-registry/brotli-8.0.4/LICENSE.BSD-3-Clause",
+        "cargo-registry/brotli-decompressor-5.0.3/LICENSE",
+        "licenses/extra/alloc-stdlib-BSD.txt"
       ]
     },
     "aaf7d597ecdcd19b737013adb5082577ce2bb57a344e39757c5f13c4d40f5b64": {
@@ -2274,7 +2274,7 @@
         "arboard 3.7.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\arboard-3.7.0\\LICENSE-MIT.txt"
+        "cargo-registry/arboard-3.7.0/LICENSE-MIT.txt"
       ]
     },
     "c90a7bc4197e25df2da09c2b7c4cb47f825c91ceaaace616d19ddef8bb845bc9": {
@@ -2282,7 +2282,7 @@
         "arrayref 0.3.9"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\arrayref-0.3.9\\LICENSE"
+        "cargo-registry/arrayref-0.3.9/LICENSE"
       ]
     },
     "625eb062458d42d2eb8c69913a4ad35e01753490350d8de9cddddb6cde8d7e62": {
@@ -2290,7 +2290,7 @@
         "arrayvec 0.7.8"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\arrayvec-0.7.8\\LICENSE-MIT"
+        "cargo-registry/arrayvec-0.7.8/LICENSE-MIT"
       ]
     },
     "8022d7ab74f93ee14da676c4ba7c767bb61ba146f8bb3afb3badf973ecfb731d": {
@@ -2298,7 +2298,7 @@
         "base64 0.22.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\base64-0.22.1\\LICENSE-MIT"
+        "cargo-registry/base64-0.22.1/LICENSE-MIT"
       ]
     },
     "c25311c4c60e634637fe8148151c9fc62b749205a8c83ad0bd02baeaf71c3209": {
@@ -2309,10 +2309,10 @@
         "num-traits 0.2.19"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\bitflags-1.3.2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\bitflags-2.13.2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\log-0.4.34\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\num-traits-0.2.19\\LICENSE-MIT"
+        "cargo-registry/bitflags-1.3.2/LICENSE-MIT",
+        "cargo-registry/bitflags-2.13.2/LICENSE-MIT",
+        "cargo-registry/log-0.4.34/LICENSE-MIT",
+        "cargo-registry/num-traits-0.2.19/LICENSE-MIT"
       ]
     },
     "7a4ef85ca0e901163f4fd408c36f96c0510b16a3e9abf796896213b1f2446909": {
@@ -2321,8 +2321,8 @@
         "block-padding 0.4.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\block-buffer-0.12.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\block-padding-0.4.2\\LICENSE-MIT"
+        "cargo-registry/block-buffer-0.12.1/LICENSE-MIT",
+        "cargo-registry/block-padding-0.4.2/LICENSE-MIT"
       ]
     },
     "24285452352bc9fa936cced4e8bdbca258e0983bc5a12e8254ca222c66673782": {
@@ -2330,7 +2330,7 @@
         "brotli 8.0.4"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\brotli-8.0.4\\LICENSE.MIT"
+        "cargo-registry/brotli-8.0.4/LICENSE.MIT"
       ]
     },
     "bbb0c7a72cdfa383f0a62db4e19033942ed3f909eac4e865334e22e1c0a17c92": {
@@ -2339,8 +2339,8 @@
         "bytemuck_derive 1.12.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\bytemuck-1.25.2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\bytemuck_derive-1.12.1\\LICENSE-MIT"
+        "cargo-registry/bytemuck-1.25.2/LICENSE-MIT",
+        "cargo-registry/bytemuck_derive-1.12.1/LICENSE-MIT"
       ]
     },
     "952115fb93510335fd97e1e479516553fa0c4da1b49acddf9cd5d18392a3e1cf": {
@@ -2349,8 +2349,8 @@
         "memchr 2.8.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\byteorder-lite-0.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\memchr-2.8.3\\LICENSE-MIT"
+        "cargo-registry/byteorder-lite-0.1.0/LICENSE-MIT",
+        "cargo-registry/memchr-2.8.3/LICENSE-MIT"
       ]
     },
     "d80d000f89d4ae45cd37ce77aaaf7f1c2b5b541a5df63bbeb4900657288747df": {
@@ -2358,7 +2358,7 @@
         "cbc 0.2.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\cbc-0.2.1\\LICENSE-MIT"
+        "cargo-registry/cbc-0.2.1/LICENSE-MIT"
       ]
     },
     "6bf6d79db7f6f622c369dc3a36429c9bfd0351ddfdcadd046e0bcf575f3d2614": {
@@ -2366,7 +2366,7 @@
         "cfg-if 1.0.5"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\cfg-if-1.0.5\\LICENSE-MIT"
+        "cargo-registry/cfg-if-1.0.5/LICENSE-MIT"
       ]
     },
     "ef7820cdb3b60213f9f4c3c86950ce1fa8350e5913f71a0bc5ef3b7fc83cf3cb": {
@@ -2374,7 +2374,7 @@
         "chacha20 0.10.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\chacha20-0.10.2\\LICENSE-MIT"
+        "cargo-registry/chacha20-0.10.2/LICENSE-MIT"
       ]
     },
     "737f471130ba2ef84c4a11efdc54fc846da51ab51cbbca3d99f437797acf4beb": {
@@ -2382,7 +2382,7 @@
         "chrono 0.4.45"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\chrono-0.4.45\\LICENSE.txt"
+        "cargo-registry/chrono-0.4.45/LICENSE.txt"
       ]
     },
     "54383a78e971927f5e61be3c168df0d261af5fda0f34e90affba1b1332f55023": {
@@ -2390,7 +2390,7 @@
         "cipher 0.5.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\cipher-0.5.2\\LICENSE-MIT"
+        "cargo-registry/cipher-0.5.2/LICENSE-MIT"
       ]
     },
     "a796d5730b60337084397744dbaaad751d2995d421f96e8842e4a22007ee284f": {
@@ -2399,8 +2399,8 @@
         "error-code 3.4.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\error-code-3.4.0\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\licenses\\extra\\clipboard-win-BSL.txt"
+        "cargo-registry/error-code-3.4.0/LICENSE",
+        "licenses/extra/clipboard-win-BSL.txt"
       ]
     },
     "35f51b752e2ed3a70a42802849f421cdba9dd561fd6ef484e26bf2e0fa992713": {
@@ -2409,8 +2409,8 @@
         "error-code 3.4.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\clipboard-win-5.4.1\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\error-code-3.4.0\\Cargo.toml"
+        "cargo-registry/clipboard-win-5.4.1/Cargo.toml",
+        "cargo-registry/error-code-3.4.0/Cargo.toml"
       ]
     },
     "7c9b48b52decb9837c70f608678129e1ac79e056829c8d1e82e8cdd8aed562f8": {
@@ -2423,12 +2423,12 @@
         "simdutf8 0.1.5"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\color-0.3.3\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fdeflate-0.3.7\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\half-2.7.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\image-0.25.10\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\linebender_resource_handle-0.1.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\simdutf8-0.1.5\\LICENSE-MIT"
+        "cargo-registry/color-0.3.3/LICENSE-MIT",
+        "cargo-registry/fdeflate-0.3.7/LICENSE-MIT",
+        "cargo-registry/half-2.7.1/LICENSE-MIT",
+        "cargo-registry/image-0.25.10/LICENSE-MIT",
+        "cargo-registry/linebender_resource_handle-0.1.1/LICENSE-MIT",
+        "cargo-registry/simdutf8-0.1.5/LICENSE-MIT"
       ]
     },
     "1fcf0b1a3d6cd04fbf94e0499a96f37d138562e956f9bd156e07974dd63b6db5": {
@@ -2436,7 +2436,7 @@
         "color_quant 1.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\color_quant-1.1.0\\LICENSE"
+        "cargo-registry/color_quant-1.1.0/LICENSE"
       ]
     },
     "192e528aaef25b8013961fb8c18f1544d533c5205a71dd717429e7f9b8abb41a": {
@@ -2445,8 +2445,8 @@
         "cpufeatures 0.3.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\const-oid-0.10.2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\cpufeatures-0.3.1\\LICENSE-MIT"
+        "cargo-registry/const-oid-0.10.2/LICENSE-MIT",
+        "cargo-registry/cpufeatures-0.3.1/LICENSE-MIT"
       ]
     },
     "705524a2bfd96f3ee8b9120120a8799455eab746cda1f063489797c3fa2c0e42": {
@@ -2454,7 +2454,7 @@
         "core_detect 1.0.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\core_detect-1.0.0\\LICENSE-MIT"
+        "cargo-registry/core_detect-1.0.0/LICENSE-MIT"
       ]
     },
     "ed7f0cddb0adb392fcc3f48b8ce84f5080d59845214fd3149cb211cf7e71ea97": {
@@ -2462,7 +2462,7 @@
         "cpubits 0.1.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\cpubits-0.1.1\\LICENSE-MIT"
+        "cargo-registry/cpubits-0.1.1/LICENSE-MIT"
       ]
     },
     "f28f9359846407cb2d33869d82508a7e27476ac318e69b7e877d11301210914e": {
@@ -2470,7 +2470,7 @@
         "craft-print 0.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\craft-libs\\LICENSE-MIT"
+        "vendor/craft-libs/LICENSE-MIT"
       ]
     },
     "05c28b49ee8975246b29492e4d0ee1f24e29dd7cdf2def577547e239e68a748d": {
@@ -2478,7 +2478,7 @@
         "crc32fast 1.5.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\crc32fast-1.5.2\\LICENSE-MIT"
+        "cargo-registry/crc32fast-1.5.2/LICENSE-MIT"
       ]
     },
     "d90ed0b5db95520a003153a030247a21869285ebf5748f9655b876a00b7c00cb": {
@@ -2488,9 +2488,9 @@
         "crossbeam-utils 0.8.23"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\crossbeam-deque-0.8.8\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\crossbeam-epoch-0.9.21\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\crossbeam-utils-0.8.23\\LICENSE-MIT"
+        "cargo-registry/crossbeam-deque-0.8.8/LICENSE-MIT",
+        "cargo-registry/crossbeam-epoch-0.9.21/LICENSE-MIT",
+        "cargo-registry/crossbeam-utils-0.8.23/LICENSE-MIT"
       ]
     },
     "3842af121d4afce3b5566d207d25b46fb115c27eb15d1db7291fba22d9528c44": {
@@ -2498,7 +2498,7 @@
         "crypto-common 0.2.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\crypto-common-0.2.2\\LICENSE-MIT"
+        "cargo-registry/crypto-common-0.2.2/LICENSE-MIT"
       ]
     },
     "db5f6bc4dde798854049502531275f15235b72e550cc8b509cc480e9426ebda1": {
@@ -2506,7 +2506,7 @@
         "cursor-icon 1.2.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\cursor-icon-1.2.0\\LICENSE-MIT"
+        "cargo-registry/cursor-icon-1.2.0/LICENSE-MIT"
       ]
     },
     "754203e3cff426006981dbbf85fc9260a470613ba8e5223ee1a5812c017aa4e2": {
@@ -2514,7 +2514,7 @@
         "data-url 0.3.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\data-url-0.3.2\\LICENSE-MIT"
+        "cargo-registry/data-url-0.3.2/LICENSE-MIT"
       ]
     },
     "96dd5b9548d184de34fc27fa95bae4edfbcb9a2043b7a74de57e84aadf73b696": {
@@ -2522,7 +2522,7 @@
         "digest 0.11.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\digest-0.11.3\\LICENSE-MIT"
+        "cargo-registry/digest-0.11.3/LICENSE-MIT"
       ]
     },
     "e723f0aaad2740b74a5042e19c02f312c567b0b26ccbc5eacc7b6fb4023d13ca": {
@@ -2530,7 +2530,7 @@
         "document-features 0.2.12"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\document-features-0.2.12\\LICENSE-MIT"
+        "cargo-registry/document-features-0.2.12/LICENSE-MIT"
       ]
     },
     "958e28cd3f37c23ec02881fe20cb82d4151668349e1c7beb2daea4ce2640dcf0": {
@@ -2540,9 +2540,9 @@
         "winit 0.30.13"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\dpi-0.1.2\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-general-category-1.1.0\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\winit\\LICENSE"
+        "cargo-registry/dpi-0.1.2/LICENSE",
+        "cargo-registry/unicode-general-category-1.1.0/LICENSE",
+        "vendor/pdfcraft/vendor/winit/LICENSE"
       ]
     },
     "4185c7e32a0d9eea3138bb38d168e0e70d51c112f3608d803f73d2a3157420b1": {
@@ -2550,7 +2550,7 @@
         "dpi 0.1.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\dpi-0.1.2\\LICENSE-LIBM-MIT"
+        "cargo-registry/dpi-0.1.2/LICENSE-LIBM-MIT"
       ]
     },
     "83cead4c167b152fbbe8e9b4b84ade1bd501200de7eb148caa9cf6f9f7ab403e": {
@@ -2558,7 +2558,7 @@
         "ecb 0.2.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\ecb-0.2.1\\LICENSE-MIT"
+        "cargo-registry/ecb-0.2.1/LICENSE-MIT"
       ]
     },
     "6666680f3c11c508acfcdc077f7bb2c498aa78382e358d8daec21791545e1dd0": {
@@ -2574,7 +2574,7 @@
         "epaint_default_fonts 0.36.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\licenses\\extra\\egui-MIT.txt"
+        "licenses/extra/egui-MIT.txt"
       ]
     },
     "f6b06eca855bbfd854ba2f545c684dade8593e27cc95877587fa21a8932100bb": {
@@ -2583,8 +2583,8 @@
         "itertools 0.15.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\either-1.19.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\itertools-0.15.0\\LICENSE-MIT"
+        "cargo-registry/either-1.19.0/LICENSE-MIT",
+        "cargo-registry/itertools-0.15.0/LICENSE-MIT"
       ]
     },
     "96ddb586b5e9b938b99647ea079dc54930376ddb942f6c2796bbf2b046235c9b": {
@@ -2592,7 +2592,7 @@
         "encoding_rs 0.8.42"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\encoding_rs-0.8.42\\COPYRIGHT"
+        "cargo-registry/encoding_rs-0.8.42/COPYRIGHT"
       ]
     },
     "69fb5adae13beb99216e03791764546ec81f2c6fe5d00b085fea691800741b4e": {
@@ -2601,8 +2601,8 @@
         "multiversion_no_op 1.0.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\encoding_rs-0.8.42\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\multiversion_no_op-1.0.0\\LICENSE-MIT"
+        "cargo-registry/encoding_rs-0.8.42/LICENSE-MIT",
+        "cargo-registry/multiversion_no_op-1.0.0/LICENSE-MIT"
       ]
     },
     "4ad2597de723f2e3a717783e259d857ec703583f64a3dcacf1a2364f868ba9a0": {
@@ -2610,7 +2610,7 @@
         "encoding_rs 0.8.42"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\encoding_rs-0.8.42\\LICENSE-WHATWG"
+        "cargo-registry/encoding_rs-0.8.42/LICENSE-WHATWG"
       ]
     },
     "c963879647034d6c5d7027d8e2b024213589b749d11ba7320032802307bced9c": {
@@ -2619,8 +2619,8 @@
         "enum-map-derive 0.17.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\enum-map-2.7.3\\LICENSES\\MIT.txt",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\enum-map-derive-0.17.0\\LICENSES\\MIT.txt"
+        "cargo-registry/enum-map-2.7.3/LICENSES/MIT.txt",
+        "cargo-registry/enum-map-derive-0.17.0/LICENSES/MIT.txt"
       ]
     },
     "3c7d8bcc6f358ab370c9153e0ca3a77ad0589daa316d23f17f58e1e89ac8b2a6": {
@@ -2628,7 +2628,7 @@
         "equivalent 1.0.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\equivalent-1.0.3\\LICENSE-MIT"
+        "cargo-registry/equivalent-1.0.3/LICENSE-MIT"
       ]
     },
     "9fba058782d4dbf4eda66df225dfc11e8afdc5618f6bc36c2dafbb087cda3971": {
@@ -2639,10 +2639,10 @@
         "unicode-segmentation 1.13.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\euclid-0.22.14\\COPYRIGHT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-normalization-0.1.26\\COPYRIGHT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-properties-0.1.4\\COPYRIGHT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-segmentation-1.13.3\\COPYRIGHT"
+        "cargo-registry/euclid-0.22.14/COPYRIGHT",
+        "cargo-registry/unicode-normalization-0.1.26/COPYRIGHT",
+        "cargo-registry/unicode-properties-0.1.4/COPYRIGHT",
+        "cargo-registry/unicode-segmentation-1.13.3/COPYRIGHT"
       ]
     },
     "f68b2461e05d8f7a696e193bb874cf499e35a9158f0540f3bb70df356cd3b958": {
@@ -2650,7 +2650,7 @@
         "euclid 0.22.14"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\euclid-0.22.14\\LICENSE-MIT"
+        "cargo-registry/euclid-0.22.14/LICENSE-MIT"
       ]
     },
     "5d20351f6f5f4f8329425f81b342ae18734bad6d4443a379ffdd481c12756b4a": {
@@ -2658,7 +2658,7 @@
         "fastrand 2.5.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fastrand-2.5.0\\Cargo.toml"
+        "cargo-registry/fastrand-2.5.0/Cargo.toml"
       ]
     },
     "9630a8e6f7bd28c4e5ce838d2c245e1dfd295da21d1d84493d19dace486ea698": {
@@ -2666,7 +2666,7 @@
         "fax 0.2.7"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fax-0.2.7\\LICENSE"
+        "cargo-registry/fax-0.2.7/LICENSE"
       ]
     },
     "d7c83fd7a9fdfb565f1855b8ca0ec1da926cf3881f6781fb97459a7532210d0c": {
@@ -2675,8 +2675,8 @@
         "image 0.25.10"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fdeflate-0.3.7\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\image-0.25.10\\Cargo.toml"
+        "cargo-registry/fdeflate-0.3.7/Cargo.toml",
+        "cargo-registry/image-0.25.10/Cargo.toml"
       ]
     },
     "2282235099b50048933be2d40bd83b40d9fd548a8e173c79b8a788ab5938a027": {
@@ -2688,11 +2688,11 @@
         "polycool 0.4.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fearless_simd-0.4.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\kurbo-0.11.3\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\kurbo-0.13.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\peniko-0.6.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\polycool-0.4.0\\LICENSE-MIT"
+        "cargo-registry/fearless_simd-0.4.1/LICENSE-MIT",
+        "cargo-registry/kurbo-0.11.3/LICENSE-MIT",
+        "cargo-registry/kurbo-0.13.1/LICENSE-MIT",
+        "cargo-registry/peniko-0.6.1/LICENSE-MIT",
+        "cargo-registry/polycool-0.4.0/LICENSE-MIT"
       ]
     },
     "697ea72a946eafdb737d99d54adb1913f6679744b60833d4e056f0aed60447ec": {
@@ -2700,7 +2700,7 @@
         "flate2 1.1.10"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\flate2-1.1.10\\LICENSE-MIT"
+        "cargo-registry/flate2-1.1.10/LICENSE-MIT"
       ]
     },
     "7cde3795b0fbf51c1f3517cff290ff6de1fe3183c309b74bf926a642b229826c": {
@@ -2708,7 +2708,7 @@
         "float-cmp 0.9.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\float-cmp-0.9.0\\LICENSE"
+        "cargo-registry/float-cmp-0.9.0/LICENSE"
       ]
     },
     "4077caef2f969a9c68243d8425136e12e9a9c486fe67778e65043e2f94cd99c1": {
@@ -2717,8 +2717,8 @@
         "fmt-derive-proc 0.1.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fmt-derive-0.1.2\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\fmt-derive-proc-0.1.2\\Cargo.toml"
+        "cargo-registry/fmt-derive-0.1.2/Cargo.toml",
+        "cargo-registry/fmt-derive-proc-0.1.2/Cargo.toml"
       ]
     },
     "3a31f72fe7c9baf376c3da1d7d0154366be8ef0bab0a3f7531db4c2abf1ad062": {
@@ -2726,7 +2726,7 @@
         "foldhash 0.2.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\foldhash-0.2.0\\LICENSE"
+        "cargo-registry/foldhash-0.2.0/LICENSE"
       ]
     },
     "cff000a3aee311d2cd74fab02968c804e742f81fdf48e0216b9c9fcb8d134a38": {
@@ -2736,9 +2736,9 @@
         "skrifa 0.42.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\font-types-0.11.3\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\read-fonts-0.39.2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\skrifa-0.42.1\\LICENSE-MIT"
+        "cargo-registry/font-types-0.11.3/LICENSE-MIT",
+        "cargo-registry/read-fonts-0.39.2/LICENSE-MIT",
+        "cargo-registry/skrifa-0.42.1/LICENSE-MIT"
       ]
     },
     "ba498e49a767fdce1599e589d3b063d9b27fb05b24f3063928cfb8f54a918ce1": {
@@ -2750,11 +2750,11 @@
         "skrifa 0.47.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\font-types-0.12.7\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\read-fonts-0.41.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\read-fonts-0.44.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\skrifa-0.44.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\skrifa-0.47.0\\LICENSE-MIT"
+        "cargo-registry/font-types-0.12.7/LICENSE-MIT",
+        "cargo-registry/read-fonts-0.41.0/LICENSE-MIT",
+        "cargo-registry/read-fonts-0.44.0/LICENSE-MIT",
+        "cargo-registry/skrifa-0.44.0/LICENSE-MIT",
+        "cargo-registry/skrifa-0.47.0/LICENSE-MIT"
       ]
     },
     "1e13a8a06f81a470e5014ba676ebb33ff06f7a560afd221fd9a95a9babea8960": {
@@ -2762,7 +2762,7 @@
         "getrandom 0.3.4"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\getrandom-0.3.4\\LICENSE-MIT"
+        "cargo-registry/getrandom-0.3.4/LICENSE-MIT"
       ]
     },
     "cb140e49d1fab067368f600b35180ac7db34064581a51d37730d2c6ac8864a15": {
@@ -2770,7 +2770,7 @@
         "getrandom 0.4.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\getrandom-0.4.3\\LICENSE-MIT"
+        "cargo-registry/getrandom-0.4.3/LICENSE-MIT"
       ]
     },
     "8c437afe392c7967256ea3caaa6461a2dd7780f2565ffe1efbadef23b3ff03a5": {
@@ -2778,7 +2778,7 @@
         "gif 0.14.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\gif-0.14.2\\LICENSE-MIT"
+        "cargo-registry/gif-0.14.2/LICENSE-MIT"
       ]
     },
     "3bdc74346e186d0c92e67b47ee16acae953ac66671363593ec56ebc24d6e5e7b": {
@@ -2787,8 +2787,8 @@
         "glifo 0.2.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glifo-0.1.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glifo-0.2.0\\LICENSE-MIT"
+        "cargo-registry/glifo-0.1.1/LICENSE-MIT",
+        "cargo-registry/glifo-0.2.0/LICENSE-MIT"
       ]
     },
     "0cdf7cd132d06e4c42a10e844f64b509086337d2edc93ee50eb12ee0193431b5": {
@@ -2796,7 +2796,7 @@
         "glow 0.17.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glow-0.17.0\\Cargo.toml"
+        "cargo-registry/glow-0.17.0/Cargo.toml"
       ]
     },
     "372f45e927bea5f3620bbd5ff3fa9e88b5460843fc5ba5a1e15a7c695ef998d4": {
@@ -2806,9 +2806,9 @@
         "glutin_wgl_sys 0.6.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glutin-0.32.3\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glutin_egl_sys-0.7.1\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glutin_wgl_sys-0.6.1\\LICENSE"
+        "cargo-registry/glutin-0.32.3/LICENSE",
+        "cargo-registry/glutin_egl_sys-0.7.1/LICENSE",
+        "cargo-registry/glutin_wgl_sys-0.6.1/LICENSE"
       ]
     },
     "7204f6a95231d62aa15941e2c699f64370ef9a31ed2f93b589b516d6594bdcd4": {
@@ -2816,7 +2816,7 @@
         "glutin-winit 0.5.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\glutin-winit-0.5.0\\LICENSE"
+        "cargo-registry/glutin-winit-0.5.0/LICENSE"
       ]
     },
     "a64ea0e55875bc08c909c42eb057ce3906090d8a5e8cf87cea9ee220b2f9ec73": {
@@ -2824,7 +2824,7 @@
         "guillotiere 0.7.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\guillotiere-0.7.0\\LICENSE-MIT"
+        "cargo-registry/guillotiere-0.7.0/LICENSE-MIT"
       ]
     },
     "6620b490b5adb55cdf430542f702820c168686261292a8eac806c34e88e4ded4": {
@@ -2832,7 +2832,7 @@
         "half 2.7.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\half-2.7.1\\Cargo.toml"
+        "cargo-registry/half-2.7.1/Cargo.toml"
       ]
     },
     "c17f62454747f138f5e5fa0c7c2bc1fdb2303e05fcbb68b52a390e14f5ebe94c": {
@@ -2840,7 +2840,7 @@
         "harfrust 0.12.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\harfrust-0.12.0\\LICENSE"
+        "cargo-registry/harfrust-0.12.0/LICENSE"
       ]
     },
     "7e1f7cb813ec8afdb27afbb7162b48874c3f6c5b55f2affcbc5f4c132d8861c4": {
@@ -2849,8 +2849,8 @@
         "hashbrown 0.17.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hashbrown-0.16.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hashbrown-0.17.1\\LICENSE-MIT"
+        "cargo-registry/hashbrown-0.16.1/LICENSE-MIT",
+        "cargo-registry/hashbrown-0.17.1/LICENSE-MIT"
       ]
     },
     "8cb86a9bbc53862d20e8c9ca7f26578084437a21fac89ea0e56c5e5a5456be90": {
@@ -2865,14 +2865,14 @@
         "hayro-syntax 0.7.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hayro-ccitt-0.3.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hayro-cmap-0.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hayro-jpeg2000-0.3.5\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hayro-postscript-0.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\hayro-interpret\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\hayro-jbig2\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\hayro-syntax\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\hayro\\LICENSE-MIT"
+        "cargo-registry/hayro-ccitt-0.3.0/LICENSE-MIT",
+        "cargo-registry/hayro-cmap-0.1.0/LICENSE-MIT",
+        "cargo-registry/hayro-jpeg2000-0.3.5/LICENSE-MIT",
+        "cargo-registry/hayro-postscript-0.1.0/LICENSE-MIT",
+        "vendor/pdfcraft/vendor/hayro-interpret/LICENSE-MIT",
+        "vendor/pdfcraft/vendor/hayro-jbig2/LICENSE-MIT",
+        "vendor/pdfcraft/vendor/hayro-syntax/LICENSE-MIT",
+        "vendor/pdfcraft/vendor/hayro/LICENSE-MIT"
       ]
     },
     "d1442c3bc874608ba5ed80a044a1f7aa115565c30214e2e4ef8563acf0309d39": {
@@ -2884,11 +2884,11 @@
         "unicode-segmentation 1.13.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\heck-0.5.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-bidi-0.3.18\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-normalization-0.1.26\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-properties-0.1.4\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-segmentation-1.13.3\\LICENSE-MIT"
+        "cargo-registry/heck-0.5.0/LICENSE-MIT",
+        "cargo-registry/unicode-bidi-0.3.18/LICENSE-MIT",
+        "cargo-registry/unicode-normalization-0.1.26/LICENSE-MIT",
+        "cargo-registry/unicode-properties-0.1.4/LICENSE-MIT",
+        "cargo-registry/unicode-segmentation-1.13.3/LICENSE-MIT"
       ]
     },
     "11347be29e177845d3f3a7c2ae195afb04621c9413a9ae53486ed23dcee0cc27": {
@@ -2896,7 +2896,7 @@
         "hybrid-array 0.4.15"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hybrid-array-0.4.15\\LICENSE-MIT"
+        "cargo-registry/hybrid-array-0.4.15/LICENSE-MIT"
       ]
     },
     "acb6d6b1ed20fb8195d77f5eb7723790926cf2a9595046dd9fed988b23c0924e": {
@@ -2904,7 +2904,7 @@
         "imagesize 0.13.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\imagesize-0.13.0\\LICENSE"
+        "cargo-registry/imagesize-0.13.0/LICENSE"
       ]
     },
     "72c966073ea33b7014ce2d23cc0bba6d184017cca50703ee4808c02af4624f46": {
@@ -2912,7 +2912,7 @@
         "indexmap 2.14.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\indexmap-2.14.2\\LICENSE-MIT"
+        "cargo-registry/indexmap-2.14.2/LICENSE-MIT"
       ]
     },
     "76267e2333b65823cebf895db594509087c6f4a1aa207a6f8ee47ba640043cb0": {
@@ -2920,7 +2920,7 @@
         "inout 0.2.5"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\inout-0.2.5\\LICENSE-MIT"
+        "cargo-registry/inout-0.2.5/LICENSE-MIT"
       ]
     },
     "ea0dc7698d0d9df8fe6181301ac199525620e3682b5aa914f0bb4be961787f69": {
@@ -2935,14 +2935,14 @@
         "zmij 1.0.23"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\itoa-1.0.18\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\quote-1.0.47\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\syn-1.0.109\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\syn-2.0.119\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\syn-3.0.9\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\thiserror-2.0.21\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\thiserror-impl-2.0.21\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zmij-1.0.23\\Cargo.toml"
+        "cargo-registry/itoa-1.0.18/Cargo.toml",
+        "cargo-registry/quote-1.0.47/Cargo.toml",
+        "cargo-registry/syn-1.0.109/Cargo.toml",
+        "cargo-registry/syn-2.0.119/Cargo.toml",
+        "cargo-registry/syn-3.0.9/Cargo.toml",
+        "cargo-registry/thiserror-2.0.21/Cargo.toml",
+        "cargo-registry/thiserror-impl-2.0.21/Cargo.toml",
+        "cargo-registry/zmij-1.0.23/Cargo.toml"
       ]
     },
     "121aea2578cd98e64faa0ca32acfd4f83551b1ecd293730a9541a4f5a37bf85c": {
@@ -2950,7 +2950,7 @@
         "libloading 0.8.9"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\libloading-0.8.9\\LICENSE"
+        "cargo-registry/libloading-0.8.9/LICENSE"
       ]
     },
     "1816a1f362c89aa6d4b41fd44c14a8f6dc2bc788ac03877e48cb76d3e1b15784": {
@@ -2958,7 +2958,7 @@
         "litrs 1.0.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\litrs-1.0.1\\LICENSE-MIT"
+        "cargo-registry/litrs-1.0.1/LICENSE-MIT"
       ]
     },
     "2810737fc58c4fa01c84559aa0b48db577fb0d7e0f871a2459b2551976b9a446": {
@@ -2968,9 +2968,9 @@
         "parking_lot_core 0.9.12"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\lock_api-0.4.14\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\parking_lot-0.12.5\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\parking_lot_core-0.9.12\\LICENSE-MIT"
+        "cargo-registry/lock_api-0.4.14/LICENSE-MIT",
+        "cargo-registry/parking_lot-0.12.5/LICENSE-MIT",
+        "cargo-registry/parking_lot_core-0.9.12/LICENSE-MIT"
       ]
     },
     "d6a4c64baa404dd0c660d64485f04eeda91d601692d5d744b1c3a324e40db285": {
@@ -2978,7 +2978,7 @@
         "lopdf 0.45.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\lopdf\\LICENSE"
+        "vendor/pdfcraft/vendor/lopdf/LICENSE"
       ]
     },
     "3278167e3626545e878297b272945dc46931e6ce63251592ed5cc14fa50d2498": {
@@ -2987,8 +2987,8 @@
         "sha2 0.11.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\md-5-0.11.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\sha2-0.11.1\\LICENSE-MIT"
+        "cargo-registry/md-5-0.11.0/LICENSE-MIT",
+        "cargo-registry/sha2-0.11.1/LICENSE-MIT"
       ]
     },
     "9a3c7889befa85a4cb1d348a470521c5b8f7bd0baff3a94b1090c94488d27d95": {
@@ -2997,8 +2997,8 @@
         "miniz_oxide 0.9.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\miniz_oxide-0.8.9\\LICENSE-MIT.md",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\miniz_oxide-0.9.1\\LICENSE-MIT.md"
+        "cargo-registry/miniz_oxide-0.8.9/LICENSE-MIT.md",
+        "cargo-registry/miniz_oxide-0.9.1/LICENSE-MIT.md"
       ]
     },
     "642fcbed2668a30055be0a45d807abf66dd1bf939b9b1bffd605d29a100b4c87": {
@@ -3008,9 +3008,9 @@
         "pxfm 0.1.30"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\moxcms-0.8.1\\LICENSE-APACHE.md",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\pic-scale-0.7.12\\LICENSE-APACHE.md",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\pxfm-0.1.30\\LICENSE-APACHE.md"
+        "cargo-registry/moxcms-0.8.1/LICENSE-APACHE.md",
+        "cargo-registry/pic-scale-0.7.12/LICENSE-APACHE.md",
+        "cargo-registry/pxfm-0.1.30/LICENSE-APACHE.md"
       ]
     },
     "74336d0287de26948cb80ac5620cd2459a9c3c3dca67bb69386d00a5471780ec": {
@@ -3018,7 +3018,7 @@
         "multiversion_no_op 1.0.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\multiversion_no_op-1.0.0\\COPYRIGHT"
+        "cargo-registry/multiversion_no_op-1.0.0/COPYRIGHT"
       ]
     },
     "e66ab43f8c02a51502f9623b17006e150166cd4b196cfe9daf0e47a506279a31": {
@@ -3026,7 +3026,7 @@
         "nohash-hasher 0.2.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\nohash-hasher-0.2.0\\LICENSE-MIT"
+        "cargo-registry/nohash-hasher-0.2.0/LICENSE-MIT"
       ]
     },
     "8f22db49e2533d6dc726e7932e6450615c76fe8d4bca663ac222a2d574a50e6c": {
@@ -3034,7 +3034,7 @@
         "nom 8.0.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\nom-8.0.0\\LICENSE"
+        "cargo-registry/nom-8.0.0/LICENSE"
       ]
     },
     "a39d634241073e210e29bfe661d322bb2fcd8ec0d8f243cb41966c9b7fe539eb": {
@@ -3043,8 +3043,8 @@
         "smol_str 0.2.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\once_cell-1.21.4\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\smol_str-0.2.2\\Cargo.toml"
+        "cargo-registry/once_cell-1.21.4/Cargo.toml",
+        "cargo-registry/smol_str-0.2.2/Cargo.toml"
       ]
     },
     "db25b79f715fa66b2f720eb0246bdd79c451e2162df8222a850127c7f9c90003": {
@@ -3052,7 +3052,7 @@
         "Moteur documentaire PDF"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\LICENSE-MIT"
+        "vendor/pdfcraft/LICENSE-MIT"
       ]
     },
     "c15ea0a2ad3d6bb4c1ab6e79914fcbb4b931252b30c3a408062ba4a4e4aaac34": {
@@ -3071,10 +3071,10 @@
         "phf_shared 0.13.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\phf-0.13.1\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\phf_generator-0.13.1\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\phf_macros-0.13.1\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\phf_shared-0.13.1\\LICENSE"
+        "cargo-registry/phf-0.13.1/LICENSE",
+        "cargo-registry/phf_generator-0.13.1/LICENSE",
+        "cargo-registry/phf_macros-0.13.1/LICENSE",
+        "cargo-registry/phf_shared-0.13.1/LICENSE"
       ]
     },
     "c60df383f3ef88c941d2aac91e8e39975212dbd2e96ef6a64c958499795c3499": {
@@ -3082,7 +3082,7 @@
         "pico-args 0.5.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\pico-args-0.5.0\\LICENSE"
+        "cargo-registry/pico-args-0.5.0/LICENSE"
       ]
     },
     "eb328b02641b963c159f0bf3a5f8bb41dc4dba0213f6570a0df8f270aae596c6": {
@@ -3091,8 +3091,8 @@
         "png 0.18.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\png-0.17.16\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\png-0.18.1\\LICENSE-MIT"
+        "cargo-registry/png-0.17.16/LICENSE-MIT",
+        "cargo-registry/png-0.18.1/LICENSE-MIT"
       ]
     },
     "94ac4aee40ce822fdeafc759ca1471464186134f3b0ae955e0252144cd392dfd": {
@@ -3100,7 +3100,7 @@
         "proc-macro-crate 3.5.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\proc-macro-crate-3.5.0\\Cargo.toml"
+        "cargo-registry/proc-macro-crate-3.5.0/Cargo.toml"
       ]
     },
     "14511d0576d366bd63b95af61eac478181726ea2aa6de6a0c7310ea85eb7e248": {
@@ -3109,8 +3109,8 @@
         "proc-macro-error-attr 1.0.4"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\proc-macro-error-1.0.4\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\proc-macro-error-attr-1.0.4\\LICENSE-MIT"
+        "cargo-registry/proc-macro-error-1.0.4/LICENSE-MIT",
+        "cargo-registry/proc-macro-error-attr-1.0.4/LICENSE-MIT"
       ]
     },
     "acdcb7a3e5f2d56ca98de6038337bce0123ea4465d5ae01e00b4784b43a54314": {
@@ -3118,7 +3118,7 @@
         "proc-macro2 1.0.107"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\proc-macro2-1.0.107\\Cargo.toml"
+        "cargo-registry/proc-macro2-1.0.107/Cargo.toml"
       ]
     },
     "1834e4a70e47109cc013a1fa4f34cb0e5b32753be1247a116ec1f1357b87115f": {
@@ -3126,7 +3126,7 @@
         "profiling 1.0.18"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\licenses\\extra\\profiling-MIT.txt"
+        "licenses/extra/profiling-MIT.txt"
       ]
     },
     "f8045e4596656573bf8dcf8761e4a055096b8d704e8c47ddf4e57d8121a48a51": {
@@ -3134,7 +3134,7 @@
         "quick-error 2.0.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\quick-error-2.0.1\\LICENSE-MIT"
+        "cargo-registry/quick-error-2.0.1/LICENSE-MIT"
       ]
     },
     "fbe36b2f9c615c784fdb1a83a9ff22f1446349491f1fd29dd3d24db381527b07": {
@@ -3142,7 +3142,7 @@
         "rand 0.10.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rand-0.10.3\\COPYRIGHT"
+        "cargo-registry/rand-0.10.3/COPYRIGHT"
       ]
     },
     "d13eb3644fef1189a95d78f7362685d943ba495d04666e1c8abf156aa87eb557": {
@@ -3150,7 +3150,7 @@
         "rand 0.10.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rand-0.10.3\\LICENSE-MIT"
+        "cargo-registry/rand-0.10.3/LICENSE-MIT"
       ]
     },
     "78017899fb8f1e85c9614a61344679fda56e4606f75c8073b400d5912d96790a": {
@@ -3158,7 +3158,7 @@
         "rand_core 0.10.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rand_core-0.10.1\\COPYRIGHT"
+        "cargo-registry/rand_core-0.10.1/COPYRIGHT"
       ]
     },
     "f19347226b493ced6077135ff987bc0eb5ce0b86202930506c9110d54a82f37a": {
@@ -3166,7 +3166,7 @@
         "rand_core 0.10.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rand_core-0.10.1\\LICENSE-MIT"
+        "cargo-registry/rand_core-0.10.1/LICENSE-MIT"
       ]
     },
     "29683a809316d6ee1386ad030904596753d1a2ecfd7541834efb4b453de33eb7": {
@@ -3174,7 +3174,7 @@
         "rangemap 1.8.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rangemap-1.8.0\\LICENSE-MIT"
+        "cargo-registry/rangemap-1.8.0/LICENSE-MIT"
       ]
     },
     "279ce0b86b8d12d7f1ee41a38e62214daaca48e151ce43e111eae0869ad48009": {
@@ -3182,7 +3182,7 @@
         "raw-window-handle 0.6.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\raw-window-handle-0.6.2\\LICENSE-MIT.md"
+        "cargo-registry/raw-window-handle-0.6.2/LICENSE-MIT.md"
       ]
     },
     "3205929a91448102764fa620a252e25abb6993e9afe7cb6bd4caed8895e13aae": {
@@ -3191,8 +3191,8 @@
         "rayon-core 1.13.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rayon-1.12.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rayon-core-1.13.0\\LICENSE-MIT"
+        "cargo-registry/rayon-1.12.0/LICENSE-MIT",
+        "cargo-registry/rayon-core-1.13.0/LICENSE-MIT"
       ]
     },
     "c79f43bac7c5124fbf7cc41548e5afc19aa6559857901c815992373164cb9e24": {
@@ -3201,8 +3201,8 @@
         "usvg 0.45.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\resvg-0.45.1\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\usvg-0.45.1\\LICENSE-MIT"
+        "cargo-registry/resvg-0.45.1/LICENSE-MIT",
+        "cargo-registry/usvg-0.45.1/LICENSE-MIT"
       ]
     },
     "1a706847b4d3364e7d34a0e645d80657357f6c7e615ad4dbb54e20328aa68fbd": {
@@ -3210,7 +3210,7 @@
         "rfd 0.17.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rfd-0.17.2\\LICENSE"
+        "cargo-registry/rfd-0.17.2/LICENSE"
       ]
     },
     "0ec5ba73473a6811fec813c0e0ac98bbcd0e1f66a1539f5494b0cfe064b14a6b": {
@@ -3218,7 +3218,7 @@
         "rgb 0.8.53"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rgb-0.8.53\\LICENSE"
+        "cargo-registry/rgb-0.8.53/LICENSE"
       ]
     },
     "8043e674fa95d7399ae42ac66e2f4cec1997995c7c9616e431a5d35294598980": {
@@ -3226,7 +3226,7 @@
         "roxmltree 0.20.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\roxmltree-0.20.0\\LICENSE-MIT"
+        "cargo-registry/roxmltree-0.20.0/LICENSE-MIT"
       ]
     },
     "988172c6757a7ced453e179c7bb4d8a860c4a8e950097890225c95e47093f521": {
@@ -3234,7 +3234,7 @@
         "rustc-hash 2.1.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\rustc-hash-2.1.3\\Cargo.toml"
+        "cargo-registry/rustc-hash-2.1.3/Cargo.toml"
       ]
     },
     "4e212f4528c9ceca0d7a6dbcc0833cd19a84fb113fff70144bd4c172324bdf5b": {
@@ -3242,7 +3242,7 @@
         "scopeguard 1.2.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\scopeguard-1.2.0\\LICENSE-MIT"
+        "cargo-registry/scopeguard-1.2.0/LICENSE-MIT"
       ]
     },
     "0ffddef9e48f8a09aed5caf2d44f7ba1c1be2d9b8e0a6f693b1635b2d5566645": {
@@ -3250,7 +3250,7 @@
         "self_cell 1.3.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\self_cell-1.3.0\\LICENSE-APACHE"
+        "cargo-registry/self_cell-1.3.0/LICENSE-APACHE"
       ]
     },
     "6c69fa258551457581d0f044fe88b2d23a33b3ca0b60ea5eb5b95b72ee705315": {
@@ -3260,9 +3260,9 @@
         "serde_derive 1.0.229"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde-1.0.229\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde_core-1.0.229\\Cargo.toml",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\serde_derive-1.0.229\\Cargo.toml"
+        "cargo-registry/serde-1.0.229/Cargo.toml",
+        "cargo-registry/serde_core-1.0.229/Cargo.toml",
+        "cargo-registry/serde_derive-1.0.229/Cargo.toml"
       ]
     },
     "dc667681a0b1b0e4aa2d6d084c99f0b4e4a0176a8562e3940a62d33d5f2f838f": {
@@ -3270,7 +3270,7 @@
         "simd-adler32 0.3.10"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\simd-adler32-0.3.10\\LICENSE.md"
+        "cargo-registry/simd-adler32-0.3.10/LICENSE.md"
       ]
     },
     "cf45269bb31b5c5e2d968d133bf44efd8bc777f42a341beef5a7ee25d8626fe7": {
@@ -3278,7 +3278,7 @@
         "simdutf8 0.1.5"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\simdutf8-0.1.5\\Cargo.toml"
+        "cargo-registry/simdutf8-0.1.5/Cargo.toml"
       ]
     },
     "a1bcbaa2f39759904ae5fef710e4e415a91189bfd000b50f3abe0a7d3181ed94": {
@@ -3286,7 +3286,7 @@
         "simplecss 0.2.2"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\simplecss-0.2.2\\LICENSE-MIT"
+        "cargo-registry/simplecss-0.2.2/LICENSE-MIT"
       ]
     },
     "b44feb55f3ddf09158d206d7fd3dc46d7eef061f0e847562bfa3eede5ae99cac": {
@@ -3294,7 +3294,7 @@
         "siphasher 1.0.4"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\siphasher-1.0.4\\Cargo.toml"
+        "cargo-registry/siphasher-1.0.4/Cargo.toml"
       ]
     },
     "2736d79caea349a8296cf4b17009aee66cb09683beee42232e27a86252aab766": {
@@ -3302,7 +3302,7 @@
         "smallvec 1.16.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\smallvec-1.16.3\\LICENSE-MIT"
+        "cargo-registry/smallvec-1.16.3/LICENSE-MIT"
       ]
     },
     "194d6cf951b5e0ff6d998769f0415f7afaa79b492d87eae43bd606f0c11df209": {
@@ -3310,7 +3310,7 @@
         "stable_deref_trait 1.2.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\stable_deref_trait-1.2.1\\LICENSE-MIT"
+        "cargo-registry/stable_deref_trait-1.2.1/LICENSE-MIT"
       ]
     },
     "8ec9de4a8300964b9806862de209aea912c02413c5303f040ef1d25734679296": {
@@ -3318,7 +3318,7 @@
         "static_assertions 1.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\static_assertions-1.1.0\\LICENSE-MIT"
+        "cargo-registry/static_assertions-1.1.0/LICENSE-MIT"
       ]
     },
     "3f5e640dedfbf95da2d3e2a8d43c0f2ddb7f1f3231cc1113c4fde04dd36dfe75": {
@@ -3326,7 +3326,7 @@
         "strict-num 0.1.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\strict-num-0.1.1\\LICENSE"
+        "cargo-registry/strict-num-0.1.1/LICENSE"
       ]
     },
     "bac4b879d37303be0a9af52b5a57bf06aa2dfa5bc7436fbb3294473f15ab0ea9": {
@@ -3334,7 +3334,7 @@
         "stringprep 0.1.5"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\stringprep-0.1.5\\LICENSE-MIT"
+        "cargo-registry/stringprep-0.1.5/LICENSE-MIT"
       ]
     },
     "cf31c130f8cc9cb4c5468b977817770709b955669bd28f5778889a8db0d87a3e": {
@@ -3343,8 +3343,8 @@
         "strum_macros 0.28.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\strum-0.28.0\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\strum_macros-0.28.0\\LICENSE"
+        "cargo-registry/strum-0.28.0/LICENSE",
+        "cargo-registry/strum_macros-0.28.0/LICENSE"
       ]
     },
     "fe76f771cc39a47684647e43507b206e52d66c818760ed57b7847a299ef81978": {
@@ -3353,8 +3353,8 @@
         "ttf-parser 0.25.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\svgtypes-0.15.3\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\ttf-parser-0.25.1\\LICENSE-MIT"
+        "cargo-registry/svgtypes-0.15.3/LICENSE-MIT",
+        "cargo-registry/ttf-parser-0.25.1/LICENSE-MIT"
       ]
     },
     "902fd48c97920580b310f65e3f5eb3177efacaf24f93071f86301918d8b909c5": {
@@ -3362,7 +3362,7 @@
         "synstructure 0.14.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\synstructure-0.14.0\\LICENSE"
+        "cargo-registry/synstructure-0.14.0/LICENSE"
       ]
     },
     "b6191798a51f013690ff1e3e32fb30374010551c3495cb16897c1e000f0812bc": {
@@ -3370,7 +3370,7 @@
         "tempfile 3.27.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tempfile-3.27.0\\LICENSE-MIT"
+        "cargo-registry/tempfile-3.27.0/LICENSE-MIT"
       ]
     },
     "29a06335937b95f71d4895347f0b33273848a1dcbf90bb81a1c09096dc4ff16f": {
@@ -3378,7 +3378,7 @@
         "tiff 0.11.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tiff-0.11.3\\LICENSE"
+        "cargo-registry/tiff-0.11.3/LICENSE"
       ]
     },
     "9c6b11f6a8f4ad36b7d76e6bdca50b78b2f8dc618916f1930282d965600ccdc4": {
@@ -3387,8 +3387,8 @@
         "tiny-skia-path 0.11.4"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tiny-skia-0.11.4\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tiny-skia-path-0.11.4\\LICENSE"
+        "cargo-registry/tiny-skia-0.11.4/LICENSE",
+        "cargo-registry/tiny-skia-path-0.11.4/LICENSE"
       ]
     },
     "79e72bbb5749007caafca320695900883359ec2cc3a93879f7d49bcab207e561": {
@@ -3396,7 +3396,7 @@
         "tinyvec 1.13.3"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tinyvec-1.13.3\\Cargo.toml"
+        "cargo-registry/tinyvec-1.13.3/Cargo.toml"
       ]
     },
     "970a729dace5d76f575938d7e5c4a87e92a0d1699e7a5001b463aaa1851a1426": {
@@ -3406,9 +3406,9 @@
         "toml_parser 1.1.5+spec-1.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\toml_datetime-1.1.2+spec-1.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\toml_edit-0.25.17+spec-1.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\toml_parser-1.1.5+spec-1.1.0\\LICENSE-MIT"
+        "cargo-registry/toml_datetime-1.1.2+spec-1.1.0/LICENSE-MIT",
+        "cargo-registry/toml_edit-0.25.17+spec-1.1.0/LICENSE-MIT",
+        "cargo-registry/toml_parser-1.1.5+spec-1.1.0/LICENSE-MIT"
       ]
     },
     "ef44c1fd00b29e85b55d011c05b0901bb8cdc36e3cde5bb3b08e519f3e9b893b": {
@@ -3418,9 +3418,9 @@
         "tracing-core 0.1.36"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tracing-0.1.44\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tracing-attributes-0.1.31\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\tracing-core-0.1.36\\LICENSE"
+        "cargo-registry/tracing-0.1.44/LICENSE",
+        "cargo-registry/tracing-attributes-0.1.31/LICENSE",
+        "cargo-registry/tracing-core-0.1.36/LICENSE"
       ]
     },
     "574f47f354afb5af89b1ea4de48bbb1d4e9064c334fe590ee35895ab39b3d3da": {
@@ -3428,7 +3428,7 @@
         "typenum 1.20.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\typenum-1.20.1\\LICENSE-MIT"
+        "cargo-registry/typenum-1.20.1/LICENSE-MIT"
       ]
     },
     "bc59ca9a878df120b69909305e3d4f7c993e7dbb8578224879e88eee07f891a5": {
@@ -3436,7 +3436,7 @@
         "unicode-bidi 0.3.18"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-bidi-0.3.18\\COPYRIGHT"
+        "cargo-registry/unicode-bidi-0.3.18/COPYRIGHT"
       ]
     },
     "21b7ffe46249356209d64748a5179bf37a704880d8af02c77bd65d20800503f0": {
@@ -3445,8 +3445,8 @@
         "unicode-normalization 0.1.26"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-ident-1.0.27\\LICENSE-UNICODE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\unicode-normalization-0.1.26\\LICENSE-UNICODE"
+        "cargo-registry/unicode-ident-1.0.27/LICENSE-UNICODE",
+        "cargo-registry/unicode-normalization-0.1.26/LICENSE-UNICODE"
       ]
     },
     "de1bcb73d8f5f58556f70ed0681b98700bdbfd33a6bf554d245c3caddafb3463": {
@@ -3454,7 +3454,7 @@
         "uuid 1.28.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\uuid-1.28.0\\LICENSE-MIT"
+        "cargo-registry/uuid-1.28.0/LICENSE-MIT"
       ]
     },
     "9f9798cd07a4dd02a4589873a9d0529fd25afe1ab4cad5d4e52b40902d8fe903": {
@@ -3466,11 +3466,11 @@
         "vello_cpu 0.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\vello_common-0.0.9\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\vello_common-0.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\vello_cpu-0.0.8\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\vello_cpu-0.1.0\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\vello_common\\LICENSE-MIT"
+        "cargo-registry/vello_common-0.0.9/LICENSE-MIT",
+        "cargo-registry/vello_common-0.1.0/LICENSE-MIT",
+        "cargo-registry/vello_cpu-0.0.8/LICENSE-MIT",
+        "cargo-registry/vello_cpu-0.1.0/LICENSE-MIT",
+        "vendor/pdfcraft/vendor/vello_common/LICENSE-MIT"
       ]
     },
     "85939736cbbc2113e3e01da49e9ac5657979e8c0d344729355561093df6fdd70": {
@@ -3478,7 +3478,7 @@
         "web-time 1.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\web-time-1.1.0\\LICENSE-MIT"
+        "cargo-registry/web-time-1.1.0/LICENSE-MIT"
       ]
     },
     "2ea8b3dfe371487e7fb182369779e57728d1b8a54c06e226b056504b459f34a1": {
@@ -3487,8 +3487,8 @@
         "weezl 0.2.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\weezl-0.1.12\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\weezl-0.2.1\\LICENSE-MIT"
+        "cargo-registry/weezl-0.1.12/LICENSE-MIT",
+        "cargo-registry/weezl-0.2.1/LICENSE-MIT"
       ]
     },
     "1f17794ed0a91f046d197aec731e880a0d318af4832967ff8d86580a16520f6e": {
@@ -3511,22 +3511,22 @@
         "windows_x86_64_msvc 0.52.6"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-0.62.2\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-collections-0.3.2\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-core-0.62.2\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-future-0.3.2\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-implement-0.60.2\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-interface-0.59.3\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-link-0.2.1\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-numerics-0.3.1\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-result-0.4.1\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-strings-0.5.1\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-sys-0.52.0\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-sys-0.59.0\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-sys-0.61.2\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-targets-0.52.6\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows-threading-0.2.1\\license-mit",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows_x86_64_msvc-0.52.6\\license-mit"
+        "cargo-registry/windows-0.62.2/license-mit",
+        "cargo-registry/windows-collections-0.3.2/license-mit",
+        "cargo-registry/windows-core-0.62.2/license-mit",
+        "cargo-registry/windows-future-0.3.2/license-mit",
+        "cargo-registry/windows-implement-0.60.2/license-mit",
+        "cargo-registry/windows-interface-0.59.3/license-mit",
+        "cargo-registry/windows-link-0.2.1/license-mit",
+        "cargo-registry/windows-numerics-0.3.1/license-mit",
+        "cargo-registry/windows-result-0.4.1/license-mit",
+        "cargo-registry/windows-strings-0.5.1/license-mit",
+        "cargo-registry/windows-sys-0.52.0/license-mit",
+        "cargo-registry/windows-sys-0.59.0/license-mit",
+        "cargo-registry/windows-sys-0.61.2/license-mit",
+        "cargo-registry/windows-targets-0.52.6/license-mit",
+        "cargo-registry/windows-threading-0.2.1/license-mit",
+        "cargo-registry/windows_x86_64_msvc-0.52.6/license-mit"
       ]
     },
     "715d0140544250880d7d0712d3123b37a1f13968f177942d8ffcd4da76a95173": {
@@ -3534,7 +3534,7 @@
         "winprint 0.2.1"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\winprint\\LICENSE.md"
+        "vendor/winprint/LICENSE.md"
       ]
     },
     "ae07546762a326b2454f906c4dcc5c4f0b2f0dde026accb6aa91e411af3bcae8": {
@@ -3542,7 +3542,7 @@
         "winreg 0.55.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\winreg-0.55.0\\LICENSE"
+        "cargo-registry/winreg-0.55.0/LICENSE"
       ]
     },
     "a5572aec9f81a5c1971a2a5e2f75102c3c82d76151d3d228ade9aa9f626e0be1": {
@@ -3550,7 +3550,7 @@
         "winsafe 0.0.29"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\winsafe-0.0.29\\LICENSE.md"
+        "cargo-registry/winsafe-0.0.29/LICENSE.md"
       ]
     },
     "502292ebd8d883e73d2b433a3bb4531fe5c7d917959377f1cb6e75bf4cbd89ad": {
@@ -3558,7 +3558,7 @@
         "xml 1.4.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\xml-1.4.0\\LICENSE"
+        "cargo-registry/xml-1.4.0/LICENSE"
       ]
     },
     "2d34dcfc794b32145dc7f5d9b132ab6817c835fb693969ce160dc8aa4263b100": {
@@ -3566,7 +3566,7 @@
         "xmlwriter 0.1.0"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\xmlwriter-0.1.0\\LICENSE"
+        "cargo-registry/xmlwriter-0.1.0/LICENSE"
       ]
     },
     "96fb22b42a4475c0114dbdf0aedf68d06da95c8b17574242619c09eb3010155c": {
@@ -3577,10 +3577,10 @@
         "zerofrom-derive 0.1.8"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\yoke-0.8.3\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\yoke-derive-0.8.4\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zerofrom-0.1.8\\LICENSE",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zerofrom-derive-0.1.8\\LICENSE"
+        "cargo-registry/yoke-0.8.3/LICENSE",
+        "cargo-registry/yoke-derive-0.8.4/LICENSE",
+        "cargo-registry/zerofrom-0.1.8/LICENSE",
+        "cargo-registry/zerofrom-derive-0.1.8/LICENSE"
       ]
     },
     "bc6715c4aa80f44647f3afe233cbc0409cad091d77fb94925a257770714f42c3": {
@@ -3589,8 +3589,8 @@
         "zerocopy-derive 0.8.63"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zerocopy-0.8.63\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zerocopy-derive-0.8.63\\LICENSE-MIT"
+        "cargo-registry/zerocopy-0.8.63/LICENSE-MIT",
+        "cargo-registry/zerocopy-derive-0.8.63/LICENSE-MIT"
       ]
     },
     "c92308dba082dfcdb2cd9934a30143085d22bac7c09731783a3f4ba32e0ed689": {
@@ -3598,7 +3598,7 @@
         "zlib-rs 0.6.8"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zlib-rs-0.6.8\\LICENSE"
+        "cargo-registry/zlib-rs-0.6.8/LICENSE"
       ]
     },
     "ef6e07485b922f59874d35a31ad34dbec1630e32a18235cb6f6c920b71cce9e6": {
@@ -3607,8 +3607,8 @@
         "zune-jpeg 0.5.15"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zune-core-0.5.3\\LICENSE-MIT",
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\zune-jpeg-0.5.15\\LICENSE-MIT"
+        "cargo-registry/zune-core-0.5.3/LICENSE-MIT",
+        "cargo-registry/zune-jpeg-0.5.15/LICENSE-MIT"
       ]
     },
     "ffff24faeefa61bfc5494e9b39427b89be960ea8b80cec9f715ad454b19448ca": {
@@ -3616,7 +3616,7 @@
         "Ressources CMap Adobe"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\hayro-cmap-0.1.0\\assets\\LICENSE.txt"
+        "cargo-registry/hayro-cmap-0.1.0/assets/LICENSE.txt"
       ]
     },
     "7cfbf620441fe766cc8cb48cbaf67a61f3c586922768a9695168d6faca05df73": {
@@ -3624,7 +3624,7 @@
         "Polices de substitution PDF standard"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\vendor\\hayro-interpret\\assets\\LICENSE_FOXIT"
+        "vendor/pdfcraft/vendor/hayro-interpret/assets/LICENSE_FOXIT"
       ]
     },
     "b90a800cbf5ce3632813ce3d11160b10d0d3b009f4716ef06b45ed8a310345e6": {
@@ -3632,7 +3632,7 @@
         "Police Inter"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\vendor\\pdfcraft\\assets\\fonts\\OFL-Inter.txt"
+        "vendor/pdfcraft/assets/fonts/OFL-Inter.txt"
       ]
     },
     "957d37be54ce6bd143af95e70896807257d1ef2f7285e444e97d5821b7af65d3": {
@@ -3640,7 +3640,7 @@
         "Police emoji-icon-font"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.36.2\\fonts\\emoji-icon-font-mit-license.txt"
+        "cargo-registry/epaint_default_fonts-0.36.2/fonts/emoji-icon-font-mit-license.txt"
       ]
     },
     "b1d996ec2b733284ead23a6c23e976d703ab093c13216c8ca396280f6ab2fe02": {
@@ -3648,7 +3648,7 @@
         "Police Hack"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.36.2\\fonts\\Hack-Regular.ttf"
+        "cargo-registry/epaint_default_fonts-0.36.2/fonts/Hack-Regular.ttf"
       ]
     },
     "6ce8a12c834bd937931a8142ad8e6195d94766f3538b93c6b18ea82e1d878ad9": {
@@ -3656,7 +3656,7 @@
         "Police Noto Emoji"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.36.2\\fonts\\NotoEmoji-Regular.ttf"
+        "cargo-registry/epaint_default_fonts-0.36.2/fonts/NotoEmoji-Regular.ttf"
       ]
     },
     "a877cee8c756ae88fd233aeb70e1bd6d863b1ba805228c2068d6792f198eddcf": {
@@ -3664,7 +3664,7 @@
         "Police Ubuntu Light"
       ],
       "sources": [
-        "C:\\Users\\Josselin\\Desktop\\transcri\\Ergonatus\\PDFinator\\.tools\\cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.36.2\\fonts\\Ubuntu-Light.ttf"
+        "cargo-registry/epaint_default_fonts-0.36.2/fonts/Ubuntu-Light.ttf"
       ]
     }
   },

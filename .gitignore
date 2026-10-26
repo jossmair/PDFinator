@@ -7,6 +7,9 @@
 /audit/
 /release/
 /.license-*.json
+/portable-exe-verification-*.json
+/setup-verification-*.json
+/release-verification-*.json
 *.log
 *.pdb
 *.tmp

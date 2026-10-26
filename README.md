@@ -12,9 +12,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-Setup.exe"><img src="assets/telecharger-installateur.svg" alt="Télécharger l’installeur Windows — EXE, 9,5 Mo" width="310"></a>
+  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-Setup.exe"><img src="assets/telecharger-installateur.svg" alt="Télécharger l’installeur Windows — EXE, 9,6 Mo" width="310"></a>
   &nbsp;
-  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-portable-exe-windows-x64.zip"><img src="assets/telecharger-portable.svg" alt="Télécharger la version portable — ZIP, 10,7 Mo" width="310"></a>
+  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-portable-exe-windows-x64.zip"><img src="assets/telecharger-portable.svg" alt="Télécharger la version portable — ZIP, 10,8 Mo" width="310"></a>
 </p>
 
 <p align="center">
@@ -64,7 +64,7 @@ tournez une page ou insérez une page blanche pour préparer votre version final
 | --- | --- |
 | Téléchargez l’**installeur EXE**, puis suivez l’assistant en français. | Téléchargez le **ZIP portable**, extrayez-le entièrement, puis ouvrez **PDFinator.exe**. |
 | Installation pour votre compte Windows, avec raccourcis. | Aucun interpréteur ni installation supplémentaire nécessaire. |
-| [**Télécharger l’installeur · 9,5 Mo**](https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-Setup.exe) | [**Télécharger le portable · 10,7 Mo**](https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-portable-exe-windows-x64.zip) |
+| [**Télécharger l’installeur · 9,6 Mo**](https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-Setup.exe) | [**Télécharger le portable · 10,8 Mo**](https://github.com/jossmair/PDFinator/releases/download/v1.0.1/PDFinator-1.0.1-portable-exe-windows-x64.zip) |
 
 Pour la version portable, lancez le programme **après extraction**, et conservez
 `LICENCES.txt` à ses côtés. Aucun téléchargement n’est nécessaire pendant

@@ -48,6 +48,8 @@ jobs:
           }
       - name: Check formatting
         run: cargo fmt --all -- --check
+      - name: Check public licence inventory privacy
+        run: python scripts/check_source_inventory.py
       - name: Check all application targets
         run: cargo clippy --locked --all-targets -- -D warnings
       - name: Run unit, simulated UI and integration tests

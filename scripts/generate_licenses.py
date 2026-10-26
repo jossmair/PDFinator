@@ -33,6 +33,21 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig").replace("\r\n", "\n").strip()
 
 
+def public_source(path: Path) -> str:
+    """Keep provenance without publishing the builder's account/cache paths."""
+    path = path.resolve()
+    try:
+        return path.relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        pass
+    registry = Path(os.environ.get("CARGO_HOME", Path.home() / ".cargo")) / "registry/src"
+    try:
+        parts = path.relative_to(registry.resolve()).parts
+        return "cargo-registry/" + "/".join(parts[1:])
+    except ValueError:
+        return "external-input/" + path.name
+
+
 def metadata() -> dict:
     env = os.environ.copy()
     cargo = ROOT / ".tools/cargo/bin/cargo.exe"
@@ -148,7 +163,7 @@ def make_bundle(meta: dict, executable: bytes) -> tuple[str, dict]:
         return key
 
     def add_file(origin: str, path: Path) -> str:
-        return add(origin, read(path), str(path))
+        return add(origin, read(path), public_source(path))
 
     for package in packages:
         name = package["name"]
@@ -161,7 +176,7 @@ def make_bundle(meta: dict, executable: bytes) -> tuple[str, dict]:
             # Some published crates omit a copyright line from their licence
             # file; retain their declared authors alongside the complete text.
             if all("copyright" not in documents[key]["text"].lower().split("permission")[0] for key in keys) and package.get("authors"):
-                keys.append(add(origin, "Authors: " + "; ".join(package["authors"]), package["manifest_path"]))
+                keys.append(add(origin, "Authors: " + "; ".join(package["authors"]), public_source(Path(package["manifest_path"]))))
         records.append({"package": name, "version": package["version"], "declared": package["license"], "documents": keys})
 
     by_name = {p["name"]: p for p in packages}
@@ -193,11 +208,11 @@ def make_bundle(meta: dict, executable: bytes) -> tuple[str, dict]:
         if font.name == "emoji-icon-font.ttf":
             add_file("Police emoji-icon-font", default_fonts / "emoji-icon-font-mit-license.txt")
         elif font.name == "Ubuntu-Light.ttf":
-            add("Police Ubuntu Light", values[0] + "\n\n" + read(EXTRA / "Ubuntu-font-1.0.txt"), str(font))
+            add("Police Ubuntu Light", values[0] + "\n\n" + read(EXTRA / "Ubuntu-font-1.0.txt"), public_source(font))
         elif font.name == "NotoEmoji-Regular.ttf":
-            add("Police Noto Emoji", values[0] + "\n\n" + values[13] + "\n\n" + ofl, str(font))
+            add("Police Noto Emoji", values[0] + "\n\n" + values[13] + "\n\n" + ofl, public_source(font))
         elif font.name == "Hack-Regular.ttf":
-            add("Police Hack", values[13], str(font))
+            add("Police Hack", values[13], public_source(font))
         else:
             raise RuntimeError(f"Unreviewed default font: {font}")
 
