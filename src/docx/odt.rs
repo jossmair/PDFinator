@@ -114,7 +114,12 @@ impl Writer {
         if r.strike {
             props.push_str(" style:text-line-through-style=\"solid\"");
         }
-        if r.script != 0 {
+        if let Some(rise) = r.rise {
+            props.push_str(&format!(
+                " style:text-position=\"{}% 100%\"",
+                rise / r.size.max(0.01) * 100.
+            ));
+        } else if r.script != 0 {
             props.push_str(if r.script > 0 {
                 " style:text-position=\"super 70%\""
             } else {

@@ -29,7 +29,7 @@ fn color(c: [f64; 3]) -> String {
         (c[2].clamp(0., 1.) * 255.).round() as u8
     )
 }
-fn run(r: &Run) -> String {
+pub(super) fn run(r: &Run) -> String {
     let mut properties = format!(
         "<w:rFonts w:ascii=\"{}\" w:hAnsi=\"{}\"/><w:sz w:val=\"{}\"/><w:szCs w:val=\"{}\"/><w:color w:val=\"{}\"/>",
         xml(&r.font),
@@ -50,7 +50,14 @@ fn run(r: &Run) -> String {
     if r.strike {
         properties.push_str("<w:strike/>");
     }
-    if r.script != 0 {
+    if let Some(rise) = r.rise {
+        // Source PDF glyphs already have their final size. vertAlign would
+        // shrink them again; position only translates the original baseline.
+        properties.push_str(&format!(
+            "<w:position w:val=\"{}\"/>",
+            (rise * 2.).round() as i64
+        ));
+    } else if r.script != 0 {
         properties.push_str(&format!(
             "<w:vertAlign w:val=\"{}\"/>",
             if r.script > 0 {

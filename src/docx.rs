@@ -17,6 +17,10 @@ struct Run {
     underline: bool,
     strike: bool,
     script: i8,
+    // Source baseline in display coordinates (downwards); inferred rise is in
+    // points upwards and preserves a PDF script's already reduced font size.
+    baseline: Option<f64>,
+    rise: Option<f64>,
     background: Option<[f64; 3]>,
     rect: Option<[f64; 4]>,
     fraction: Option<Box<Fraction>>,
@@ -343,6 +347,67 @@ pub fn convert_with_progress(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_scripts_keep_their_source_size_and_baseline_offsets() {
+        use pdfcraft_cos::{Dict, Object, Stream};
+        let mut doc = pdfcraft_create::blank(595., 842., 1).unwrap();
+        let mut face = Dict::new();
+        face.set(b"Type".to_vec(), Object::name("Font"));
+        face.set(b"Subtype".to_vec(), Object::name("Type1"));
+        face.set(b"BaseFont".to_vec(), Object::name("Helvetica"));
+        let mut fonts = Dict::new();
+        fonts.set(b"F1".to_vec(), Object::Ref(doc.add(face)));
+        let mut resources = Dict::new();
+        resources.set(b"Font".to_vec(), Object::Dict(fonts));
+        let stream = doc.add(Stream::flate(Dict::new(), b"BT /F1 14 Tf 50 700 Td (H) Tj /F1 9 Tf -4 Ts (2) Tj 0 Ts /F1 14 Tf (O) Tj ET BT /F1 14 Tf 50 640 Td (x) Tj /F1 9 Tf 6 Ts (2) Tj 0 Ts /F1 14 Tf (+y) Tj ET BT /F1 14 Tf 50 580 Td (A) Tj /F1 9 Tf (3) Tj /F1 14 Tf (B) Tj ET"));
+        let page = pdfcraft_model::pages(&doc)[0].obj;
+        doc.update_dict(page, |d| {
+            d.set(b"Resources".to_vec(), Object::Dict(resources));
+            d.set(b"Contents".to_vec(), Object::Ref(stream));
+        })
+        .unwrap();
+        let editor =
+            super::Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap())
+                .unwrap();
+        let page = super::layout::page(&editor, 0).unwrap();
+        let scripts: Vec<_> = page
+            .items
+            .iter()
+            .filter_map(|i| match i {
+                super::Item::Paragraph(p) => Some(&p.runs),
+                _ => None,
+            })
+            .flatten()
+            .filter(|r| r.text.trim() == "2")
+            .collect();
+        assert_eq!(scripts.len(), 2);
+        assert_eq!(scripts[0].script, -1, "The lowered 2 must stay an index");
+        assert_eq!(scripts[1].script, 1, "The raised 2 must stay an exponent");
+        assert!(scripts.iter().all(|r| (r.size - 9.).abs() < 0.01));
+        assert!((scripts[0].rise.unwrap() + 4.).abs() < 0.01);
+        assert!((scripts[1].rise.unwrap() - 6.).abs() < 0.01);
+        let small = page
+            .items
+            .iter()
+            .filter_map(|i| match i {
+                super::Item::Paragraph(p) => Some(&p.runs),
+                _ => None,
+            })
+            .flatten()
+            .find(|r| r.text.trim() == "3")
+            .unwrap();
+        assert_eq!(
+            small.script, 0,
+            "A small font on the baseline is not an index"
+        );
+        assert!(small.rise.is_none());
+        let word = super::word::run(scripts[0]);
+        assert!(word.contains("<w:position w:val=\"-8\"/>"));
+        assert!(
+            !word.contains("vertAlign"),
+            "Do not shrink a source-sized index a second time"
+        );
+    }
     #[test]
     fn percentages_export_regression() {
         let Some(path) = std::env::var_os("PDFINATOR_PERCENTAGES_PDF") else {

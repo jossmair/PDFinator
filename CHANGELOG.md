@@ -1,5 +1,13 @@
 # Changements PDFinator
 
+## 1.0.2 — indices et exposants dans les exports Office
+
+- Conservation de la taille des indices et exposants natifs du PDF, avec leur
+  décalage de ligne de base, sans seconde réduction de taille à l’export DOCX/ODT.
+- Régression synthétique exécutée sans fichier utilisateur ; corpus reproductible
+  pour les formules et les documents alternant formats de page et pages blanches.
+- Procédure de vérification des rendus dans `OFFICE-VALIDATION.md`.
+
 ## 1.0.1 — récupération complète et contrôles
 
 - Récupération des blocs non validés avec styles de caractères, polices en mémoire,
