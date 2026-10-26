@@ -1,0 +1,21 @@
+Printing components used by PDFinator
+
+craft-print, craft-libs revision 666c358065261a2816b376fa3bb10538dbf53040
+Copyright (c) 2026 ArtCraft Team and the craft-libs contributors.
+MIT OR Apache-2.0. See vendor/craft-libs/LICENSE-MIT, LICENSE-APACHE and NOTICE.
+
+winprint 0.2.1, revision 5f80b9baf6b58937c401656634e42d33f00ddf49
+https://github.com/storytold/winprint.rs
+Fork of https://github.com/ArcticLampyrid/winprint.rs
+BSD-3-Clause; original licence retained in vendor/winprint.
+
+PDFinator vendor changes: the optional PDFium downloader build script and its
+network/verification-only build dependencies are removed. Default features are
+empty and explicitly enabling the unsupported PDFium path produces a compilation
+error. Only the native Windows.Data.Pdf / XPS spooler backend is used. No print
+backend or OS wrapper implementation is changed.
+
+The inline source-font layout in src/ui/inline.rs is adapted from PdfCraft 0.9
+edit_text_ui.rs, copyright (c) 2026 ArtCraft Team and PdfCraft contributors,
+under MIT OR Apache-2.0. The application interface and vector pictograms are
+original PDFinator creations.

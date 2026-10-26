@@ -1,0 +1,15 @@
+/target/
+/target-release/
+/.tools/
+/runtime/
+/test-output/
+/dist/
+/audit/
+/release/
+/.license-*.json
+*.log
+*.pdb
+*.tmp
+__pycache__/
+.env
+.env.*

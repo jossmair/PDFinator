@@ -1,0 +1,23 @@
+PDFinator — Ergonatus
+Application originale, 2026. Code sous MIT OU Apache-2.0.
+
+Moteur dérivé de PdfCraft, copyright 2026 ArtCraft Team et contributeurs,
+https://github.com/storytold/pdfcraft
+Révision auditée : ec0a965074f376a5bf610435948e4e5184bf3299.
+Les licences et mentions originales sont conservées dans ce dossier et vendor/pdfcraft.
+
+PDFinator ne reprend pas l’interface, les marques ni les logos de PdfCraft/ArtCraft.
+Les dossiers docs/brand et assets/app-icon ont été retirés de la copie fournisseur.
+ATTRIBUTION.md et ATTRIBUTION.toml sont les inventaires historiques du fournisseur :
+ils décrivent aussi des fichiers non distribués avec PDFinator.
+Les polices nécessaires au moteur conservent leurs mentions OFL.
+Les ressources de compatibilité PDF et les polices de substitution hayro conservent
+leurs mentions BSD dans NOTICE et les licences accompagnant les dépendances.
+
+Modifications : nouvelle façade documentaire, gestion de fichiers et historique,
+interface française eframe, validation des permissions et des substitutions de police,
+tests et lancement indépendant. Correctifs locaux du moteur dans crates/edit/src/text.rs
+et text_regions.rs : texte marqué PNText, formatage de caractères, barré, fond coloré,
+exposants/indices, regroupement des lignes avec Ts et suppression des décorations
+de la version précédente. Ces modifications ne proviennent pas du fournisseur.
+Ni affiliation ni approbation par ArtCraft ou Adobe.

@@ -1,0 +1,5 @@
+vendor/** linguist-vendored
+*.png -text
+*.ico -text
+*.ttf -text
+*.otf -text

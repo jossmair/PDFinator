@@ -1,0 +1,32 @@
+[
+  {
+    "file": "egui-MIT.txt",
+    "source": "https://raw.githubusercontent.com/emilk/egui/49682f8baa058bf49e011035cfbd6e825f88a5ef/LICENSE-MIT",
+    "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+  },
+  {
+    "file": "accesskit-MIT.txt",
+    "source": "https://raw.githubusercontent.com/AccessKit/accesskit/a55d3e1a18bb9ef0e4bccc9083fb13c3e0ad8969/LICENSE-MIT",
+    "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+  },
+  {
+    "file": "profiling-MIT.txt",
+    "source": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-MIT",
+    "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333"
+  },
+  {
+    "file": "alloc-stdlib-BSD.txt",
+    "source": "https://raw.githubusercontent.com/dropbox/rust-alloc-no-stdlib/ae42d22078b98549e987d2f03d12df7b984fde47/LICENSE",
+    "sha256": "c0c56f26d9c051cac4d200c34c84e7ae9aaa853e01a982a1df08b09931e518ae"
+  },
+  {
+    "file": "clipboard-win-BSL.txt",
+    "source": "https://raw.githubusercontent.com/DoumanAsh/clipboard-win/3b27cf2bfd1adcfa6e0264eb51c1025ddaf0f342/LICENSE",
+    "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+  },
+  {
+    "file": "Ubuntu-font-1.0.txt",
+    "source": "https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/Ubuntu-font-1.0.txt",
+    "sha256": "2f0015108d68627bd788d313f529c21ff4da2c2c42a5e1f3883acc83480f9002"
+  }
+]

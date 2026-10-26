@@ -70,6 +70,14 @@ Pour la version portable, lancez le programme **après extraction**, et conserve
 `LICENCES.txt` à ses côtés. Aucun téléchargement n’est nécessaire pendant
 l’installation ou l’utilisation du logiciel.
 
+## Le code est disponible
+
+Retrouvez les sources Rust, les tests, les ressources et les dépendances locales
+directement dans ce dépôt. Pour reconstruire l’application ou préparer une
+distribution Windows, suivez le [guide de compilation](BUILDING.md).
+
+[Sources figées de la V1](https://github.com/jossmair/PDFinator/tree/v1.0.0-sources) · [Archive complète des sources](https://github.com/jossmair/PDFinator/releases/download/v1.0.0/PDFinator-1.0.0-sources.zip)
+
 <details>
 <summary><strong>Compatibilité, vérifications et limites connues</strong></summary>
 
@@ -96,6 +104,6 @@ les PDF, toutes les configurations Windows ou tous les pilotes d’imprimante.
   <a href="https://github.com/jossmair/PDFinator/releases/latest">Télécharger PDFinator</a>
 </p>
 
-Ce dépôt distribue les versions Windows, leur documentation et les captures de
-présentation. Les mentions légales des composants accompagnent les téléchargements.
+Ce dépôt contient le code source, les versions Windows, leur documentation et
+les captures de présentation. Les mentions légales des composants accompagnent les téléchargements.
 Ne joignez pas de document contenant des informations personnelles à un signalement public.
