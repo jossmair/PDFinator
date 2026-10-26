@@ -190,7 +190,11 @@ mod tests {
             nodes
                 .iter()
                 .any(|(_, node)| node.numeric_value() == Some(0.0)),
-            "{:?}", nodes.iter().map(|(_, n)| (n.role(), n.label(), n.value(), n.numeric_value())).collect::<Vec<_>>()
+            "{:?}",
+            nodes
+                .iter()
+                .map(|(_, n)| (n.role(), n.label(), n.value(), n.numeric_value()))
+                .collect::<Vec<_>>()
         );
         assert!(
             !nodes

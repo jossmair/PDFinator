@@ -407,7 +407,10 @@ impl App {
     }
     fn discard_decision(&mut self) -> CloseDecision {
         if !self.editor.as_ref().is_some_and(Editor::dirty)
-            && !self.inline.as_ref().is_some_and(|i| !i.committed && i.changed())
+            && !self
+                .inline
+                .as_ref()
+                .is_some_and(|i| !i.committed && i.changed())
             && !self.comment_changed()
         {
             return CloseDecision::Proceed;
@@ -1011,6 +1014,12 @@ impl App {
             shift: true,
             ..Modifiers::CTRL
         };
+        if self.workspace == Workspace::Pages
+            && ctx.input_mut(|i| i.consume_key(ctrl_shift, Key::N))
+        {
+            self.insert_blank_page();
+            return;
+        }
         if self.workspace == Workspace::Pages
             && ctx.input_mut(|i| i.consume_key(ctrl_shift, Key::O))
         {

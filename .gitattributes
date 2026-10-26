@@ -3,3 +3,4 @@ vendor/** linguist-vendored
 *.ico -text
 *.ttf -text
 *.otf -text
+licenses/extra/*.txt -text

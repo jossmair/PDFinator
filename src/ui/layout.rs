@@ -133,6 +133,17 @@ impl App {
                 // Zoom, text search and reading navigation do not affect the page organizer.
                 if self.workspace == Workspace::Pages {
                     ui.separator();
+                    rail_row(ui, cell, |ui| {
+                        if action(
+                            ui,
+                            Icon::BlankPage,
+                            "Ajouter une page blanche après la page sélectionnée · Ctrl+Maj+N",
+                            false,
+                            enabled,
+                        ) {
+                            self.insert_blank_page();
+                        }
+                    });
                     ui.add_enabled_ui(enabled, |ui| self.page_controls(ui, cell));
                     return;
                 }
