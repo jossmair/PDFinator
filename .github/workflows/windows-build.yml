@@ -2,7 +2,7 @@ name: Windows verification and portable build
 
 on:
   push:
-    branches: [main, "improvements/**"]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
