@@ -133,7 +133,7 @@ impl Journal {
             loop {
                 let received = rx.recv_timeout(Duration::from_millis(600));
                 let idle = received.is_err();
-                let disconnected = matches!(received, Err(mpsc::RecvTimeoutError::Disconnected));
+                let disconnected = matches!(&received, Err(mpsc::RecvTimeoutError::Disconnected));
                 match received {
                     Ok(Command::Put(id, bytes, meta, old)) => {
                         pending.insert(id, (bytes, meta, old));
@@ -355,7 +355,10 @@ mod tests {
         std::fs::write(dir.join("4.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
         let third = Journal::start(temp.path()).unwrap();
         assert_eq!(third.entries.len(), 1);
-        assert_eq!(third.entries[0].metadata.name, "Cours de français.pdf");
+        assert_eq!(
+            third.entries[0].metadata.name,
+            "Cours de français.pdf"
+        );
     }
 
     #[test]
@@ -364,7 +367,14 @@ mod tests {
         let temp = tempfile::tempdir_in(root).unwrap();
         let mut journal = Journal::start(temp.path()).unwrap();
         let path = journal.directory.as_ref().unwrap().join("15.pdf");
-        journal.observe(15, 1, Arc::new(b"saved draft".to_vec()), "Cours.pdf".into(), "été".into(), true);
+        journal.observe(
+            15,
+            1,
+            Arc::new(b"saved draft".to_vec()),
+            "Cours.pdf".into(),
+            "été".into(),
+            true,
+        );
         drop(journal);
         for _ in 0..100 {
             if path.exists() {
@@ -374,5 +384,4 @@ mod tests {
         }
         assert_eq!(std::fs::read(&path).unwrap(), b"saved draft");
     }
-
 }
