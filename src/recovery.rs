@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs::File,
+    io::Read,
     path::{Path, PathBuf},
     sync::{Arc, mpsc},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
@@ -22,6 +23,8 @@ struct StoredMetadata {
     metadata: Metadata,
     #[serde(default)]
     pdf_length: Option<u64>,
+    #[serde(default)]
+    pdf_checksum: Option<u64>,
 }
 
 #[derive(Clone)]
@@ -100,6 +103,10 @@ impl Journal {
                         && stored.pdf_length.is_none_or(|expected| {
                             std::fs::metadata(p.with_extension("pdf"))
                                 .is_ok_and(|actual| actual.len() == expected)
+                        })
+                        && stored.pdf_checksum.is_none_or(|expected| {
+                            checksum_file(&p.with_extension("pdf"))
+                                .is_ok_and(|actual| actual == expected)
                         })
                     {
                         entries.push(Entry {
@@ -246,6 +253,30 @@ impl Journal {
         }
     }
 }
+// FNV-1a is a deterministic accidental-corruption checksum, not a security signature.
+const FNV_OFFSET: u64 = 0xcbf29ce484222325;
+const FNV_PRIME: u64 = 0x100000001b3;
+
+fn checksum_update(mut checksum: u64, bytes: &[u8]) -> u64 {
+    for byte in bytes {
+        checksum = (checksum ^ u64::from(*byte)).wrapping_mul(FNV_PRIME);
+    }
+    checksum
+}
+
+fn checksum_file(path: &Path) -> Result<u64> {
+    let mut input = File::open(path).map_err(|e| e.to_string())?;
+    let mut buffer = [0_u8; 64 * 1024];
+    let mut checksum = FNV_OFFSET;
+    loop {
+        let count = input.read(&mut buffer).map_err(|e| e.to_string())?;
+        if count == 0 {
+            return Ok(checksum);
+        }
+        checksum = checksum_update(checksum, &buffer[..count]);
+    }
+}
+
 fn store(directory: &Path, id: u64, bytes: &[u8], meta: &Metadata) -> Result<()> {
     files::atomic_write(&directory.join(format!("{id}.pdf")), bytes)?;
     files::atomic_write(
@@ -253,6 +284,7 @@ fn store(directory: &Path, id: u64, bytes: &[u8], meta: &Metadata) -> Result<()>
         &serde_json::to_vec(&StoredMetadata {
             metadata: meta.clone(),
             pdf_length: Some(bytes.len() as u64),
+            pdf_checksum: Some(checksum_update(FNV_OFFSET, bytes)),
         })
         .map_err(|e| e.to_string())?,
     )
@@ -345,13 +377,14 @@ mod tests {
         };
         store(&dir, 4, b"original snapshot", &meta).unwrap();
         // Simulate a torn checkpoint whose metadata still describes the old PDF.
-        std::fs::write(dir.join("4.pdf"), b"short").unwrap();
+        std::fs::write(dir.join("4.pdf"), b"xxxxxxxxxxxxxxxxx").unwrap();
+        assert_eq!(std::fs::metadata(dir.join("4.pdf")).unwrap().len(), 17);
         drop(first);
         let second = Journal::start(temp.path()).unwrap();
         assert!(second.entries.is_empty());
         drop(second);
 
-        // Checkpoints created by v1.0.0 did not carry pdf_length.
+        // Checkpoints created by v1.0.0 did not carry either integrity field.
         std::fs::write(dir.join("4.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
         let third = Journal::start(temp.path()).unwrap();
         assert_eq!(third.entries.len(), 1);
