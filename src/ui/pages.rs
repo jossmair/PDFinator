@@ -143,7 +143,10 @@ impl App {
         }
     }
     pub(super) fn insert_blank_page(&mut self) {
-        if self.workspace != Workspace::Edit || !self.deselect() || !self.permit() {
+        if !matches!(self.workspace, Workspace::Edit | Workspace::Pages)
+            || !self.deselect()
+            || !self.permit()
+        {
             return;
         }
         let Some(editor) = &mut self.editor else {

@@ -355,10 +355,7 @@ mod tests {
         std::fs::write(dir.join("4.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
         let third = Journal::start(temp.path()).unwrap();
         assert_eq!(third.entries.len(), 1);
-        assert_eq!(
-            third.entries[0].metadata.name,
-            "Cours de français.pdf"
-        );
+        assert_eq!(third.entries[0].metadata.name, "Cours de français.pdf");
     }
 
     #[test]

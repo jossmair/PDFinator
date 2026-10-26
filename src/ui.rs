@@ -1015,6 +1015,12 @@ impl App {
             ..Modifiers::CTRL
         };
         if self.workspace == Workspace::Pages
+            && ctx.input_mut(|i| i.consume_key(ctrl_shift, Key::N))
+        {
+            self.insert_blank_page();
+            return;
+        }
+        if self.workspace == Workspace::Pages
             && ctx.input_mut(|i| i.consume_key(ctrl_shift, Key::O))
         {
             self.pick_append_pdfs();
