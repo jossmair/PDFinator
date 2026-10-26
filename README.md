@@ -1,46 +1,101 @@
-# PDFinator
+<p align="center">
+  <img src="assets/banniere.svg" alt="PDFinator — Lisez. Modifiez. Organisez." width="100%">
+</p>
 
-PDFinator est une application Windows x64 de lecture et modification de PDF.
-Elle fonctionne hors ligne, sans compte et sans téléchargement pendant son utilisation.
+<p align="center">
+  <strong>Vos PDF, prêts à être retravaillés.</strong><br>
+  Corrigez un texte, annotez un cours, réorganisez vos pages et repartez avec le bon document.
+</p>
 
-**[Télécharger la dernière version](https://github.com/jossmair/PDFinator/releases/latest)**
+<p align="center">
+  <strong>Gratuit</strong> &nbsp;·&nbsp; <strong>Hors ligne</strong> &nbsp;·&nbsp; <strong>Sans compte</strong> &nbsp;·&nbsp; Windows 10 / 11 x64
+</p>
 
-## Télécharger et lancer
+<p align="center">
+  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.0/PDFinator-1.0.0-Setup.exe"><img src="assets/telecharger-installateur.svg" alt="Télécharger l’installeur Windows — EXE, 9,5 Mo" width="310"></a>
+  &nbsp;
+  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.0/PDFinator-1.0.0-portable-exe-windows-x64.zip"><img src="assets/telecharger-portable.svg" alt="Télécharger la version portable — ZIP, 10,7 Mo" width="310"></a>
+</p>
 
-- **Version portable** : télécharger le ZIP, l’extraire entièrement, puis lancer
-  `PDFinator.exe`. Ce fichier est un véritable exécutable Windows natif.
-- **Version installable** : télécharger le fichier `PDFinator-1.0.0-Setup.exe`, puis
-  suivre l’assistant en français. L’installation concerne le compte Windows actuel.
+<p align="center">
+  Version <strong>1.0.0</strong> &nbsp;·&nbsp;
+  <a href="https://github.com/jossmair/PDFinator/releases/latest">Tous les téléchargements</a> &nbsp;·&nbsp;
+  <a href="https://github.com/jossmair/PDFinator/releases/download/v1.0.0/SHA256SUMS.txt">Vérifier les fichiers</a>
+</p>
 
-Ne lancez pas l’exécutable directement depuis le ZIP. Gardez `LICENCES.txt` avec
-la version portable. Le fichier `SHA256SUMS.txt` permet de vérifier les téléchargements.
+---
 
-## Fonctions principales
+## Corrigez votre document, directement sur la page
 
-- Lecture, recherche, sélection de texte, main et zoom.
-- Surlignage et commentaires.
-- Modification de texte, polices et styles ; insertion et déplacement de blocs.
-- Images : copier, couper, coller et rogner par menu contextuel.
-- OCR local créant des blocs de texte modifiables à partir des images.
-- Dessins, tracés, formes et tableaux.
-- Réorganisation des pages et des onglets par glisser-déposer ; ajout de PDF.
-- Export de copies éditables en DOCX ou ODT.
-- Impression avec choix des pages ; sauvegarde et récupération après interruption.
+Une phrase à changer, un titre à mettre en valeur, une précision à ajouter ?
+Modifiez les blocs de texte reconnus à leur emplacement et retrouvez les réglages
+de police, de taille, de couleur et d’alignement à droite.
 
-## Compatibilité et limites
+![Modifier un texte dans PDFinator : blocs sélectionnables et réglages de mise en forme](assets/modifier.png)
 
-Windows 10/11 x64. L’OCR nécessite une langue de reconnaissance disponible dans
-Windows. La fidélité et l’éditabilité dépendent de la structure du PDF, des polices,
-de la qualité du scan et du logiciel Office utilisé. Les résultats OCR et les
-documents convertis doivent être relus. Les fichiers dépassant 256 Mio ne sont
-pas ouverts par cette version. Les exécutables ne sont pas signés Authenticode.
+## Un espace pour lire et annoter
+
+Parcourez vos documents avec les miniatures, la recherche, le zoom et l’outil Main.
+Ajoutez un surlignage ou un commentaire pour retrouver l’essentiel.
+
+![Mode Lecture de PDFinator avec les outils à gauche et la page au centre](assets/lecture.png)
+
+## Vos pages dans le bon ordre
+
+Glissez les miniatures pour réorganiser un document. Ajoutez d’autres PDF,
+tournez une page ou insérez une page blanche pour préparer votre version finale.
+
+![Réorganisation des pages par glisser-déposer : aperçu de la page déplacée et repère d’insertion](assets/pages.png)
+
+## Un outil pour chaque étape
+
+| Ce que vous voulez faire | Ce que PDFinator propose |
+| --- | --- |
+| **Retoucher un document** | Modifier ou insérer du texte, régler les styles, ajouter des puces et ajuster les interlignes. |
+| **Travailler sur un scan** | Reconnaissance OCR locale du texte des images, puis création de blocs modifiables. Une relecture reste nécessaire. |
+| **Illustrer et compléter** | Images avec rognage par clic droit, traits, formes et tableaux avec réglages de couleur et d’épaisseur. |
+| **Assembler vos contenus** | Ajout de PDF, déplacement des pages et des onglets, copier-coller de blocs entre documents. |
+| **Continuer dans un traitement de texte** | Exporter une copie éditable en **DOCX ou ODT**, avec reconstruction de la disposition. |
+| **Garder la main sur votre travail** | Annuler/rétablir, enregistrer sous un autre nom et récupérer le travail après une interruption. |
+
+## Prêt en quelques clics
+
+| **Installer PDFinator** | **L’emporter avec vous** |
+| --- | --- |
+| Téléchargez l’**installeur EXE**, puis suivez l’assistant en français. | Téléchargez le **ZIP portable**, extrayez-le entièrement, puis ouvrez **PDFinator.exe**. |
+| Installation pour votre compte Windows, avec raccourcis. | Aucun interpréteur ni installation supplémentaire nécessaire. |
+| [**Télécharger l’installeur · 9,5 Mo**](https://github.com/jossmair/PDFinator/releases/download/v1.0.0/PDFinator-1.0.0-Setup.exe) | [**Télécharger le portable · 10,7 Mo**](https://github.com/jossmair/PDFinator/releases/download/v1.0.0/PDFinator-1.0.0-portable-exe-windows-x64.zip) |
+
+Pour la version portable, lancez le programme **après extraction**, et conservez
+`LICENCES.txt` à ses côtés. Aucun téléchargement n’est nécessaire pendant
+l’installation ou l’utilisation du logiciel.
+
+<details>
+<summary><strong>Compatibilité, vérifications et limites connues</strong></summary>
+
+Windows 10/11 x64. Les exécutables ne sont pas signés Authenticode.
+L’OCR nécessite une langue de reconnaissance disponible dans Windows ; sa qualité
+dépend de l’image. La modification et l’export Office dépendent de la structure du
+PDF et des polices : une reproduction identique de tous les documents n’est pas
+garantie. Relisez vos résultats OCR et vos fichiers convertis.
+Les fichiers dépassant 256 Mio ne sont pas ouverts par cette version.
+
+**158 tests automatisés réussis** pour la V1, complétés par des vérifications
+d’export, de récupération et des fichiers de distribution. Cela ne couvre pas tous
+les PDF, toutes les configurations Windows ou tous les pilotes d’imprimante.
 
 [Notes de version et limites détaillées](CHANGELOG.md) · [Validation](VALIDATION.md)
 
-Ce dépôt distribue les versions Windows et leur documentation. Les mentions
-légales des composants sont fournies dans chaque téléchargement. Aucun document
-PDF utilisé pendant les essais n’est distribué dans ce dépôt.
+</details>
 
-Pour signaler un problème, utilisez les [Issues](https://github.com/jossmair/PDFinator/issues).
-Précisez la version, les étapes et le résultat attendu ; ne publiez pas de document
-contenant des informations personnelles.
+---
+
+<p align="center">
+  <strong>Un retour, une idée, un problème ?</strong><br>
+  <a href="https://github.com/jossmair/PDFinator/issues">Ouvrir un signalement</a> &nbsp;·&nbsp;
+  <a href="https://github.com/jossmair/PDFinator/releases/latest">Télécharger PDFinator</a>
+</p>
+
+Ce dépôt distribue les versions Windows, leur documentation et les captures de
+présentation. Les mentions légales des composants accompagnent les téléchargements.
+Ne joignez pas de document contenant des informations personnelles à un signalement public.

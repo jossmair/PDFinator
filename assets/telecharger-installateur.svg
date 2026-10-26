@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="144" viewBox="0 0 620 144">
+<rect x="1" y="1" width="618" height="142" rx="20" fill="#5061ed" stroke="#8294ff" stroke-opacity=".35" stroke-width="2"/>
+<rect x="24" y="31" width="78" height="78" rx="20" fill="#ffffff" fill-opacity=".1"/>
+<path d="M63 48V80M49 66L63 80L77 66M44 87V95H82V87" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<g font-family="Segoe UI,Arial,sans-serif" fill="#ffffff"><text x="124" y="68" font-size="30" font-weight="700">Installer PDFinator</text><text x="126" y="103" font-size="17" letter-spacing="1" opacity=".8">WINDOWS · EXE · 9,5 Mo</text></g>
+</svg>

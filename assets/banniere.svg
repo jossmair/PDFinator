@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360">
+<defs>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101a30"/><stop offset="1" stop-color="#23204c"/></linearGradient>
+ <linearGradient id="edge"><stop stop-color="#5a8dff"/><stop offset="1" stop-color="#a885ff"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#7161ed" stop-opacity=".32"/><stop offset="1" stop-color="#7161ed" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1280" height="360" rx="24" fill="url(#bg)"/>
+<ellipse cx="1070" cy="160" rx="360" ry="290" fill="url(#glow)"/>
+<path d="M0 322H1280" stroke="url(#edge)" stroke-opacity=".22"/>
+<g opacity=".1" fill="none" stroke="#adbcff"><rect x="1000" y="-60" width="180" height="245" rx="22" transform="rotate(20 1090 65)"/><rect x="1080" y="160" width="180" height="245" rx="22" transform="rotate(20 1170 282)"/></g>
+<g transform="translate(50 72) scale(.73)">
+ <defs>
+  <linearGradient id="tile" x1="28" y1="20" x2="226" y2="240" gradientUnits="userSpaceOnUse"><stop stop-color="#226cf5"/><stop offset=".52" stop-color="#5553ee"/><stop offset="1" stop-color="#833de0"/></linearGradient>
+  <linearGradient id="paper" x1="78" y1="49" x2="178" y2="208" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#dcecff"/></linearGradient>
+  <linearGradient id="pen" x1="133" y1="202" x2="212" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#62d4f8"/><stop offset="1" stop-color="#b8ffff"/></linearGradient>
+ </defs>
+ <rect x="12" y="12" width="232" height="232" rx="60" fill="url(#tile)"/>
+ <rect x="15" y="15" width="226" height="226" rx="57" fill="none" stroke="#ffffff" stroke-opacity=".2" stroke-width="2"/>
+ <path d="M76 48h65l39 39v109a13 13 0 0 1-13 13H76a13 13 0 0 1-13-13V61a13 13 0 0 1 13-13Z" fill="#152a7d" opacity=".2" transform="translate(0 6)"/>
+ <path d="M76 45h65l39 39v109a13 13 0 0 1-13 13H76a13 13 0 0 1-13-13V58a13 13 0 0 1 13-13Z" fill="url(#paper)"/>
+ <path d="M141 45v27a12 12 0 0 0 12 12h27Z" fill="#a7c8ff"/>
+ <path d="M91 165v-57h27a20 20 0 0 1 0 40H92" fill="none" stroke="#4c59d8" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="m135 196 7-25 52-52a9 9 0 0 1 13 0l5 5a9 9 0 0 1 0 13l-52 52Z" fill="#1b368c" opacity=".22" transform="translate(0 4)"/>
+ <path d="m135 194 7-25 52-52a9 9 0 0 1 13 0l5 5a9 9 0 0 1 0 13l-52 52Z" fill="url(#pen)"/>
+ <path d="m135 194 7-25 18 18Z" fill="#efffff"/><path d="m191 121 17 17" fill="none" stroke="#3f69d1" stroke-width="5"/>
+</g>
+<g font-family="Segoe UI,Arial,sans-serif">
+ <text x="280" y="120" font-size="64" font-weight="750" fill="#ffffff">PDFinator</text>
+ <text x="283" y="178" font-size="34" font-weight="600" fill="#c4d5ff">Lisez. Modifiez. Organisez.</text>
+ <text x="284" y="222" font-size="21" fill="#aab6d0">Votre espace de travail PDF, sur Windows.</text>
+ <rect x="284" y="252" width="98" height="33" rx="16" fill="#ffffff" fill-opacity=".08"/>
+ <text x="333" y="274" text-anchor="middle" font-size="15" fill="#eff3ff">Gratuit</text>
+ <rect x="393" y="252" width="110" height="33" rx="16" fill="#ffffff" fill-opacity=".08"/>
+ <text x="448" y="274" text-anchor="middle" font-size="15" fill="#eff3ff">Hors ligne</text>
+ <rect x="514" y="252" width="126" height="33" rx="16" fill="#ffffff" fill-opacity=".08"/>
+ <text x="577" y="274" text-anchor="middle" font-size="15" fill="#eff3ff">Sans compte</text>
+ <text x="1230" y="344" text-anchor="end" font-size="13" letter-spacing="2" fill="#94a3c9">WINDOWS 10 / 11 · V1.0</text>
+</g></svg>
