@@ -2,6 +2,7 @@
 use super::*;
 pub(super) struct DocumentState {
     panel_width: f32,
+    properties_collapsed: bool,
     fit_compensation: f32,
     editor: Option<Editor>,
     raster: raster::Raster,
@@ -32,6 +33,7 @@ impl DocumentState {
     fn empty() -> Self {
         Self {
             panel_width: 0.,
+            properties_collapsed: false,
             fit_compensation: 0.,
             editor: None,
             raster: Default::default(),
@@ -61,6 +63,10 @@ impl DocumentState {
     }
     fn exchange(&mut self, app: &mut App) {
         std::mem::swap(&mut self.panel_width, &mut app.work.panel_width);
+        std::mem::swap(
+            &mut self.properties_collapsed,
+            &mut app.properties_collapsed,
+        );
         std::mem::swap(&mut self.fit_compensation, &mut app.work.fit_compensation);
         std::mem::swap(&mut self.editor, &mut app.editor);
         std::mem::swap(&mut self.raster, &mut app.raster);
@@ -125,18 +131,56 @@ impl DocumentState {
         let draft = self
             .inline
             .as_ref()
-            .filter(|i| !i.committed && i.changed())
+            .filter(|i| {
+                !i.committed
+                    && (i.changed()
+                        || i.selection.typing != Default::default()
+                        || matches!(i.selection.target, Target::New))
+            })
             .map(|i| i.selection.draft.as_str())
             .or_else(|| self.comment_draft())
             .unwrap_or("");
         let name = e.display_name();
-        journal.observe(
+        let snapshot = self
+            .inline
+            .as_ref()
+            .filter(|i| {
+                !i.committed
+                    && (i.changed()
+                        || i.selection.typing != Default::default()
+                        || matches!(i.selection.target, Target::New))
+            })
+            .map(|i| {
+                drafts::Snapshot::capture(
+                    i,
+                    self.zoom,
+                    self.scroll_offset,
+                    self.properties_collapsed,
+                )
+            })
+            .or_else(|| {
+                self.selected
+                    .as_ref()
+                    .filter(|_| self.comment_draft().is_some())
+                    .map(|s| {
+                        drafts::Snapshot::comment(
+                            s.clone(),
+                            self.zoom,
+                            self.scroll_offset,
+                            self.properties_collapsed,
+                        )
+                    })
+            });
+        let state = snapshot.and_then(|s| s.pending().ok());
+        let dirty = self.dirty() || state.is_some();
+        journal.observe_state(
             e.instance,
             e.revision(),
             e.bytes.clone(),
             name,
             draft.to_owned(),
-            self.dirty(),
+            dirty,
+            state,
         );
     }
 }
