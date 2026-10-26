@@ -32,7 +32,9 @@ pub(super) struct Work {
     pub journal: pdfinator::recovery::Journal,
     pub show_recovery: bool,
     pub recovered_draft: Option<String>,
+    pub pending_restore: Option<(Option<String>, String)>,
     pub recovering_from: Option<PathBuf>,
+    pub recovering_entry: Option<pdfinator::recovery::Entry>,
 }
 impl Default for Work {
     fn default() -> Self {
@@ -53,7 +55,9 @@ impl Default for Work {
             journal: pdfinator::recovery::Journal::disabled(),
             show_recovery: false,
             recovered_draft: None,
+            pending_restore: None,
             recovering_from: None,
+            recovering_entry: None,
         }
     }
 }
@@ -79,22 +83,27 @@ impl App {
                     self.work.opening = None;
                     match result {
                         Ok(e) => self.work.ready = Some(e),
-                        Err(e) => self.message = Some(e),
+                        Err(e) => {
+                            self.failed_recovery_open();
+                            self.message = Some(e);
+                        }
                     }
                 }
                 Err(TryRecvError::Disconnected) => {
                     self.work.opening_path = None;
                     self.work.opening = None;
+                    self.failed_recovery_open();
                     self.message = Some("L’ouverture s’est interrompue.".into());
                 }
                 _ => {}
             }
         }
         if self.work.ready.is_some()
-            && self.finish_text()
+            && (self.work.recovering_entry.is_some() || self.finish_text())
             && let Some(e) = self.work.ready.take()
         {
             self.install_opened(e);
+            self.restore_pending_draft(ctx);
         }
         if let Some(rx) = &self.work.saving {
             match rx.try_recv() {
@@ -249,9 +258,6 @@ impl App {
                 return;
             }
         }
-        if let Some(old) = self.work.recovering_from.take() {
-            self.work.journal.adopt(e.instance, old);
-        }
         self.insert_document(e);
         self.objects.clear();
         self.blocks.clear();
@@ -300,10 +306,46 @@ impl App {
             doc.checkpoint(&mut self.work.journal);
         }
         if let Some(e) = &self.editor {
+            let snapshot = self
+                .inline
+                .as_ref()
+                .filter(|i| {
+                    !i.committed
+                        && (i.changed()
+                            || i.selection.typing != Default::default()
+                            || matches!(i.selection.target, Target::New))
+                })
+                .map(|i| {
+                    drafts::Snapshot::capture(
+                        i,
+                        self.zoom,
+                        self.scroll_offset,
+                        self.properties_collapsed,
+                    )
+                })
+                .or_else(|| {
+                    self.selected
+                        .as_ref()
+                        .filter(|_| self.comment_changed())
+                        .map(|s| {
+                            drafts::Snapshot::comment(
+                                s.clone(),
+                                self.zoom,
+                                self.scroll_offset,
+                                self.properties_collapsed,
+                            )
+                        })
+                });
+            let state = snapshot.and_then(|s| s.pending().ok());
             let draft = self
                 .inline
                 .as_ref()
-                .filter(|i| !i.committed && i.changed())
+                .filter(|i| {
+                    !i.committed
+                        && (i.changed()
+                            || i.selection.typing != Default::default()
+                            || matches!(i.selection.target, Target::New))
+                })
                 .map(|i| i.selection.draft.clone())
                 .or_else(|| {
                     self.selected
@@ -314,13 +356,15 @@ impl App {
                 .or_else(|| self.work.recovered_draft.clone())
                 .unwrap_or_default();
             let name = e.display_name();
-            self.work.journal.observe(
+            let dirty = e.dirty() || !draft.is_empty() || state.is_some();
+            self.work.journal.observe_state(
                 e.instance,
                 e.revision(),
                 e.bytes.clone(),
                 name,
                 draft.clone(),
-                e.dirty() || !draft.is_empty(),
+                dirty,
+                state,
             );
         }
         if self.work.journal.active() {
@@ -371,17 +415,20 @@ impl App {
             && self.work.ready.is_none()
             && self.work.paths.is_empty()
         {
-            let entries = self.work.journal.entries.clone();
+            let entries: Vec<_> = self
+                .work
+                .journal
+                .entries
+                .iter()
+                .map(|e| e.metadata.name.clone())
+                .collect();
             let mut recover = None;
             egui::Modal::new(egui::Id::new("recovery")).show(ctx, |ui| {
                 ui.set_width((ctx.content_rect().width() - 80.).clamp(320., 560.));
                 ui.heading("Récupérer le travail interrompu");
                 ui.label("Des copies de travail sont disponibles après une fermeture inattendue.");
-                for (i, entry) in entries.iter().enumerate() {
-                    if ui
-                        .button(format!("Récupérer {}", entry.metadata.name))
-                        .clicked()
-                    {
+                for (i, name) in entries.iter().enumerate() {
+                    if ui.button(format!("Récupérer {name}")).clicked() {
                         recover = Some(i);
                     }
                 }
@@ -391,8 +438,10 @@ impl App {
             });
             if let Some(i) = recover {
                 let entry = self.work.journal.entries.remove(i);
+                self.work.recovering_entry = Some(entry.clone());
                 self.work.recovering_from = Some(entry.pdf.clone());
                 let draft = entry.metadata.draft;
+                self.work.pending_restore = Some((entry.metadata.state, draft));
                 let name = std::path::Path::new(&entry.metadata.name)
                     .file_name()
                     .map(|n| n.to_string_lossy().into_owned())
@@ -407,9 +456,6 @@ impl App {
                     });
                     let _ = tx.send(result);
                 });
-                if !draft.is_empty() {
-                    self.work.recovered_draft = Some(draft);
-                }
                 self.work.show_recovery = !self.work.journal.entries.is_empty();
             }
         }

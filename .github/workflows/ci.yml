@@ -1,0 +1,81 @@
+name: Rust and recovery checks
+
+on:
+  push:
+    branches: [main, 'improvements/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  RUST_VERSION: '1.99.1'
+  CARGO_TERM_COLOR: always
+  CARGO_BUILD_JOBS: '2'
+
+jobs:
+  windows:
+    name: Windows / format, clippy, tests
+    runs-on: windows-2025
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        shell: pwsh
+        run: |
+          rustup toolchain install $env:RUST_VERSION --profile minimal --component rustfmt --component clippy
+          rustup override set $env:RUST_VERSION
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: windows-rust-${{ env.RUST_VERSION }}-${{ hashFiles('Cargo.lock') }}
+      - name: Provision French Windows OCR for the native OCR tests
+        shell: pwsh
+        run: |
+          $capability = Get-WindowsCapability -Online -Name 'Language.OCR~~~fr-FR~0.0.1.0'
+          if ($capability.State -ne 'Installed') {
+            Add-WindowsCapability -Online -Name 'Language.OCR~~~fr-FR~0.0.1.0' -ErrorAction Stop
+          }
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Check all application targets
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Run unit, simulated UI and integration tests
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force test-output | Out-Null
+          cargo test --locked -j 2 -- --test-threads=2
+      - name: Exercise abrupt process exit and recovery
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $false
+          cargo run --locked --example recovery_probe -- write test-output/ci-recovery
+          if ($LASTEXITCODE -ne 77) { throw 'The checkpoint process did not reach its intentional abrupt exit.' }
+          cargo run --locked --example recovery_probe -- recover test-output/ci-recovery
+          if ($LASTEXITCODE -ne 0) { throw 'The next process could not recover its checkpoint.' }
+
+  security:
+    name: RustSec / locked dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust and cargo-audit
+        run: |
+          rustup toolchain install "$RUST_VERSION" --profile minimal
+          rustup override set "$RUST_VERSION"
+          cargo install cargo-audit --version 0.22.2 --locked --no-default-features
+      - name: Audit against the current RustSec advisory database
+        run: cargo audit --json

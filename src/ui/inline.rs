@@ -14,7 +14,7 @@ pub struct Inline {
     pub background: Background,
     pub fonts: HashMap<String, String>,
     pub focus: bool,
-    cursor: Option<egui::text::CCursorRange>,
+    pub(super) cursor: Option<egui::text::CCursorRange>,
     pub committed: bool,
     pub view: PageInfo,
     pub screen: Rect,
@@ -45,17 +45,18 @@ impl Inline {
             },
         )?;
         let mut definitions = ctx.fonts(|f| f.definitions().clone());
+        let prefix = format!("document-{}-", editor.instance);
         definitions
             .font_data
-            .retain(|name, _| !name.starts_with("document-"));
+            .retain(|name, _| !name.starts_with(&prefix));
         definitions.families.retain(
-            |family, _| !matches!(family,FontFamily::Name(name)if name.starts_with("document-")),
+            |family, _| !matches!(family,FontFamily::Name(name)if name.starts_with(&prefix)),
         );
         let programs =
             pdfcraft_edit::text::text_editor_fonts(&editor.doc, page).map_err(|e| e.to_string())?;
         let mut fonts = HashMap::new();
         for (i, p) in programs.iter().enumerate() {
-            let name = format!("document-{i}");
+            let name = format!("{prefix}{i}");
             definitions.font_data.insert(
                 name.clone(),
                 Arc::new(egui::FontData::from_owned(p.bytes.clone())),

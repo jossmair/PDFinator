@@ -11,13 +11,18 @@ fn main() {
             Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap())
                 .unwrap();
         editor.insert_blank_after(0).unwrap();
-        journal.observe(
+        let styles=serde_json::json!({"bold":true,"italic":true,"size":19.5,"line_spacing":1.7,"color":[0.2,0.3,0.7]}).to_string();
+        journal.observe_state(
             editor.instance,
             editor.revision(),
             editor.bytes.clone(),
             "Cours.pdf".into(),
             "Brouillon : été œ".into(),
             true,
+            Some(pdfinator::recovery::PendingState {
+                key: styles.clone(),
+                encode: std::sync::Arc::new(move || Ok(styles.clone())),
+            }),
         );
         let complete = || {
             std::fs::read_dir(&root).unwrap().flatten().any(|d| {
@@ -40,6 +45,12 @@ fn main() {
         assert_eq!(journal.entries.len(), 1);
         let entry = &journal.entries[0];
         assert_eq!(entry.metadata.draft, "Brouillon : été œ");
+        let styles: serde_json::Value =
+            serde_json::from_str(entry.metadata.state.as_ref().expect("formatted state")).unwrap();
+        assert_eq!(styles["bold"], true);
+        assert_eq!(styles["italic"], true);
+        assert_eq!(styles["line_spacing"], 1.7);
+        assert_eq!(styles["size"], 19.5);
         let editor = Editor::open(&entry.pdf).unwrap();
         assert_eq!(editor.info.pages.len(), 2);
         assert!(
@@ -50,7 +61,7 @@ fn main() {
                 .contains("Travail a recuperer")
         );
         println!(
-            "RECOVERY_VERIFIED: 2 pages and Unicode draft, original process exited without cleanup"
+            "RECOVERY_VERIFIED: 2 pages, Unicode draft and formatting, original process exited without cleanup"
         );
         journal.clean_exit();
     }

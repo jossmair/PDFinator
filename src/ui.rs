@@ -6,6 +6,7 @@ mod clipboard;
 mod comments;
 mod crop;
 mod documents;
+mod drafts;
 mod drawing;
 mod drawing_style;
 mod export;
@@ -53,7 +54,7 @@ enum CloseDecision {
     Cancel,
     WaitForSave(u64),
 }
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 enum Target {
     Block(usize),
     Added(usize),
@@ -62,7 +63,7 @@ enum Target {
     Comment(usize),
     New,
 }
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 struct Selection {
     page: usize,
     target: Target,
@@ -71,14 +72,18 @@ struct Selection {
     size: f64,
     color: [f32; 3],
     bold: bool,
+    #[serde(with = "drafts::family")]
     family: Option<Family>,
+    #[serde(with = "drafts::align")]
     align: Option<Align>,
     resource: Option<String>,
     original_size: f64,
     original_color: [f32; 3],
     original_bold: bool,
     is_image: bool,
+    #[serde(with = "drafts::family")]
     original_family: Option<Family>,
+    #[serde(with = "drafts::align")]
     original_align: Option<Align>,
     line_spacing: Option<f64>,
     original_line_spacing: Option<f64>,
@@ -87,6 +92,7 @@ struct Selection {
     rich: Vec<pdfinator::rich::Span>,
     original_rich: Vec<pdfinator::rich::Span>,
     text_range: Option<std::ops::Range<usize>>,
+    #[serde(with = "drafts::fonts")]
     font_bindings: Vec<(String, typography::FontFace)>,
     scope_all: bool,
     typing: pdfinator::rich::Format,
@@ -407,7 +413,10 @@ impl App {
     }
     fn discard_decision(&mut self) -> CloseDecision {
         if !self.editor.as_ref().is_some_and(Editor::dirty)
-            && !self.inline.as_ref().is_some_and(|i| !i.committed && i.changed())
+            && !self
+                .inline
+                .as_ref()
+                .is_some_and(|i| !i.committed && i.changed())
             && !self.comment_changed()
         {
             return CloseDecision::Proceed;

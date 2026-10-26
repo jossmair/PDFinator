@@ -9,14 +9,20 @@ pub(super) struct FontFace {
     pub italic: bool,
     pub path: Option<PathBuf>,
     pub bundled: Option<&'static [u8]>,
+    pub cache: Arc<OnceLock<Vec<u8>>>,
 }
 impl FontFace {
     pub fn bytes(&self) -> Result<Vec<u8>> {
-        match (&self.path, self.bundled) {
+        if let Some(bytes) = self.cache.get() {
+            return Ok(bytes.clone());
+        }
+        let bytes = match (&self.path, self.bundled) {
             (Some(p), _) => pdfinator::files::read(p),
             (_, Some(b)) => Ok(b.to_vec()),
             _ => Err("Police indisponible.".into()),
-        }
+        }?;
+        let _ = self.cache.set(bytes.clone());
+        Ok(bytes)
     }
 }
 pub(super) struct FontBook {
@@ -39,6 +45,7 @@ impl FontBook {
                 bold: false,
                 italic: false,
                 path: None,
+                cache: Default::default(),
                 bundled: Some(include_bytes!(
                     "../../vendor/pdfcraft/assets/fonts/Inter-Regular.ttf"
                 )),
@@ -88,6 +95,7 @@ impl FontBook {
                             italic: false,
                             path: None,
                             bundled: Some(bytes),
+                            cache: Default::default(),
                         });
                     }
                     let mut directories = Vec::new();
@@ -157,6 +165,7 @@ impl FontBook {
                                 italic: face.is_italic(),
                                 path: Some(path),
                                 bundled: None,
+                                cache: Default::default(),
                             });
                         }
                     }
@@ -214,7 +223,7 @@ impl Selection {
             .map(|s| s.format.clone())
             .unwrap_or_else(|| self.typing.clone())
     }
-    fn data(&self, p: &PageInfo) -> pdfinator::rich::TextData {
+    pub(super) fn data(&self, p: &PageInfo) -> pdfinator::rich::TextData {
         let rect = if matches!(self.target, Target::New | Target::Added(_)) {
             let v = self.view_rect(p);
             p.view_rect_to_user([v.left(), v.top(), v.right(), v.bottom()])

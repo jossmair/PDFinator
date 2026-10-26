@@ -1,0 +1,25 @@
+name: Signaler un dysfonctionnement
+description: Un comportement incorrect ou une régression de PDFinator.
+body:
+  - type: markdown
+    attributes:
+      value: "Ne joignez aucune donnée personnelle. Pour une vulnérabilité, suivez SECURITY.md plutôt que ce formulaire public."
+  - type: input
+    id: version
+    attributes:
+      label: Version de PDFinator et de Windows
+      placeholder: "PDFinator 1.0.0, Windows 11 x64 ; portable ou installé"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Étapes pour reproduire
+      description: Décrivez les actions, le résultat attendu et le résultat observé.
+    validations:
+      required: true
+  - type: textarea
+    id: document
+    attributes:
+      label: Document de démonstration
+      description: "Un exemple synthétique ou librement redistribuable, sans données personnelles. Indiquez aussi le logiciel qui a créé le PDF si vous le savez."

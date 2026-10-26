@@ -76,6 +76,10 @@ Retrouvez les sources Rust, les tests, les ressources et les dépendances locale
 directement dans ce dépôt. Pour reconstruire l’application ou préparer une
 distribution Windows, suivez le [guide de compilation](BUILDING.md).
 
+Les priorités de développement sont suivies dans la [feuille de route](ROADMAP.md).
+Pour proposer un correctif, consultez [CONTRIBUTING.md](CONTRIBUTING.md) ; pour un
+problème sensible, suivez [SECURITY.md](SECURITY.md).
+
 [Sources figées de la V1](https://github.com/jossmair/PDFinator/tree/v1.0.0-sources) · [Archive complète des sources](https://github.com/jossmair/PDFinator/releases/download/v1.0.0/PDFinator-1.0.0-sources.zip)
 
 <details>

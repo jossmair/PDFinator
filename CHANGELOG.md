@@ -1,4 +1,23 @@
-# PDFinator 1.0.0
+# Changements PDFinator
+
+## En préparation — récupération complète et contrôles
+
+- Récupération des blocs non validés avec styles de caractères, polices en mémoire,
+  réglages de paragraphe, position, sélection et curseur ; commentaires et onglets.
+- Écriture des PDF de récupération par générations avec publication atomique de
+  l’état associé ; maintien du dernier checkpoint complet si le remplacement échoue.
+- Compatibilité de lecture des anciens journaux texte et secours conservé en cas
+  d’état inconnu. Un échec d’ouverture ne transfère pas le brouillon au document suivant.
+- Actions GitHub pour formatage, Clippy strict, tests Windows, reprise entre
+  processus et audit RustSec ; nouvelles régressions synthétiques.
+- Mise à jour ciblée Tokio 1.54.0 vers 1.54.1 dans Cargo.lock pour RUSTSEC-2026-0384.
+  Le graphe Windows normal vérifié ne dépend pas de Tokio ; aucun exploit de l’EXE
+  n’est affirmé. Les avis de maintenance, dont ttf-parser dans la cible Windows,
+  restent suivis dans DEPENDENCIES.md.
+
+Les téléchargements de la V1 ne sont pas remplacés par ce lot de développement.
+
+## PDFinator 1.0.0
 
 Application Windows x64 de lecture, annotation et modification de PDF, avec OCR
 local et export en DOCX ou ODT. Utilisation hors ligne, sans compte.
