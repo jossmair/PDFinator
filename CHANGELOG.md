@@ -1,6 +1,6 @@
 # Changements PDFinator
 
-## En préparation — récupération complète et contrôles
+## 1.0.1 — récupération complète et contrôles
 
 - Récupération des blocs non validés avec styles de caractères, polices en mémoire,
   réglages de paragraphe, position, sélection et curseur ; commentaires et onglets.
@@ -15,7 +15,9 @@
   n’est affirmé. Les avis de maintenance, dont ttf-parser dans la cible Windows,
   restent suivis dans DEPENDENCIES.md.
 
-Les téléchargements de la V1 ne sont pas remplacés par ce lot de développement.
+Les téléchargements 1.0.0 restent disponibles. La version 1.0.1 apporte ces correctifs.
+Les anciens journaux ne contenant que le texte restent lisibles, mais leurs styles
+non enregistrés ne peuvent pas être reconstruits rétroactivement.
 
 ## PDFinator 1.0.0
 
