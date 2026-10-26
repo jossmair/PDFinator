@@ -17,6 +17,15 @@ jobs:
       CARGO_TERM_COLOR: always
     steps:
       - uses: actions/checkout@v4
+      - name: Verify pinned license hashes before compiling
+        shell: pwsh
+        run: |
+          $sources = Get-Content licenses/extra/SOURCES.json -Raw | ConvertFrom-Json
+          foreach ($source in $sources) {
+            $path = Join-Path licenses/extra $source.file
+            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($hash -ne $source.sha256) { throw "Licence modifiée : $($source.file)" }
+          }
       - name: Install Rust (MSVC)
         uses: dtolnay/rust-toolchain@stable
         with:
