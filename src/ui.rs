@@ -407,7 +407,10 @@ impl App {
     }
     fn discard_decision(&mut self) -> CloseDecision {
         if !self.editor.as_ref().is_some_and(Editor::dirty)
-            && !self.inline.as_ref().is_some_and(|i| !i.committed && i.changed())
+            && !self
+                .inline
+                .as_ref()
+                .is_some_and(|i| !i.committed && i.changed())
             && !self.comment_changed()
         {
             return CloseDecision::Proceed;

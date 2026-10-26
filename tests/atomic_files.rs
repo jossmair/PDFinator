@@ -29,3 +29,12 @@ fn atomic_write_failure_leaves_existing_file_untouched() {
     assert!(atomic_write(&missing, b"replacement").is_err());
     assert_eq!(std::fs::read(&path).unwrap(), b"keep me");
 }
+
+#[test]
+fn refuses_oversized_pdf_before_allocating_its_contents() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("oversized.pdf");
+    let file = std::fs::File::create(&path).unwrap();
+    file.set_len(256 * 1024 * 1024 + 1).unwrap();
+    assert!(read(&path).unwrap_err().contains("256 Mo"));
+}

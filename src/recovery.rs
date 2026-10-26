@@ -14,6 +14,16 @@ pub struct Metadata {
     pub name: String,
     pub draft: String,
 }
+// New checkpoints include the PDF length so a torn PDF/JSON pair is ignored.
+// Older journals without pdf_length remain recoverable.
+#[derive(Serialize, Deserialize)]
+struct StoredMetadata {
+    #[serde(flatten)]
+    metadata: Metadata,
+    #[serde(default)]
+    pdf_length: Option<u64>,
+}
+
 #[derive(Clone)]
 pub struct Entry {
     pub pdf: PathBuf,
@@ -86,11 +96,15 @@ impl Journal {
                     if p.extension().is_some_and(|e| e == "json")
                         && p.with_extension("pdf").is_file()
                         && let Ok(bytes) = files::read(&p)
-                        && let Ok(metadata) = serde_json::from_slice(&bytes)
+                        && let Ok(stored) = serde_json::from_slice::<StoredMetadata>(&bytes)
+                        && stored.pdf_length.is_none_or(|expected| {
+                            std::fs::metadata(p.with_extension("pdf"))
+                                .is_ok_and(|actual| actual.len() == expected)
+                        })
                     {
                         entries.push(Entry {
                             pdf: p.with_extension("pdf"),
-                            metadata,
+                            metadata: stored.metadata,
                         });
                     }
                 }
@@ -119,6 +133,7 @@ impl Journal {
             loop {
                 let received = rx.recv_timeout(Duration::from_millis(600));
                 let idle = received.is_err();
+                let disconnected = matches!(received, Err(mpsc::RecvTimeoutError::Disconnected));
                 match received {
                     Ok(Command::Put(id, bytes, meta, old)) => {
                         pending.insert(id, (bytes, meta, old));
@@ -130,7 +145,7 @@ impl Journal {
                         }
                     }
                     Err(mpsc::RecvTimeoutError::Timeout) => {}
-                    Err(mpsc::RecvTimeoutError::Disconnected) => break,
+                    Err(mpsc::RecvTimeoutError::Disconnected) => {}
                 }
                 if since.elapsed() >= Duration::from_secs(2) || idle {
                     let mut failed = Vec::new();
@@ -154,6 +169,9 @@ impl Journal {
                     }
                     pending.extend(failed);
                     since = Instant::now();
+                }
+                if disconnected {
+                    break;
                 }
             }
         });
@@ -232,7 +250,11 @@ fn store(directory: &Path, id: u64, bytes: &[u8], meta: &Metadata) -> Result<()>
     files::atomic_write(&directory.join(format!("{id}.pdf")), bytes)?;
     files::atomic_write(
         &directory.join(format!("{id}.json")),
-        &serde_json::to_vec(meta).map_err(|e| e.to_string())?,
+        &serde_json::to_vec(&StoredMetadata {
+            metadata: meta.clone(),
+            pdf_length: Some(bytes.len() as u64),
+        })
+        .map_err(|e| e.to_string())?,
     )
 }
 
@@ -311,4 +333,46 @@ mod tests {
         let next = Journal::start(temp.path()).unwrap();
         assert!(next.entries.is_empty());
     }
+    #[test]
+    fn incomplete_snapshot_is_ignored_but_legacy_metadata_still_recovers() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("test-output");
+        let temp = tempfile::tempdir_in(root).unwrap();
+        let first = Journal::start(temp.path()).unwrap();
+        let dir = first.directory.clone().unwrap();
+        let meta = Metadata {
+            name: "Cours de français.pdf".into(),
+            draft: "modifications non sauvegardées".into(),
+        };
+        store(&dir, 4, b"original snapshot", &meta).unwrap();
+        // Simulate a torn checkpoint whose metadata still describes the old PDF.
+        std::fs::write(dir.join("4.pdf"), b"short").unwrap();
+        drop(first);
+        let second = Journal::start(temp.path()).unwrap();
+        assert!(second.entries.is_empty());
+        drop(second);
+
+        // Checkpoints created by v1.0.0 did not carry pdf_length.
+        std::fs::write(dir.join("4.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
+        let third = Journal::start(temp.path()).unwrap();
+        assert_eq!(third.entries.len(), 1);
+        assert_eq!(third.entries[0].metadata.name, "Cours de français.pdf");
+    }
+
+    #[test]
+    fn pending_checkpoint_is_written_when_sender_disconnects() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("test-output");
+        let temp = tempfile::tempdir_in(root).unwrap();
+        let mut journal = Journal::start(temp.path()).unwrap();
+        let path = journal.directory.as_ref().unwrap().join("15.pdf");
+        journal.observe(15, 1, Arc::new(b"saved draft".to_vec()), "Cours.pdf".into(), "été".into(), true);
+        drop(journal);
+        for _ in 0..100 {
+            if path.exists() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(30));
+        }
+        assert_eq!(std::fs::read(&path).unwrap(), b"saved draft");
+    }
+
 }
