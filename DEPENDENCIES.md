@@ -28,6 +28,17 @@ Cinq avis informatifs de non-maintenance restent visibles, sans masquage :
 Ces avertissements demandent néanmoins un suivi. Les contrôles suivants utilisent
 une base actualisée et peuvent donc produire un résultat différent de ce relevé.
 
+## Version retirée du catalogue
+
+Le contrôle de préparation 1.0.2 a également signalé `clipboard-win 5.4.1`
+comme version retirée du catalogue crates.io (« yanked »). Elle est remplacée
+par `5.4.3`, sans exception d’audit. Le fournisseur a corrigé la gestion de
+[fragments HTML invalides](https://github.com/DoumanAsh/clipboard-win/commit/38c3c3fef175c20ed8f8e33dacb9b1e3bb8eca87)
+et [l’attente entre tentatives d’ouverture](https://github.com/DoumanAsh/clipboard-win/commit/ed27008ae5d1f10cfbb266de039f0fb35fd05a56).
+Un retrait de version n’est pas à lui seul la preuve d’une vulnérabilité. Le
+contrôle CI refuse désormais les dépendances retirées (`--deny yanked`), tout
+en laissant visibles les cinq avis de non-maintenance suivis ci-dessus.
+
 ## Composants locaux
 
 - Le moteur PdfCraft copié est issu de la révision

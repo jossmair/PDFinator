@@ -2,6 +2,8 @@
 
 ## 1.0.2 — indices et exposants dans les exports Office
 
+- Mise à jour ciblée de clipboard-win 5.4.1 (retirée du catalogue) vers 5.4.3 ;
+  blocage des dépendances retirées dans le contrôle GitHub.
 - Conservation de la taille des indices et exposants natifs du PDF, avec leur
   décalage de ligne de base, sans seconde réduction de taille à l’export DOCX/ODT.
 - Régression synthétique exécutée sans fichier utilisateur ; corpus reproductible

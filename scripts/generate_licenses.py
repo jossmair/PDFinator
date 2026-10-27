@@ -134,7 +134,7 @@ def licence_files(package: dict) -> list[Path]:
         "accesskit_consumer": ("0.35.0", "accesskit-MIT.txt"),
         "accesskit_windows": ("0.32.1", "accesskit-MIT.txt"),
         "alloc-stdlib": ("0.2.4", "alloc-stdlib-BSD.txt"),
-        "clipboard-win": ("5.4.1", "clipboard-win-BSL.txt"),
+        "clipboard-win": ("5.4.3", "clipboard-win-BSL.txt"),
         "profiling": ("1.0.18", "profiling-MIT.txt"),
         "fmt-derive": ("0.1.2", "accesskit-MIT.txt"),
         "fmt-derive-proc": ("0.1.2", "accesskit-MIT.txt"),

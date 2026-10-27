@@ -1,7 +1,7 @@
 {
   "target": "x86_64-pc-windows-msvc",
-  "executable_sha256": "ffbd21f581c5e69ae1e23b36115ea19e99bf3d0dd384c390b1d2e1f773e35d33",
-  "cargo_lock_sha256": "1735b94d220b23b3144d9cfd38dc1690897167d97b7e75cc69bfafd47f859028",
+  "executable_sha256": "3b429529ceccda37248d6cfb106eadba59b251b4a6f381ec98f7d36258e2f717",
+  "cargo_lock_sha256": "5f2151867e07dd3914f2b0165ded07dd89bc381df4ad00aa3056f5bc88983d55",
   "normal_packages": 261,
   "unique_documents": 154,
   "embedded_fonts": [
@@ -236,7 +236,7 @@
     },
     {
       "package": "clipboard-win",
-      "version": "5.4.1",
+      "version": "5.4.3",
       "declared": "BSL-1.0",
       "documents": [
         "a796d5730b60337084397744dbaaad751d2995d421f96e8842e4a22007ee284f",
@@ -2395,7 +2395,7 @@
     },
     "a796d5730b60337084397744dbaaad751d2995d421f96e8842e4a22007ee284f": {
       "origins": [
-        "clipboard-win 5.4.1",
+        "clipboard-win 5.4.3",
         "error-code 3.4.0"
       ],
       "sources": [
@@ -2405,11 +2405,11 @@
     },
     "35f51b752e2ed3a70a42802849f421cdba9dd561fd6ef484e26bf2e0fa992713": {
       "origins": [
-        "clipboard-win 5.4.1",
+        "clipboard-win 5.4.3",
         "error-code 3.4.0"
       ],
       "sources": [
-        "cargo-registry/clipboard-win-5.4.1/Cargo.toml",
+        "cargo-registry/clipboard-win-5.4.3/Cargo.toml",
         "cargo-registry/error-code-3.4.0/Cargo.toml"
       ]
     },
@@ -3668,5 +3668,5 @@
       ]
     }
   },
-  "bundle_sha256": "499e629553b23ca943ea1672e47344ae785dd710fd361109ee5a04f18261bb71"
+  "bundle_sha256": "d6ca22a2a06cdce1fbba4598cbe42ed605475bbab092a57ece3337f3230eded2"
 }
