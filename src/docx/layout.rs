@@ -137,6 +137,11 @@ fn paragraphs(e: &Editor, index: usize) -> Result<Vec<Paragraph>> {
                         underline: f.underline.unwrap_or(false),
                         strike: f.strike.unwrap_or(false),
                         script: f.script.unwrap_or(0),
+                        baseline: source.map(|l| {
+                            let b = l.baseline();
+                            page.user_to_view(b[0] as f32, b[1] as f32)[1] as f64
+                        }),
+                        rise: None,
                         background: f
                             .highlight
                             .unwrap_or(f.background.is_some())
@@ -275,17 +280,24 @@ fn join_lines(mut input: Vec<Paragraph>, gap: f64) -> Vec<Paragraph> {
                 .filter(|r| r.fraction.is_none())
                 .map(|r| r.size)
                 .fold(1_f64, f64::max);
-            let baseline = row
+            let mut baselines: Vec<_> = row
                 .iter()
                 .flat_map(|p| &p.runs)
-                .filter(|r| r.fraction.is_none())
-                .filter_map(|r| r.rect.map(|b| b[3]))
-                .fold(0_f64, f64::max);
-            for p in &mut row {
-                if p.rect[3] < baseline - max_size * 0.2 {
-                    for r in &mut p.runs {
-                        if r.fraction.is_none() && r.size < max_size * 0.8 {
-                            r.script = 1;
+                .filter(|r| r.fraction.is_none() && r.script == 0 && r.size >= max_size * 0.8)
+                .filter_map(|r| r.baseline)
+                .collect();
+            baselines.sort_by(f64::total_cmp);
+            if let Some(&baseline) = baselines.get(baselines.len() / 2) {
+                for r in row.iter_mut().flat_map(|p| &mut p.runs) {
+                    if r.fraction.is_none()
+                        && r.script == 0
+                        && r.size < max_size * 0.8
+                        && let Some(source) = r.baseline
+                    {
+                        let rise = baseline - source;
+                        if rise.abs() > max_size * 0.15 {
+                            r.script = if rise > 0. { 1 } else { -1 };
+                            r.rise = Some(rise);
                         }
                     }
                 }
@@ -702,6 +714,11 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
                     r.bold = line.bold;
                     r.italic = line.italic;
                     r.color = line.color;
+                    let baseline = line.baseline();
+                    r.baseline = Some(
+                        e.info.pages[index].user_to_view(baseline[0] as f32, baseline[1] as f32)[1]
+                            as f64,
+                    );
                 }
             }
             if let Some(r) = p.runs.first_mut() {

@@ -41,3 +41,6 @@ ne pas masquer un avis uniquement pour obtenir un contrôle vert.
 
 Les problèmes de sécurité suivent [SECURITY.md](SECURITY.md). Les priorités sont
 suivies dans [ROADMAP.md](ROADMAP.md).
+
+Les exports DOCX/ODT ont une [procédure de validation et un corpus synthétique](OFFICE-VALIDATION.md),
+en complément des tests de structure Rust.
