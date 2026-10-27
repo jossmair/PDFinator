@@ -2573,7 +2573,7 @@ dependencies = [
 
 [[package]]
 name = "pdfinator"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "clipboard-win",
  "craft-print",
@@ -2585,6 +2585,7 @@ dependencies = [
  "pdfcraft-create",
  "pdfcraft-edit",
  "pdfcraft-export",
+ "pdfcraft-filters",
  "pdfcraft-fonts",
  "pdfcraft-model",
  "pdfcraft-organize",

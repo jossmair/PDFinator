@@ -1,5 +1,14 @@
 # Changements PDFinator
 
+## 1.0.3 — dissocier les schémas PDF compatibles
+
+- Commande « Dissocier le schéma » dans le menu contextuel du mode Modifier.
+- Conservation du rendu, des polices, de l’ordre de dessin et des autres
+  occurrences du schéma ; retrait des enveloppes simples de collage en une action.
+- Tests de rendu exact, d’édition des éléments extraits, de sauvegarde/réouverture,
+  d’annulation/rétablissement et de refus des flux endommagés ou trop complexes.
+- Périmètre et limites documentés dans `GROUPS.md`.
+
 ## 1.0.2 — indices et exposants dans les exports Office
 
 - Mise à jour ciblée de clipboard-win 5.4.1 (retirée du catalogue) vers 5.4.3 ;

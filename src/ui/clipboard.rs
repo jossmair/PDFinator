@@ -135,6 +135,23 @@ impl App {
         }
         response.context_menu(|ui| self.block_menu_contents(ui, s));
     }
+    fn form_dissociation_available(&self, ctx: &egui::Context, page: usize, index: usize) -> bool {
+        type Cached = (std::sync::Weak<Vec<u8>>, usize, usize, bool);
+        let Some(e) = &self.editor else { return false };
+        let id = egui::Id::new("form-dissociation-availability");
+        if let Some((source, p, i, available)) = ctx.data(|d| d.get_temp::<Cached>(id))
+            && p == page
+            && i == index
+            && source
+                .upgrade()
+                .is_some_and(|source| Arc::ptr_eq(&source, &e.bytes))
+        {
+            return available;
+        }
+        let available = e.can_dissociate_form(page, index);
+        ctx.data_mut(|d| d.insert_temp(id, (Arc::downgrade(&e.bytes), page, index, available)));
+        available
+    }
     fn block_menu_contents(&mut self, ui: &mut egui::Ui, s: &Selection) {
         let can_copy = matches!(
             s.target,
@@ -172,6 +189,26 @@ impl App {
         }
         if s.is_image && ui.button("Rogner").clicked() {
             self.begin_image_crop(ui.ctx(), s.clone());
+            ui.close();
+        }
+        if let Target::Image(index) = s.target
+            && self.workspace == Workspace::Edit
+            && self.form_dissociation_available(ui.ctx(), s.page, index)
+            && ui.button("Dissocier le schéma").clicked()
+        {
+            if self.finish_text() && self.permit() {
+                let result = self.editor.as_mut().unwrap().dissociate_form(s.page, index);
+                if self.changed(result, s.page) {
+                    self.selected = None;
+                    self.image_crop = None;
+                    self.image_context = None;
+                    self.drag = None;
+                    self.marquee.clear();
+                    self.drawing.selected.clear();
+                    self.drawing.drag = None;
+                    self.message = None;
+                }
+            }
             ui.close();
         }
         ui.separator();
