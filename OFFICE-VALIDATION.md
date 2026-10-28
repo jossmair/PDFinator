@@ -74,3 +74,37 @@ moins de 0,15 pt et leurs décalages relatifs à moins de 0,91 pt dans LibreOffi
 Le document synthétique de formats mixtes conserve ses trois pages, dont la page
 blanche paysage. Ces mesures documentent le périmètre testé, pas une identité
 de rendu générale ni une recette Microsoft Word.
+
+## Recette locale du correctif 1.0.5
+
+Quatorze exports ont été reconvertis et rendus dans LibreOffice : les six sorties
+sur les trois documents fournis, les quatre sorties du corpus indices/exposants
+et formats mixtes, puis quatre sorties minimales de fractions isolées.
+
+- Les fractions isolées positive et négative sont des objets mathématiques
+  éditables dans DOCX/ODT. Les quatre rendus ont une page, du texte visible et
+  une barre présente ; le cas DOCX initialement blanc ne l’est plus.
+- Les 14 fractions du document « Multiples et diviseurs », son tableau et les
+  367 éléments textuels vérifiés sont conservés. Écart vertical maximal :
+  DOCX 1,23 pt ; ODT 0,92 pt.
+- Le document sur les prismes conserve ses 54 éléments textuels, son patron,
+  son cylindre et sa page. Écart vertical maximal : 0,33 pt dans les deux formats.
+- Les pourcentages conservent leurs cinq fractions éditables, tableaux et flèches.
+  Écart vertical numérique maximal : DOCX 1,50 pt ; ODT 1,37 pt.
+- Les petits indices/exposants conservent leurs dimensions à moins de 0,15 pt
+  et leurs décalages relatifs à moins de 0,91 pt. Les trois formats de pages,
+  dont la page blanche paysage, restent conservés.
+
+Le contrôle de fractions isolées est reproductible avec
+`scripts/fraction_corpus.py <dossier>`, conversion par `examples/office_probe.rs`,
+puis rendu des deux DOCX dans `<dossier>/rendered-docx` et des deux ODT dans
+`<dossier>/rendered-odt`. Exécuter ensuite
+`scripts/verify_fraction_corpus.py <dossier>` avec pypdfium2 et lxml disponibles.
+Il contrôle les objets éditables, le texte, la pagination et la présence de la
+barre dans le rendu ; une simple recherche XML ne suffit pas.
+
+Les exemples minimaux utilisent la police Inter libre déjà présente dans les
+sources. Aucun document utilisateur n’est publié dans ce corpus. Ces contrôles
+ne garantissent pas une identité générale : les traitements de texte recalculent
+les polices de repli et la géométrie des équations. Le contrôle Microsoft Word
+reste distinct des rendus LibreOffice effectués ici.

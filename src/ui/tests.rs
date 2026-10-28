@@ -75,7 +75,7 @@ fn reading_cursor_is_an_ibeam_over_text_and_an_arrow_over_blank_page_and_margin(
     }
 }
 #[test]
-fn a_selected_block_has_an_open_hand_then_a_closed_hand_while_dragging() {
+fn selected_objects_use_a_move_cross_before_and_during_drag() {
     let (ctx, mut app) = setup();
     app.set_workspace(&ctx, Workspace::Edit);
     app.set_tool(&ctx, Tool::Select);
@@ -96,13 +96,13 @@ fn a_selected_block_has_an_open_hand_then_a_closed_hand_while_dragging() {
     input_frame(&ctx, &mut app, vec![]);
     let center = sheet_origin(&app) + block.center().to_vec2() * app.zoom;
     let out = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(center)]);
-    assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Grab);
+    assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Move);
     let out = input_frame(
         &ctx,
         &mut app,
         vec![pointer_button(center, egui::PointerButton::Primary, true)],
     );
-    assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Grabbing);
+    assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Move);
     input_frame(
         &ctx,
         &mut app,
@@ -198,7 +198,26 @@ fn diagonal_polygon_is_selected_as_a_line_then_dragged_resized_and_restyled() {
             "The oblique line must win over its white background"
         );
         let pos = sheet_origin(&app) + mid.to_vec2() * app.zoom;
-        drag_pointer(&ctx, &mut app, pos, pos + Vec2::new(80., 50.));
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(pos),
+                pointer_button(pos, egui::PointerButton::Primary, true),
+            ],
+        );
+        let end = pos + Vec2::new(80., 50.);
+        let output = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(end)]);
+        assert_eq!(
+            output.platform_output.cursor_icon,
+            egui::CursorIcon::Move,
+            "{tool:?}"
+        );
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![pointer_button(end, egui::PointerButton::Primary, false)],
+        );
         for _ in 0..200 {
             input_frame(&ctx, &mut app, vec![]);
             if app.drawing.drag.is_none() {
@@ -639,7 +658,29 @@ fn selection_rectangle_moves_text_grid_arrowheads_and_image_together_at_three_zo
         let selected = app.marquee.selected.clone();
         let start = screen(&app, [430., 615.]);
         let delta = Vec2::new(12. * zoom, 18. * zoom);
-        drag_pointer(&ctx, &mut app, start, start + delta);
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(start),
+                pointer_button(start, egui::PointerButton::Primary, true),
+            ],
+        );
+        let output = input_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerMoved(start + delta)],
+        );
+        assert_eq!(output.platform_output.cursor_icon, egui::CursorIcon::Move);
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![pointer_button(
+                start + delta,
+                egui::PointerButton::Primary,
+                false,
+            )],
+        );
         assert!(app.message.is_none(), "{:?}", app.message);
         let e = app.editor.as_mut().unwrap();
         let moved = e.selection_items(0).unwrap();
@@ -1347,11 +1388,7 @@ fn drawing_tool_creates_a_vector_line_and_dragging_its_end_changes_length_withou
 #[test]
 fn hand_cursor_is_limited_to_the_sheet_and_returns_to_an_arrow_in_the_margin() {
     let (ctx, mut app) = setup();
-    for (workspace, tool) in [
-        (Workspace::Read, Tool::Hand),
-        (Workspace::Edit, Tool::Hand),
-        (Workspace::Edit, Tool::Move),
-    ] {
+    for (workspace, tool) in [(Workspace::Read, Tool::Hand), (Workspace::Edit, Tool::Hand)] {
         app.set_workspace(&ctx, workspace);
         app.set_tool(&ctx, tool);
         for (pos, pressed, cursor) in [
@@ -1384,7 +1421,14 @@ fn hand_cursor_is_limited_to_the_sheet_and_returns_to_an_arrow_in_the_margin() {
                 |ui| app.frame_ui(ui),
             );
             out.textures_delta.clear();
-            assert_eq!(out.platform_output.cursor_icon, cursor);
+            let expected = if tool == Tool::Move
+                && matches!(cursor, egui::CursorIcon::Grab | egui::CursorIcon::Grabbing)
+            {
+                egui::CursorIcon::Move
+            } else {
+                cursor
+            };
+            assert_eq!(out.platform_output.cursor_icon, expected);
         }
     }
 }
@@ -2256,6 +2300,7 @@ fn move_tool_drags_a_text_body_without_opening_text_properties() {
             |ui| app.frame_ui(ui),
         );
         out.textures_delta.clear();
+        assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Move);
     }
     let e = app.editor.as_ref().unwrap();
     let moved = e.blocks(0).unwrap()[0].rect;
@@ -3966,6 +4011,68 @@ fn properties_recenter_the_page_in_the_visible_canvas_without_changing_zoom() {
             (center - app.canvas.center().x).abs() <= 10.,
             "page {center}, canvas {:?}",
             app.canvas
+        );
+    }
+}
+
+#[test]
+fn image_movement_uses_a_cross_and_preserves_resize_cursors_and_margin_arrow() {
+    for tool in [Tool::Edit, Tool::Move] {
+        let (ctx, mut app) = setup();
+        app.set_workspace(&ctx, Workspace::Edit);
+        app.set_tool(&ctx, tool);
+        app.fit = Fit::Manual;
+        app.zoom = 0.8;
+        let png = pdfinator::ocr::encode_png(&[220, 40, 30, 255].repeat(20 * 20), 20, 20).unwrap();
+        app.editor
+            .as_mut()
+            .unwrap()
+            .image_bytes(0, [100., 350., 400., 550.], "test.png", &png, None)
+            .unwrap();
+        app.refresh(0);
+        app.selected = app.selection_for(0, Target::Added(0));
+        for _ in 0..2 {
+            input_frame(&ctx, &mut app, vec![]);
+        }
+        let p = &app.editor.as_ref().unwrap().info.pages[0];
+        let r = app.selected.as_ref().unwrap().view_rect(p);
+        let corner = sheet_origin(&app) + r.min.to_vec2() * app.zoom;
+        let output = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(corner)]);
+        assert_eq!(
+            output.platform_output.cursor_icon,
+            egui::CursorIcon::ResizeNwSe,
+            "{tool:?}"
+        );
+        let center = sheet_origin(&app) + r.center().to_vec2() * app.zoom;
+        let output = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(center)]);
+        assert_eq!(
+            output.platform_output.cursor_icon,
+            egui::CursorIcon::Move,
+            "{tool:?}"
+        );
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![pointer_button(center, egui::PointerButton::Primary, true)],
+        );
+        let end = center + Vec2::new(50., 30.);
+        let output = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(end)]);
+        assert_eq!(
+            output.platform_output.cursor_icon,
+            egui::CursorIcon::Move,
+            "{tool:?}"
+        );
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![pointer_button(end, egui::PointerButton::Primary, false)],
+        );
+        let margin = app.canvas.min + Vec2::new(1., 3.);
+        let output = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(margin)]);
+        assert_eq!(
+            output.platform_output.cursor_icon,
+            egui::CursorIcon::Default,
+            "{tool:?}"
         );
     }
 }

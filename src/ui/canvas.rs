@@ -133,7 +133,7 @@ impl App {
                         });
                     }
                 }
-                if matches!(self.tool, Tool::Hand | Tool::Move)
+                if self.tool == Tool::Hand
                     && !self.printing.open
                     && self.recognition.is_none()
                     && self.image_crop.is_none()
@@ -151,6 +151,23 @@ impl App {
                     } else {
                         egui::CursorIcon::Grab
                     });
+                }
+                let moving_object = self
+                    .drag
+                    .as_ref()
+                    .is_some_and(|d| matches!(d.mode, DragMode::Move))
+                    || self.marquee.is_moving()
+                    || self.drawing.is_moving();
+                if moving_object
+                    && ctx.input(|i| i.pointer.primary_down())
+                    && !self.printing.open
+                    && self.recognition.is_none()
+                    && self.image_crop.is_none()
+                    && ctx.pointer_hover_pos().is_some_and(|p| {
+                        scroll.inner_rect.contains(p) && ctx.layer_id_at(p) == Some(ui.layer_id())
+                    })
+                {
+                    ctx.set_cursor_icon(egui::CursorIcon::Move);
                 }
                 let gray_click = ctx
                     .input(|i| {
@@ -272,6 +289,14 @@ impl App {
             return false;
         }
         surfaces.push(rect);
+        if self.tool == Tool::Move
+            && response.hovered()
+            && !self.printing.open
+            && self.recognition.is_none()
+            && self.image_crop.is_none()
+        {
+            ui.ctx().set_cursor_icon(egui::CursorIcon::Move);
+        }
         if rect.top() <= ui.clip_rect().top() + rect.height() * 0.5
             && rect.bottom() > ui.clip_rect().top()
         {

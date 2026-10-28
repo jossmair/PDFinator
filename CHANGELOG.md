@@ -1,5 +1,14 @@
 # Changements PDFinator
 
+## 1.0.5 — curseurs de déplacement et fractions Office
+
+- Croix de déplacement sur les textes, images, tracés et sélections mixtes ; la main reste dédiée au déplacement de la vue PDF. Conservation des curseurs de redimensionnement.
+- Reconnaissance des signes moins Unicode et des opérateurs courants dans les fractions, avec conservation du texte.
+- Réservation de la largeur de la barre source et exclusion des traits obliques dans la détection des fractions.
+- Correction des cellules DOCX ne contenant qu’une équation et rendues blanches par LibreOffice ; formule native conservée.
+- Prévention de l’étirement des caractères des fractions ODT lorsque la barre source est plus large.
+- Corpus synthétique reproductible et vérification indépendante du rendu, en complément des tests automatisés.
+
 ## 1.0.4 — intégrité des sélections
 
 - Refus des flux endommagés lors d’une sélection, d’un déplacement, d’une suppression ou d’un aperçu ; aucun contenu partiellement décodé n’est réécrit.

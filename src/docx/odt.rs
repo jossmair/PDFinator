@@ -57,7 +57,22 @@ impl Writer {
         self.zip
             .add(&format!("{name}/content.xml"), content.as_bytes(), true);
         self.formulas.push(name.clone());
-        let b = r.rect.unwrap();
+        // The paragraph reserves the whole source bar, but stretching the
+        // formula object to that width would also stretch its glyphs in Writer.
+        let b = f
+            .numerator
+            .iter()
+            .chain(&f.denominator)
+            .filter_map(|r| r.rect)
+            .reduce(|a, b| {
+                [
+                    a[0].min(b[0]),
+                    a[1].min(b[1]),
+                    a[2].max(b[2]),
+                    a[3].max(b[3]),
+                ]
+            })
+            .unwrap_or(r.rect.unwrap());
         let graphic=self.style("graphic","<style:graphic-properties style:vertical-pos=\"middle\" style:vertical-rel=\"text\" fo:margin-left=\"0pt\" fo:margin-right=\"0pt\"/>");
         format!(
             "<draw:frame draw:style-name=\"{graphic}\" draw:name=\"{name}\" text:anchor-type=\"as-char\" svg:width=\"{}pt\" svg:height=\"{}pt\"><draw:object xlink:href=\"./{name}\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/></draw:frame>",
@@ -510,4 +525,50 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
     w.zip
         .add("META-INF/manifest.xml", manifest.as_bytes(), true);
     Ok(w.zip.finish())
+}
+
+#[cfg(test)]
+mod fraction_geometry_tests {
+    use super::*;
+    #[test]
+    fn a_wide_source_bar_does_not_stretch_the_odt_formula_glyphs() {
+        let numerator = Run {
+            text: "−12".into(),
+            font: "Arial".into(),
+            size: 12.,
+            color: [0.; 3],
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            script: 0,
+            baseline: None,
+            rise: None,
+            background: None,
+            rect: Some([80., 30., 102., 42.]),
+            fraction: None,
+        };
+        let mut denominator = numerator.clone();
+        denominator.text = "7".into();
+        denominator.rect = Some([87., 50., 94., 62.]);
+        let fraction = Fraction {
+            numerator: vec![numerator.clone()],
+            denominator: vec![denominator],
+        };
+        let mut run = numerator;
+        run.rect = Some([78., 30., 112., 62.]);
+        let mut writer = Writer {
+            zip: Zip::default(),
+            styles: String::new(),
+            count: 0,
+            images: vec![],
+            formulas: vec![],
+        };
+        let xml = writer.fraction(&run, &fraction);
+        assert!(
+            xml.contains("svg:width=\"23.5pt\""),
+            "A source bar must not widen the equation's text: {xml}"
+        );
+        assert!(xml.contains("draw:object"));
+    }
 }

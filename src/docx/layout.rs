@@ -455,7 +455,7 @@ fn fractions(paragraphs: Vec<Paragraph>, lines: &[Line]) -> Vec<Paragraph> {
         .collect();
     let mut used = vec![false; runs.len()];
     let mut found = Vec::new();
-    for line in lines.iter().filter(|l| !l.vertical()) {
+    for line in lines.iter().filter(|l| (l.a[1] - l.b[1]).abs() < 1.) {
         let bar = line.rect();
         if !(3. ..=100.).contains(&(bar[2] - bar[0])) {
             continue;
@@ -476,6 +476,11 @@ fn fractions(paragraphs: Vec<Paragraph>, lines: &[Line]) -> Vec<Paragraph> {
                             || matches!(
                                 c,
                                 '+' | '-'
+                                    | '−'
+                                    | '±'
+                                    | '∓'
+                                    | '·'
+                                    | '⋅'
                                     | '×'
                                     | '÷'
                                     | '='
@@ -543,6 +548,7 @@ fn fractions(paragraphs: Vec<Paragraph>, lines: &[Line]) -> Vec<Paragraph> {
             .filter_map(|r| r.rect)
             .reduce(union)
             .unwrap();
+        let bounds = union(bounds, bar);
         let mut r = numerator[0].clone();
         r.rect = Some(bounds);
         r.text = format!(
@@ -1076,4 +1082,82 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
         decorations,
         fonts,
     })
+}
+
+#[cfg(test)]
+mod fraction_tests {
+    use super::*;
+    fn paragraph(text: &str, rect: [f64; 4]) -> Paragraph {
+        Paragraph {
+            rect,
+            align: "left",
+            spacing: None,
+            runs: vec![Run {
+                text: text.into(),
+                font: "Arial".into(),
+                size: 12.,
+                color: [0.; 3],
+                bold: false,
+                italic: false,
+                underline: false,
+                strike: false,
+                script: 0,
+                baseline: None,
+                rise: None,
+                background: None,
+                rect: Some(rect),
+                fraction: None,
+            }],
+        }
+    }
+    fn sample(num: &str, diagonal: bool) -> Vec<Paragraph> {
+        fractions(
+            vec![
+                paragraph(num, [80., 30., 102., 42.]),
+                paragraph("7", [87., 50., 94., 62.]),
+            ],
+            &[Line {
+                a: [78., 45.],
+                b: [112., if diagonal { 60. } else { 45. }],
+                width: 1.,
+                color: [0.; 3],
+            }],
+        )
+    }
+    #[test]
+    fn fraction_bounds_include_the_whole_source_bar() {
+        let p = sample("12", false);
+        let r = p
+            .iter()
+            .flat_map(|p| &p.runs)
+            .find(|r| r.fraction.is_some())
+            .unwrap();
+        assert_eq!(r.rect.unwrap(), [78., 30., 112., 62.]);
+    }
+    #[test]
+    fn unicode_minus_and_common_operators_keep_editable_fractions() {
+        for text in ["−12", "±12", "∓12", "1⋅2", "1·2", "1×2", "1÷2"] {
+            let p = sample(text, false);
+            assert_eq!(
+                p.iter()
+                    .flat_map(|p| &p.runs)
+                    .filter(|r| r.fraction.is_some())
+                    .count(),
+                1,
+                "{text}"
+            );
+            let r = p
+                .iter()
+                .flat_map(|p| &p.runs)
+                .find(|r| r.fraction.is_some())
+                .unwrap();
+            assert_eq!(r.fraction.as_ref().unwrap().numerator[0].text, text);
+        }
+    }
+    #[test]
+    fn prose_and_diagonal_strokes_do_not_turn_into_fractions() {
+        for p in [sample("Chapitre", false), sample("12", true)] {
+            assert!(p.iter().flat_map(|p| &p.runs).all(|r| r.fraction.is_none()));
+        }
+    }
 }

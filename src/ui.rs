@@ -1217,10 +1217,6 @@ fn windows_animations() -> bool {
     true
 }
 
-fn moving_cursor(ctx: &egui::Context) -> egui::CursorIcon {
-    if ctx.input(|i| i.pointer.primary_down()) {
-        egui::CursorIcon::Grabbing
-    } else {
-        egui::CursorIcon::Grab
-    }
+fn moving_cursor(_ctx: &egui::Context) -> egui::CursorIcon {
+    egui::CursorIcon::Move
 }
