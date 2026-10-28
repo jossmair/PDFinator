@@ -1,4 +1,23 @@
-# Validation de PDFinator 1.0.0
+# Validation de PDFinator
+
+## 1.0.4 — intégrité des sélections
+
+Vérifications locales sous Windows x64 le 28 octobre 2026 : **182 tests réussis**,
+formatage et Clippy strict. Les quatre nouvelles régressions portent sur les
+flux endommagés, la décompression cumulée, le nombre de flux/opérateurs et la
+conservation des flux intacts après déplacement, réouverture et annulation.
+Le test du flux endommagé échoue sur le code de sélection de la 1.0.3 et réussit
+avec le correctif. Un refus conserve également la possibilité de rétablir.
+
+Le [statut des contrôles GitHub](https://github.com/jossmair/PDFinator/actions)
+fait foi pour la validation distante. Les limites de ces protections ciblées
+sont décrites dans [SELECTION-SAFETY.md](SELECTION-SAFETY.md).
+
+Les vérifications historiques ci-dessous restent utiles pour leur périmètre ;
+elles ne valent pas nouvelle recette Word, imprimantes, lecteurs d’écran ou
+installation sur une machine vierge.
+
+## Archive de validation 1.0.0
 
 Vérifications effectuées sous Windows x64 le 25 octobre 2026.
 

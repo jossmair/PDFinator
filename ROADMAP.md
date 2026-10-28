@@ -70,11 +70,20 @@ fractionnement, comparaison et formulaires, après stabilisation du cœur.
 Les fonctions vocales, de correction IA et pédagogiques restent du ressort des
 autres outils Ergonatus plutôt que d’alourdir PDFinator.
 
+## Avancées vérifiées
+
+- 1.0.1 : récupération des brouillons avec leur mise en forme, reprise entre processus et contrôles GitHub.
+- 1.0.2 : conservation des indices/exposants dans les exports Office et régressions synthétiques. La reconstruction générale des documents reste à améliorer.
+- 1.0.3 : dissociation de groupes PDF compatibles, avec limites explicites et vérification du rendu.
+- 1.0.4 : intégrité des sélections mixtes, refus de flux endommagés, budget de décompression partagé et conservation des flux intacts. Voir `SELECTION-SAFETY.md` pour les limites du contrôle.
+
+Ces avancées couvrent des cas précis ; les autres points des lots restent ouverts.
+
 ## Validation suivie
 
 | Environnement | État de référence |
 | --- | --- |
-| Windows local, Rust 1.99.1 | V1 : 158 tests ; nouveaux tests ajoutés dans le lot 1. |
+| Windows local, Rust 1.99.1 | 1.0.4 : 182 tests locaux réussis ; V1 initiale : 158. |
 | Exports | Six rendus LibreOffice comparés sur trois documents lors de la V1. |
 | Word, imprimantes, NVDA, VM vierge | Recette dédiée encore nécessaire. |
 | GitHub Actions | Le statut des exécutions réelles fait foi, pas la seule présence du YAML. |

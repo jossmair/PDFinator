@@ -1,5 +1,12 @@
 # Changements PDFinator
 
+## 1.0.4 — intégrité des sélections
+
+- Refus des flux endommagés lors d’une sélection, d’un déplacement, d’une suppression ou d’un aperçu ; aucun contenu partiellement décodé n’est réécrit.
+- Budget de décompression partagé entre les flux de la page et limites sur leur nombre et les opérateurs analysés.
+- Conservation exacte des flux intacts pendant un déplacement et maintien de l’historique en cas de refus.
+- Quatre régressions synthétiques supplémentaires ; périmètre détaillé dans `SELECTION-SAFETY.md`.
+
 ## 1.0.3 — dissocier les schémas PDF compatibles
 
 - Commande « Dissocier le schéma » dans le menu contextuel du mode Modifier.

@@ -1,5 +1,114 @@
 use pdfcraft_cos::{Dict, Object, Stream};
 use pdfinator::{document::Editor, selection::Target};
+
+#[test]
+fn damaged_selection_streams_are_refused_without_changing_the_document_or_history() {
+    let mut doc = pdfcraft_create::blank(200., 200., 1).unwrap();
+    let page = pdfcraft_model::pages(&doc)[0].obj;
+    let mut dict = Dict::new();
+    dict.set(b"Filter".to_vec(), Object::name("ASCIIHexDecode"));
+    // A valid drawing followed by invalid hex: the viewer tolerates the suffix.
+    let stream = Stream::from_raw(dict, b"3230203330206d203830203930206c20530azz>".to_vec());
+    assert!(stream.decoded().is_ok());
+    assert!(stream.decoded_strict().is_err());
+    let id = doc.add(stream);
+    doc.update_dict(page, |d| d.set(b"Contents".to_vec(), Object::Ref(id)))
+        .unwrap();
+    let mut e =
+        Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap()).unwrap();
+    let before = e.bytes.clone();
+    e.rotate_page(0, 90).unwrap();
+    e.undo().unwrap();
+    assert!(e.can_redo());
+    assert!(e.selection_items(0).is_err());
+    assert!(
+        e.move_selection(0, &[Target::Paint(2)], [10., 10.])
+            .is_err()
+    );
+    assert!(e.delete_selection(0, &[Target::Paint(2)]).is_err());
+    assert!(
+        e.selection_preview(0, &[Target::Paint(2)], true, false)
+            .is_err()
+    );
+    assert_eq!(e.bytes, before);
+    assert!(!e.can_undo());
+    assert!(e.can_redo());
+}
+
+fn stream_page(streams: Vec<Stream>) -> Editor {
+    let mut doc = pdfcraft_create::blank(200., 200., 1).unwrap();
+    let page = pdfcraft_model::pages(&doc)[0].obj;
+    let contents = streams
+        .into_iter()
+        .map(|s| Object::Ref(doc.add(s)))
+        .collect();
+    doc.update_dict(page, |d| {
+        d.set(b"Contents".to_vec(), Object::Array(contents))
+    })
+    .unwrap();
+    Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap()).unwrap()
+}
+
+#[test]
+fn selection_decode_budget_is_shared_between_all_page_streams() {
+    let padding = vec![b' '; 8 * 1024 * 1024];
+    let mut e = stream_page(vec![
+        Stream::flate(Dict::new(), &padding),
+        Stream::flate(Dict::new(), &padding),
+        Stream::flate(Dict::new(), b"20 30 m 80 90 l S\n"),
+    ]);
+    let before = e.bytes.clone();
+    assert!(e.selection_items(0).is_err());
+    assert!(e.delete_selection(0, &[Target::Paint(2)]).is_err());
+    assert_eq!(e.bytes, before);
+    assert!(!e.can_undo());
+}
+
+#[test]
+fn excessive_selection_streams_and_operators_are_refused() {
+    for streams in [
+        vec![Stream::flate(Dict::new(), b""); 4097],
+        vec![Stream::flate(Dict::new(), &b"n\n".repeat(100_001))],
+    ] {
+        let mut e = stream_page(streams);
+        let before = e.bytes.clone();
+        assert!(e.selection_items(0).is_err());
+        assert!(
+            e.move_selection(0, &[Target::Paint(2)], [10., 10.])
+                .is_err()
+        );
+        assert_eq!(e.bytes, before);
+        assert!(!e.can_undo());
+    }
+}
+
+#[test]
+fn strict_selection_keeps_clean_streams_byte_exact_and_reopens_after_undo_redo() {
+    let untouched = Stream::flate(Dict::new(), b"% untouched metadata\n0 0 1 rg\n");
+    let raw = untouched.raw.clone();
+    let mut e = stream_page(vec![
+        untouched,
+        Stream::flate(Dict::new(), b"20 30 m 80 90 l S\n"),
+    ]);
+    let before = e.bytes.clone();
+    let target = e.selection_items(0).unwrap()[0].target;
+    e.move_selection(0, &[target], [10., -5.]).unwrap();
+    let page = pdfcraft_model::pages(&e.doc)[0].clone();
+    let contents = page.dict.get(b"Contents").unwrap().as_array().unwrap();
+    assert!(
+        contents
+            .iter()
+            .any(|o| matches!(e.doc.resolve(o).as_ref(), Object::Stream(s) if s.raw == raw))
+    );
+    let reopened = Editor::from_bytes(e.bytes.as_ref().clone()).unwrap();
+    let rect = reopened.selection_items(0).unwrap()[0].rect;
+    assert!(rect[0] > 29. && rect[1] > 24.);
+    e.undo().unwrap();
+    assert_eq!(e.bytes, before);
+    e.redo().unwrap();
+    assert_eq!(e.selection_items(0).unwrap()[0].rect, rect);
+}
+
 fn fixture(rotation: i64) -> Editor {
     let mut doc =
         pdfcraft_create::from_text("Sélection", "Texte à déplacer ensemble", (595., 842.), 16.)
