@@ -2803,6 +2803,86 @@ fn image_body_context_menu_crops_with_a_handle_in_select_edit_and_move() {
 }
 
 #[test]
+fn form_context_menu_exposes_members_without_changing_the_tool_or_zoom_and_is_undoable() {
+    use pdfcraft_cos::{Dict, Object, Stream};
+    for tool in [Tool::Select, Tool::Edit] {
+        let (ctx, mut app) = setup();
+        ctx.enable_accesskit();
+        app.set_workspace(&ctx, Workspace::Edit);
+        app.set_tool(&ctx, tool);
+        app.fit = Fit::Manual;
+        app.zoom = 0.8;
+        let e = app.editor.as_mut().unwrap();
+        e.change(false, |doc| {
+            let mut source = pdfcraft_create::blank(180., 120., 1).unwrap();
+            let page = pdfcraft_model::pages(&source)[0].obj;
+            let stream = source.add(Stream::flate(
+                Dict::new(),
+                b"0 G 2 w 10 10 m 160 100 l S 0.3 0.8 0.4 rg 20 20 20 20 re f",
+            ));
+            source
+                .update_dict(page, |d| {
+                    d.set(b"Contents".to_vec(), Object::Ref(stream));
+                })
+                .unwrap();
+            let (form, _) = pdfcraft_organize::page_as_form(doc, &source, 0).unwrap();
+            let page = pdfcraft_model::pages(doc)[0].clone();
+            let mut resources = page
+                .dict
+                .get(b"Resources")
+                .and_then(|r| doc.dict(r))
+                .unwrap_or_default();
+            let mut xo = Dict::new();
+            xo.set(b"Schema".to_vec(), Object::Ref(form));
+            resources.set(b"XObject".to_vec(), Object::Dict(xo));
+            let stream = doc.add(Stream::flate(
+                Dict::new(),
+                b"q 1 0 0 1 100 400 cm /Schema Do Q",
+            ));
+            let old = page.dict.get(b"Contents").unwrap().clone();
+            doc.update_dict(page.obj, |d| {
+                d.set(b"Resources".to_vec(), Object::Dict(resources));
+                d.set(
+                    b"Contents".to_vec(),
+                    Object::Array(vec![old, Object::Ref(stream)]),
+                );
+            })
+            .unwrap();
+            Ok(())
+        })
+        .unwrap();
+        let before = e.bytes.clone();
+        app.refresh(0);
+        for _ in 0..3 {
+            input_frame(&ctx, &mut app, vec![]);
+        }
+        let s = app.selection_for(0, Target::Image(0)).unwrap();
+        let rect = s.view_rect(&app.editor.as_ref().unwrap().info.pages[0]);
+        let pos = sheet_origin(&app) + rect.center().to_vec2() * app.zoom;
+        for pressed in [true, false] {
+            input_frame(
+                &ctx,
+                &mut app,
+                vec![
+                    egui::Event::PointerMoved(pos),
+                    pointer_button(pos, egui::PointerButton::Secondary, pressed),
+                ],
+            );
+        }
+        click_named_control(&ctx, &mut app, "Dissocier le schéma");
+        assert!(app.message.is_none(), "{:?}", app.message);
+        assert!(app.tool == tool);
+        assert_eq!(app.zoom, 0.8);
+        assert!(app.selected.is_none() && app.image_context.is_none());
+        let e = app.editor.as_mut().unwrap();
+        assert!(pdfcraft_edit::page_images(&e.doc, 0).unwrap().is_empty());
+        assert!(!e.drawings(0).unwrap().is_empty());
+        e.undo().unwrap();
+        assert_eq!(e.bytes, before);
+    }
+}
+
+#[test]
 fn image_context_cut_and_paste_uses_the_image_snapshot_in_another_pdf() {
     let (ctx, mut app) = setup();
     ctx.enable_accesskit();

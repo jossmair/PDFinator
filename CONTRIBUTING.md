@@ -44,3 +44,7 @@ suivies dans [ROADMAP.md](ROADMAP.md).
 
 Les exports DOCX/ODT ont une [procédure de validation et un corpus synthétique](OFFICE-VALIDATION.md),
 en complément des tests de structure Rust.
+
+La [dissociation des schémas](GROUPS.md) est couverte par `cargo test --test forms`
+et un test d’interface du menu contextuel. Toute extension à une nouvelle structure
+doit conserver son rendu et les occurrences partagées dans ces tests.

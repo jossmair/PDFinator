@@ -1,6 +1,6 @@
 [package]
 name = "pdfinator"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT OR Apache-2.0"
@@ -8,6 +8,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 pdfcraft-cos = { path = "vendor/pdfcraft/crates/cos" }
 pdfcraft-content = { path = "vendor/pdfcraft/crates/content" }
+pdfcraft-filters = { path = "vendor/pdfcraft/crates/filters" }
 pdfcraft-render = { path = "vendor/pdfcraft/crates/render" }
 pdfcraft-edit = { path = "vendor/pdfcraft/crates/edit" }
 pdfcraft-annot = { path = "vendor/pdfcraft/crates/annot" }

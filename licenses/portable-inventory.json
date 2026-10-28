@@ -1,7 +1,7 @@
 {
   "target": "x86_64-pc-windows-msvc",
-  "executable_sha256": "3b429529ceccda37248d6cfb106eadba59b251b4a6f381ec98f7d36258e2f717",
-  "cargo_lock_sha256": "5f2151867e07dd3914f2b0165ded07dd89bc381df4ad00aa3056f5bc88983d55",
+  "executable_sha256": "9d56fc9f57a41845e033a097f29caa5f5fb52726070dc1586c20b9b5b88332c9",
+  "cargo_lock_sha256": "21ba7c27a553e3d4f4865eae68cc6b9728f662aa5a58a8b2864567a288190e6f",
   "normal_packages": 261,
   "unique_documents": 154,
   "embedded_fonts": [
@@ -1124,7 +1124,7 @@
     },
     {
       "package": "pdfinator",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "declared": "MIT OR Apache-2.0",
       "documents": [
         "c15ea0a2ad3d6bb4c1ab6e79914fcbb4b931252b30c3a408062ba4a4e4aaac34"
