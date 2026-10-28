@@ -6,6 +6,10 @@ use pdfcraft_cos::{Dict, Document, Object, Stream};
 use pdfcraft_edit::{ObjectKind, ObjectTarget};
 use std::collections::BTreeSet;
 
+const MAX_PAGE_BYTES: usize = 16 * 1024 * 1024;
+const MAX_STREAMS: usize = 4096;
+const MAX_OPS: usize = 100_000;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Target {
     Object(ObjectTarget),
@@ -30,6 +34,7 @@ struct Paint {
 }
 struct Inventory {
     contents: Vec<Object>,
+    sizes: Vec<usize>,
     pieces: Pieces,
     ops: Vec<Op>,
     prefix: Vec<Op>,
@@ -63,21 +68,29 @@ fn inventory(doc: &Document, page: usize) -> Result<Inventory> {
             _ => vec![c.clone()],
         })
         .unwrap_or_default();
+    if contents.len() > MAX_STREAMS {
+        return Err("Cette page contient trop de flux pour une sélection simultanée.".into());
+    }
     let mut data = Vec::new();
     let mut excluded = BTreeSet::new();
+    let mut remaining = MAX_PAGE_BYTES;
     for (index, c) in contents.iter().enumerate() {
         let o = doc.resolve(c);
         let Object::Stream(s) = o.as_ref() else {
             return Err("Flux PDF invalide.".into());
         };
-        data.push(s.decoded().map_err(|e| e.to_string())?);
+        let bytes = pdfcraft_filters::decode(&s.filters(), &s.raw, remaining).map_err(|_| {
+            "Le contenu de cette page est endommagé ou trop volumineux pour être sélectionné. Le document est conservé.".to_string()
+        })?;
+        remaining -= bytes.len();
+        data.push(bytes);
         if s.dict.get(b"PCAdded").is_some() {
             excluded.insert(index);
         }
     }
     let pieces = Pieces::join(&data);
     let parsed = pieces.parse();
-    if parsed.skipped > 0 {
+    if parsed.skipped > 0 || parsed.ops.len() > MAX_OPS {
         return Err("Ce contenu PDF ne peut pas être sélectionné de manière fiable.".into());
     }
     let ops = parsed.ops;
@@ -262,6 +275,7 @@ fn inventory(doc: &Document, page: usize) -> Result<Inventory> {
     }
     Ok(Inventory {
         contents,
+        sizes: data.iter().map(Vec::len).collect(),
         pieces,
         ops,
         prefix,
@@ -280,6 +294,10 @@ fn annotations(doc: &Document, page: usize) -> Result<Vec<Object>> {
         .unwrap_or_default())
 }
 fn items(doc: &Document, page: usize) -> Result<Vec<Item>> {
+    // Validate and bound page streams before asking other inventories to decode
+    // them. A tolerant renderer may display damaged data; editing must not
+    // publish that partial decode as a replacement for the original stream.
+    let inventory = inventory(doc, page)?;
     let mut items = pdfcraft_edit::editable_objects(doc, page)
         .map_err(|e| e.to_string())?
         .into_iter()
@@ -288,7 +306,7 @@ fn items(doc: &Document, page: usize) -> Result<Vec<Item>> {
             rect: o.rect,
         })
         .collect::<Vec<_>>();
-    items.extend(inventory(doc, page)?.paints.into_iter().map(|p| Item {
+    items.extend(inventory.paints.into_iter().map(|p| Item {
         target: Target::Paint(p.id),
         rect: p.rect,
     }));
@@ -490,12 +508,16 @@ fn paints_change(
     // Isolate the old page state, including an unbalanced top-level clipping path.
     let start = doc.add(Object::Stream(Stream::flate(Dict::new(), b"q\n")));
     contents.push(Object::Ref(start));
+    let mut original_offset = 0;
     for (stream_index, (old, bytes)) in all.contents.iter().zip(chunks).enumerate() {
         let o = doc.resolve(old);
         let Object::Stream(s) = o.as_ref() else {
             return Err("Flux invalide.".into());
         };
-        if s.decoded().map_err(|e| e.to_string())? == bytes {
+        let original_end = original_offset + all.sizes[stream_index];
+        let unchanged = all.pieces.data()[original_offset..original_end] == bytes;
+        original_offset = original_end + 1; // Pieces adds a separator per stream.
+        if unchanged {
             contents.push(old.clone());
             continue;
         }
@@ -708,7 +730,7 @@ fn change(
 }
 impl Editor {
     pub fn selection_items(&self, page: usize) -> Result<Vec<Item>> {
-        items(&self.doc, page)
+        crate::document::guarded(|| items(&self.doc, page))
     }
     pub fn move_selection(
         &mut self,
