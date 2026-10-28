@@ -333,7 +333,10 @@ fn math_row(p: &Paragraph, left: f64, before: f64) -> String {
             &contents
                 .replace(
                     "<m:oMath>",
-                    "<m:oMathPara><m:oMathParaPr><m:jc m:val=\"left\"/></m:oMathParaPr><m:oMath>",
+                    // Writer can omit a table cell containing only display math.
+                    // A zero-width text run gives its paragraph a layout anchor
+                    // without adding visible text or changing the equation.
+                    "<w:r><w:rPr><w:sz w:val=\"2\"/><w:szCs w:val=\"2\"/></w:rPr><w:t>&#x200B;</w:t></w:r><m:oMathPara><m:oMathParaPr><m:jc m:val=\"left\"/></m:oMathParaPr><m:oMath>",
                 )
                 .replace("</m:oMath>", "</m:oMath></m:oMathPara>"),
         );
@@ -571,4 +574,54 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
     w.zip
         .add("word/_rels/document.xml.rels", rels.as_bytes(), true);
     Ok(w.zip.finish())
+}
+
+#[cfg(test)]
+mod math_layout_tests {
+    use super::*;
+    #[test]
+    fn math_only_cells_include_a_text_carrier_for_writer_layout() {
+        let numerator = Run {
+            text: "12".into(),
+            font: "Arial".into(),
+            size: 12.,
+            color: [0.; 3],
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            script: 0,
+            baseline: None,
+            rise: None,
+            background: None,
+            rect: Some([80., 30., 94., 42.]),
+            fraction: None,
+        };
+        let mut denominator = numerator.clone();
+        denominator.text = "7".into();
+        denominator.rect = Some([87., 50., 94., 62.]);
+        let mut carrier = numerator.clone();
+        carrier.rect = Some([78., 30., 112., 62.]);
+        carrier.fraction = Some(Box::new(Fraction {
+            numerator: vec![numerator],
+            denominator: vec![denominator],
+        }));
+        let paragraph = Paragraph {
+            rect: [78., 30., 112., 62.],
+            runs: vec![carrier],
+            align: "left",
+            spacing: None,
+        };
+        let body = math_row(&paragraph, 54., 0.);
+        let equation = body.find("<m:oMathPara>").unwrap();
+        assert!(
+            body[..equation].contains("&#x200B;"),
+            "A math-only table cell needs a zero-width text run for Writer's layout"
+        );
+        assert!(body.contains("<m:f>"), "Keep a native editable equation");
+        assert!(
+            !body.contains("<w:txbxContent"),
+            "Do not replace the fraction by positioned text boxes"
+        );
+    }
 }

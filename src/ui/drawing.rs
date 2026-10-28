@@ -15,6 +15,13 @@ pub(super) struct State {
     inventory: std::collections::HashMap<usize, (Arc<Vec<u8>>, Vec<Item>)>,
     pub drag: Option<Gesture>,
 }
+impl State {
+    pub(super) fn is_moving(&self) -> bool {
+        self.drag
+            .as_ref()
+            .is_some_and(|g| matches!(g.kind, Action::Move))
+    }
+}
 impl Default for State {
     fn default() -> Self {
         Self {

@@ -1,4 +1,5 @@
 """Check editable fractions, native text and rendered positions against the supplied PDF."""
+import argparse
 from collections import Counter
 import hashlib
 import json
@@ -14,7 +15,12 @@ import pypdfium2.raw as raw
 from lxml import etree as E
 from verify_worksheet import occurrences, tokens
 
-source = Path(sys.argv[1])
+parser = argparse.ArgumentParser()
+parser.add_argument("source", type=Path)
+parser.add_argument("--directory", type=Path, help="Corpus directory with rendered-docx and rendered-odt subdirectories")
+args = parser.parse_args()
+source = args.source
+base = args.directory or ROOT / "test-output"
 original = source.read_bytes()
 doc = pdf.PdfDocument(source)
 text = doc[0].get_textpage()
@@ -27,7 +33,7 @@ def normalize(s):
     return re.sub(r"\s+", "", s)
 
 for extension in ("docx", "odt"):
-    path = ROOT / f"test-output/47-percentages.{extension}"
+    path = base / f"47-percentages.{extension}"
     equations = Counter()
     with ZipFile(path) as z:
         assert z.testzip() is None
@@ -57,8 +63,8 @@ def in_figure(rect):
 
 anchors = ["Pourcentage", "Exemples", "II.", "Exemple", "Combien",
            "On cherche", "Le coefficient", "Rappel", "III.", "Quel", "Il y a donc"]
-for name, path in [("docx", ROOT / "test-output/47-render-docx/47-percentages.pdf"),
-                   ("odt", ROOT / "test-output/47-after-odt/47-percentages.pdf")]:
+for name, path in [("docx", base / ("rendered-docx" if args.directory else "47-render-docx") / "47-percentages.pdf"),
+                   ("odt", base / ("rendered-odt" if args.directory else "47-after-odt") / "47-percentages.pdf")]:
     output = pdf.PdfDocument(path)
     assert len(output) == len(doc) == 1
     actual = output[0].get_textpage()
@@ -125,5 +131,5 @@ for name, path in [("docx", ROOT / "test-output/47-render-docx/47-percentages.pd
                     "figures_next_to_tables": True})
 assert source.read_bytes() == original
 result = {"source_sha256": hashlib.sha256(original).hexdigest(), "results": reports}
-(ROOT / "test-output/47-verification.json").write_text(json.dumps(result, indent=2))
+(base / "47-verification.json").write_text(json.dumps(result, indent=2))
 print(json.dumps(result, indent=2))

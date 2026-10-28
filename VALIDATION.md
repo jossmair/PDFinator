@@ -1,5 +1,18 @@
 # Validation de PDFinator
 
+## 1.0.5 — curseurs et fractions Office
+
+**188 tests locaux réussis**, formatage et Clippy strict. Les variables des trois
+PDF fournis ont été activées pour les tests optionnels d’export. Les scénarios
+simulés vérifient la croix lors du déplacement des objets, la main lors du
+panoramique du PDF, les poignées diagonales et le curseur normal dans la marge.
+
+Quatorze exports ont été rendus dans LibreOffice et contrôlés indépendamment,
+y compris les fractions isolées dont le DOCX sortait blanc. Les mesures et les
+limites sont consignées dans [OFFICE-VALIDATION.md](OFFICE-VALIDATION.md).
+Le statut GitHub fait foi pour les contrôles distants ; Microsoft Word et les
+validations matérielles restent distincts de cette recette locale.
+
 ## 1.0.4 — intégrité des sélections
 
 Vérifications locales sous Windows x64 le 28 octobre 2026 : **182 tests réussis**,

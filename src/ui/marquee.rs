@@ -36,6 +36,10 @@ fn bounds(item: &Item, p: &PageInfo) -> Rect {
     Rect::from_two_pos(Pos2::new(a[0], a[1]), Pos2::new(b[0], b[1]))
 }
 impl State {
+    pub(super) fn is_moving(&self) -> bool {
+        matches!(self.gesture, Some(Gesture::Move { .. }))
+    }
+
     #[cfg(test)]
     pub fn preview_ready(&self) -> bool {
         self.preview
