@@ -1,5 +1,24 @@
 # Validation de PDFinator
 
+## 1.0.6 — groupes de pages
+
+**201 tests automatisés**, dont treize nouveaux scénarios : quatre simulations
+d'interface et neuf tests de document. Les gestes Ctrl/Maj, le glissement groupé,
+le menu contextuel, la sélection par onglet, l'extraction et les raccourcis sont
+exercés. Le test existant d'annulation du glissement a détecté un conflit avec le
+nouvel Échap de sélection ; la priorité à l'annulation du glissement est rétablie.
+
+Le corpus synthétique vérifie les liens internes explicites, un signet, les
+commentaires, un champ AcroForm simple pendant le déplacement, les rotations,
+les formats mixtes, la réouverture, l'historique et les refus de modification
+des documents signés. Le rendu des copies et extractions est identique pixel par
+pixel aux sources dans ce corpus. L'extraction vérifie aussi l'enregistrement
+d'une nouvelle copie avec un nom accentué, sans toucher au document source.
+
+Cette recette porte sur les groupes de pages ; elle n'ajoute pas de validation
+Microsoft Word, NVDA, imprimante physique ou machine Windows vierge. Les limites
+et les commandes sont détaillées dans [PAGES.md](PAGES.md).
+
 ## 1.0.5 — curseurs et fractions Office
 
 **188 tests locaux réussis**, formatage et Clippy strict. Les variables des trois

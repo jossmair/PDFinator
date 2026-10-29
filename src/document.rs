@@ -108,6 +108,13 @@ impl Editor {
     pub fn dirty(&self) -> bool {
         self.revision != self.saved_revision
     }
+    /// A generated document has never been saved, even before its first edit.
+    pub fn from_generated_bytes(bytes: Vec<u8>, name: String) -> Result<Self> {
+        let mut editor = Self::from_bytes(bytes)?;
+        editor.mark_recovered();
+        editor.recovered_name = Some(name);
+        Ok(editor)
+    }
     pub fn display_name(&self) -> String {
         self.path
             .as_ref()
