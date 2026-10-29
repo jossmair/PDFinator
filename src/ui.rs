@@ -231,6 +231,7 @@ pub struct App {
     thumbnail_visible: Vec<usize>,
     page_destination: usize,
     page_drag: Option<usize>,
+    page_selection: pages::PageSelection,
     scroll_offset: Vec2,
     documents: Vec<Option<documents::DocumentState>>,
     active_document: usize,
@@ -288,6 +289,7 @@ impl App {
             thumbnail_visible: Vec::new(),
             page_destination: 1,
             page_drag: None,
+            page_selection: Default::default(),
             scroll_offset: Vec2::ZERO,
             documents: Vec::new(),
             active_document: 0,
@@ -700,6 +702,7 @@ impl App {
                 if let Some(e) = &self.editor {
                     let changed_count = e.info.pages.len() != previous_count;
                     self.page = self.page.min(e.info.pages.len().saturating_sub(1));
+                    self.page_selection.replace([self.page]);
                     self.page_destination = self.page + 1;
                     if changed_count {
                         self.jump = Some(self.page);
@@ -1111,6 +1114,7 @@ impl App {
             return;
         }
         if self.workspace == Workspace::Pages {
+            self.page_selection_shortcuts(ctx);
             let count = self.editor.as_ref().map_or(0, |e| e.info.pages.len());
             if ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Enter)) {
                 self.open_page(self.page);
@@ -1124,6 +1128,7 @@ impl App {
                 if ctx.input_mut(|i| i.consume_key(Modifiers::CTRL, key)) {
                     self.move_current_page(dest);
                 } else if ctx.input_mut(|i| i.consume_key(Modifiers::NONE, key)) {
+                    self.page_selection.replace([dest]);
                     self.page = dest;
                     self.page_destination = dest + 1;
                     self.jump = Some(dest);

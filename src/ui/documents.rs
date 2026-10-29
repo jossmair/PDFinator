@@ -27,6 +27,7 @@ pub(super) struct DocumentState {
     thumbnails: bool,
     page_destination: usize,
     page_drag: Option<usize>,
+    page_selection: pages::PageSelection,
     scroll_offset: Vec2,
 }
 impl DocumentState {
@@ -58,6 +59,7 @@ impl DocumentState {
             thumbnails: true,
             page_destination: 1,
             page_drag: None,
+            page_selection: Default::default(),
             scroll_offset: Vec2::ZERO,
         }
     }
@@ -91,6 +93,7 @@ impl DocumentState {
         std::mem::swap(&mut self.thumbnails, &mut app.thumbnails);
         std::mem::swap(&mut self.page_destination, &mut app.page_destination);
         std::mem::swap(&mut self.page_drag, &mut app.page_drag);
+        std::mem::swap(&mut self.page_selection, &mut app.page_selection);
         std::mem::swap(&mut self.scroll_offset, &mut app.scroll_offset);
     }
     fn take(app: &mut App) -> Self {

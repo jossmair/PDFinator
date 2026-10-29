@@ -1,5 +1,14 @@
 # Changements PDFinator
 
+## 1.0.6 — sélectionner et organiser plusieurs pages
+
+- Sélection par Ctrl, Maj et Ctrl+Maj dans les miniatures des trois espaces ; état indépendant pour chaque onglet et indication accessible des pages sélectionnées.
+- Glisser-déposer groupé avec repère d'insertion, aperçu du nombre de pages et maintien de l'ordre d'origine.
+- Duplication, rotation et suppression groupées depuis le menu contextuel, avec une seule étape d'annulation et protection de la dernière page.
+- Extraction des pages sélectionnées vers un nouvel onglet non enregistré, sans modification du PDF source.
+- Ctrl+A, Maj+flèches, Suppr et Échap en mode Pages ; priorité conservée à l'annulation d'un glissement.
+- Régressions synthétiques sur liens, signets, commentaires, champ AcroForm simple, formats mixtes, rendu exact, sauvegarde/réouverture et documents signés. Détails dans [PAGES.md](PAGES.md).
+
 ## 1.0.5 — curseurs de déplacement et fractions Office
 
 - Croix de déplacement sur les textes, images, tracés et sélections mixtes ; la main reste dédiée au déplacement de la vue PDF. Conservation des curseurs de redimensionnement.
