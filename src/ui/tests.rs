@@ -10,6 +10,266 @@ fn input_frame(ctx: &egui::Context, app: &mut App, events: Vec<egui::Event>) -> 
     out.textures_delta.clear();
     out
 }
+
+fn page_test_setup(mode: Workspace) -> (egui::Context, App) {
+    let (ctx, mut app) = setup();
+    ctx.enable_accesskit();
+    let mut doc = pdfcraft_create::blank(420., 595., 5).unwrap();
+    for page in 0..5 {
+        pdfcraft_edit::add_content(
+            &mut doc,
+            page,
+            &Content::Text(AddedText {
+                rect: [20., 30., 300., 65.],
+                text: format!("Page test {page}"),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+    }
+    app.editor = Some(
+        Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap()).unwrap(),
+    );
+    app.raster
+        .document(app.editor.as_ref().unwrap().bytes.clone(), true, None);
+    app.set_workspace(&ctx, mode);
+    for _ in 0..3 {
+        input_frame(&ctx, &mut app, vec![]);
+    }
+    (ctx, app)
+}
+fn page_test_position(ctx: &egui::Context, app: &mut App, page: usize) -> Pos2 {
+    let label = if app.workspace == Workspace::Pages {
+        format!("Page {} · double-cliquer pour lire", page + 1)
+    } else {
+        format!("Lire la page {}", page + 1)
+    };
+    let out = input_frame(ctx, app, vec![]);
+    let r = out
+        .platform_output
+        .accesskit_update
+        .as_ref()
+        .unwrap()
+        .nodes
+        .iter()
+        .find(|(_, n)| n.label() == Some(label.as_str()))
+        .unwrap()
+        .1
+        .bounds()
+        .unwrap();
+    Pos2::new(((r.x0 + r.x1) / 2.) as f32, ((r.y0 + r.y1) / 2.) as f32)
+}
+fn page_test_click(
+    ctx: &egui::Context,
+    app: &mut App,
+    page: usize,
+    button: egui::PointerButton,
+    modifiers: Modifiers,
+) {
+    let pos = page_test_position(ctx, app, page);
+    for pressed in [true, false] {
+        let mut out = ctx.run_ui(
+            egui::RawInput {
+                events: vec![
+                    egui::Event::ModifiersChanged(modifiers),
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button,
+                        pressed,
+                        modifiers,
+                    },
+                ],
+                ..Default::default()
+            },
+            |ui| app.frame_ui(ui),
+        );
+        out.textures_delta.clear();
+    }
+}
+
+#[test]
+fn thumbnails_support_ctrl_shift_and_context_group_duplication_in_all_workspaces() {
+    for mode in [Workspace::Read, Workspace::Edit, Workspace::Pages] {
+        let (ctx, mut app) = page_test_setup(mode);
+        page_test_click(
+            &ctx,
+            &mut app,
+            0,
+            egui::PointerButton::Primary,
+            Modifiers::NONE,
+        );
+        page_test_click(
+            &ctx,
+            &mut app,
+            2,
+            egui::PointerButton::Primary,
+            Modifiers::CTRL,
+        );
+        assert_eq!(app.selected_pages(), [0, 2]);
+        page_test_click(
+            &ctx,
+            &mut app,
+            1,
+            egui::PointerButton::Primary,
+            Modifiers {
+                shift: true,
+                ..Modifiers::NONE
+            },
+        );
+        assert_eq!(app.selected_pages(), [1, 2]);
+        page_test_click(
+            &ctx,
+            &mut app,
+            0,
+            egui::PointerButton::Primary,
+            Modifiers {
+                ctrl: true,
+                shift: true,
+                ..Modifiers::NONE
+            },
+        );
+        assert_eq!(app.selected_pages(), [0, 1, 2]);
+        let before = app.editor.as_ref().unwrap().bytes.clone();
+        page_test_click(
+            &ctx,
+            &mut app,
+            1,
+            egui::PointerButton::Secondary,
+            Modifiers::NONE,
+        );
+        assert_eq!(app.selected_pages(), [0, 1, 2]);
+        click_named_control(&ctx, &mut app, "Dupliquer");
+        assert_eq!(
+            app.editor.as_ref().unwrap().info.pages.len(),
+            8,
+            "{:?}",
+            app.message
+        );
+        assert_eq!(app.selected_pages(), [3, 4, 5]);
+        app.undo_redo(false);
+        assert_eq!(app.editor.as_ref().unwrap().bytes, before);
+        assert!(!app.editor.as_ref().unwrap().can_undo());
+        assert_eq!(app.selected_pages().len(), 1);
+    }
+}
+
+#[test]
+fn selected_page_groups_drag_together_and_keep_their_relative_order() {
+    for mode in [Workspace::Read, Workspace::Edit, Workspace::Pages] {
+        let (ctx, mut app) = page_test_setup(mode);
+        app.select_thumbnail(0, Modifiers::NONE);
+        app.select_thumbnail(2, Modifiers::CTRL);
+        let start = page_test_position(&ctx, &mut app, 0);
+        let target = page_test_position(&ctx, &mut app, 1)
+            + if mode == Workspace::Pages {
+                Vec2::new(30., 0.)
+            } else {
+                Vec2::new(0., 25.)
+            };
+        let before = app.editor.as_ref().unwrap().bytes.clone();
+        drag_pointer(&ctx, &mut app, start, target);
+        let e = app.editor.as_ref().unwrap();
+        assert_ne!(e.bytes, before, "{:?}", app.message);
+        for (page, expected) in [1, 0, 2, 3, 4].into_iter().enumerate() {
+            assert!(
+                e.text(page)
+                    .unwrap()
+                    .plain_text()
+                    .contains(&format!("Page test {expected}"))
+            );
+        }
+        assert_eq!(app.selected_pages(), [1, 2]);
+        app.undo_redo(false);
+        assert_eq!(app.editor.as_ref().unwrap().bytes, before);
+        assert!(!app.editor.as_ref().unwrap().can_undo());
+    }
+}
+
+#[test]
+fn page_extraction_opens_an_unsaved_independent_tab_and_retains_source_selection() {
+    let (ctx, mut app) = page_test_setup(Workspace::Pages);
+    app.select_thumbnail(0, Modifiers::NONE);
+    app.select_thumbnail(2, Modifiers::CTRL);
+    let source = app.editor.as_ref().unwrap().bytes.clone();
+    page_test_click(
+        &ctx,
+        &mut app,
+        0,
+        egui::PointerButton::Secondary,
+        Modifiers::NONE,
+    );
+    click_named_control(&ctx, &mut app, "Extraire vers un nouveau PDF");
+    assert_eq!(app.documents.len(), 2);
+    assert_eq!(app.active_document, 1);
+    let extracted = app.editor.as_ref().unwrap();
+    assert_eq!(extracted.info.pages.len(), 2);
+    assert!(extracted.dirty());
+    assert!(!extracted.can_undo());
+    assert!(app.activate_document(0));
+    assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+    assert!(!app.editor.as_ref().unwrap().dirty());
+    assert_eq!(app.selected_pages(), [0, 2]);
+    assert!(app.activate_document(1));
+    assert_eq!(app.selected_pages(), [0]);
+}
+
+#[test]
+fn keyboard_page_selection_deletion_and_escape_protect_the_whole_document() {
+    let (ctx, mut app) = page_test_setup(Workspace::Pages);
+    let key = |ctx: &egui::Context, app: &mut App, key, modifiers| {
+        let mut out = ctx.run_ui(
+            egui::RawInput {
+                events: vec![
+                    egui::Event::ModifiersChanged(modifiers),
+                    egui::Event::Key {
+                        key,
+                        physical_key: None,
+                        pressed: true,
+                        repeat: false,
+                        modifiers,
+                    },
+                ],
+                ..Default::default()
+            },
+            |ui| app.frame_ui(ui),
+        );
+        out.textures_delta.clear();
+        input_frame(
+            ctx,
+            app,
+            vec![egui::Event::Key {
+                key,
+                physical_key: None,
+                pressed: false,
+                repeat: false,
+                modifiers,
+            }],
+        );
+    };
+    let before = app.editor.as_ref().unwrap().bytes.clone();
+    key(&ctx, &mut app, Key::A, Modifiers::CTRL);
+    assert_eq!(app.selected_pages(), [0, 1, 2, 3, 4]);
+    key(&ctx, &mut app, Key::Delete, Modifiers::NONE);
+    assert_eq!(app.editor.as_ref().unwrap().bytes, before);
+    assert!(!app.editor.as_ref().unwrap().can_undo());
+    key(&ctx, &mut app, Key::Escape, Modifiers::NONE);
+    assert_eq!(app.selected_pages(), [0]);
+    key(
+        &ctx,
+        &mut app,
+        Key::ArrowRight,
+        Modifiers {
+            shift: true,
+            ..Modifiers::NONE
+        },
+    );
+    assert_eq!(app.selected_pages(), [0, 1]);
+    key(&ctx, &mut app, Key::Delete, Modifiers::NONE);
+    assert_eq!(app.editor.as_ref().unwrap().info.pages.len(), 3);
+    app.undo_redo(false);
+    assert_eq!(app.editor.as_ref().unwrap().bytes, before);
+}
 fn pointer_button(pos: Pos2, button: egui::PointerButton, pressed: bool) -> egui::Event {
     egui::Event::PointerButton {
         pos,

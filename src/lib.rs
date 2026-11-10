@@ -4,6 +4,7 @@ pub mod drawing;
 pub mod files;
 pub mod forms;
 pub mod ocr;
+pub mod page_ops;
 pub mod print_pages;
 pub mod recovery;
 pub mod rich;

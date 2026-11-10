@@ -325,9 +325,10 @@ impl App {
                                 },
                             );
                             response.widget_info(|| {
-                                egui::WidgetInfo::labeled(
+                                egui::WidgetInfo::selected(
                                     egui::WidgetType::Button,
                                     true,
+                                    self.page_selection.contains(page, self.page),
                                     format!("Lire la page {}", page + 1),
                                 )
                             });
@@ -340,7 +341,9 @@ impl App {
                             if ui.is_rect_visible(rect) {
                                 self.thumbnail_visible.push(page);
                                 let mut painter = ui.painter().clone();
-                                if self.page_drag == Some(page) {
+                                if self.page_drag.is_some()
+                                    && self.page_selection.contains(page, self.page)
+                                {
                                     painter.multiply_opacity(0.35);
                                 }
                                 let sheet = Rect::from_min_size(rect.min, size);
@@ -364,8 +367,12 @@ impl App {
                                     sheet.expand(2.),
                                     3.,
                                     Stroke::new(
-                                        if page == self.page { 2. } else { 1. },
-                                        if page == self.page {
+                                        if self.page_selection.contains(page, self.page) {
+                                            2.
+                                        } else {
+                                            1.
+                                        },
+                                        if self.page_selection.contains(page, self.page) {
                                             icons::BLUE
                                         } else {
                                             Color32::from_gray(220)
@@ -383,6 +390,7 @@ impl App {
                             }
                             self.page_context_menu(&response, page);
                             if response.clicked() {
+                                self.select_thumbnail(page, ui.input(|i| i.modifiers));
                                 self.jump = Some(page);
                             }
                             ui.add_space(10.);

@@ -78,6 +78,7 @@ autres outils Ergonatus plutôt que d’alourdir PDFinator.
 - 1.0.4 : intégrité des sélections mixtes, refus de flux endommagés, budget de décompression partagé et conservation des flux intacts. Voir `SELECTION-SAFETY.md` pour les limites du contrôle.
 
 - 1.0.5 : croix de déplacement des objets, fractions Unicode et visibilité des équations DOCX ; corpus de 14 rendus Office contrôlés.
+- 1.0.6 : sélection et opérations groupées de pages, extraction vers un nouveau PDF et treize régressions ciblées. Voir `PAGES.md` pour le périmètre.
 
 Ces avancées couvrent des cas précis ; les autres points des lots restent ouverts.
 
@@ -85,7 +86,7 @@ Ces avancées couvrent des cas précis ; les autres points des lots restent ouve
 
 | Environnement | État de référence |
 | --- | --- |
-| Windows local, Rust 1.99.1 | 1.0.5 : 188 tests locaux réussis ; V1 initiale : 158. |
+| Windows local, Rust 1.99.1 | 1.0.6 : 201 tests automatisés ; V1 initiale : 158. |
 | Exports | Six rendus LibreOffice comparés sur trois documents lors de la V1. |
 | Word, imprimantes, NVDA, VM vierge | Recette dédiée encore nécessaire. |
 | GitHub Actions | Le statut des exécutions réelles fait foi, pas la seule présence du YAML. |
