@@ -1,5 +1,17 @@
 # Validation de PDFinator
 
+## 1.0.8 — copie des pages entre onglets
+
+La suite compte **210 tests**. Trois nouvelles simulations couvrent le dépôt sur
+un onglet dans les trois espaces de travail, un groupe non consécutif, le
+curseur de copie, le source et son historique intacts, le contenu réouvert,
+l’annulation/rétablissement dans la destination, Échap, le dépôt hors cible et
+le menu contextuel. Le dépôt ajoute en fin ; il n’active pas l’onglet au survol.
+
+L’audit de la capture et des commandes est dans [AUDIT-INTERFACE.md](AUDIT-INTERFACE.md).
+Ses propositions visuelles et recettes matérielles sont distinguées des
+comportements vérifiés ; il ne certifie pas tous les PDF ou matériels Windows.
+
 ## 1.0.7 — insertion et stabilité de l'édition
 
 La suite PDFinator compte **207 tests**, avec six nouveaux scénarios ciblés.

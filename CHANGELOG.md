@@ -1,5 +1,12 @@
 # Changements PDFinator
 
+## 1.0.8 — pages entre onglets et audit
+
+- Déposer des miniatures sur un autre onglet copie les pages sélectionnées à la fin du PDF cible, dans Lecture, Modifier et Pages.
+- Destination encadrée, curseur de copie, groupe sélectionné à l’arrivée et annulation de l’ajout en une seule fois. Le PDF source reste intact.
+- Menu contextuel « Copier vers un autre PDF » ; Échap et dépôt hors cible sans modification.
+- Aide de la barre sombre rendue lisible ; audit fonctionnel et visuel publié dans AUDIT-INTERFACE.md.
+
 ## 1.0.7 — insertion et édition du texte
 
 - Un nouvel encadré se trace par glisser-déposer avec l'outil Texte. Le clic simple sert à sélectionner ou reprendre l'édition.
