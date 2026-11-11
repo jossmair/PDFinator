@@ -1,5 +1,18 @@
 # Validation de PDFinator
 
+## 1.0.9 — survol des objets et insertion entre miniatures
+
+**215 tests**, dont cinq nouveaux scénarios : survol et insertion dans les trois
+modes, annulation après changement d’onglet, conservation d’un brouillon cible
+et de ses styles, découverte/sélection des objets sans encadrements permanents,
+et insertion transactionnelle aux frontières de début, milieu et fin avec
+liens internes, commentaire, géométrie, réouverture et historique.
+
+Les événements de souris vérifient le repère peint, le curseur de copie, l’ordre
+des pages et le source intact. Les erreurs d’import et positions invalides ne
+changent pas le PDF cible. Le test de rendu des pictogrammes couvre la nouvelle
+icône ; les choix DOCX et ODT restent inchangés.
+
 ## 1.0.8 — copie des pages entre onglets
 
 La suite compte **210 tests**. Trois nouvelles simulations couvrent le dépôt sur

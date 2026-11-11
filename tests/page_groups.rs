@@ -373,3 +373,54 @@ fn signed_document_group_edits_require_acceptance_and_fail_atomically() {
     e.move_page_group(&[0, 2], 2).unwrap();
     assert_eq!(order(&e), [1, 3, 0, 2, 4]);
 }
+
+#[test]
+fn insertion_at_any_boundary_preserves_links_geometry_and_transactional_history() {
+    let src = source();
+    let original = src.bytes.clone();
+    let extracted = src.extract_page_group(&[0, 3]).unwrap();
+    for at in [0, 2, 5] {
+        let mut dst = source();
+        let before = dst.bytes.clone();
+        assert!(dst.insert_pdf_at("Pages", extracted.clone(), 6).is_err());
+        assert!(
+            dst.insert_pdf_at("Pages", b"invalid pdf".to_vec(), at)
+                .is_err()
+        );
+        assert_eq!(dst.bytes, before);
+        assert!(!dst.can_undo());
+        assert_eq!(
+            dst.insert_pdf_at("Pages", extracted.clone(), at).unwrap(),
+            at..at + 2
+        );
+        let mut expected = vec![0, 1, 2, 3, 4];
+        expected.splice(at..at, [0, 3]);
+        assert_eq!(order(&dst), expected);
+        assert_eq!(dst.info.pages[at + 1].width, src.info.pages[3].width);
+        assert_eq!(dst.info.pages[at + 1].height, src.info.pages[3].height);
+        assert_eq!(
+            link_destination(&dst.doc, at),
+            pdfcraft_model::pages(&dst.doc)[at + 1].obj
+        );
+        let reopened = reopened(&dst);
+        assert_eq!(order(&reopened), expected);
+        assert_eq!(
+            link_destination(&reopened.doc, at),
+            pdfcraft_model::pages(&reopened.doc)[at + 1].obj
+        );
+        assert!(
+            reopened
+                .info
+                .annotations
+                .iter()
+                .any(|a| a.page == at + 1
+                    && a.contents.as_deref() == Some("Commentaire de la page 3"))
+        );
+        dst.undo().unwrap();
+        assert_eq!(dst.bytes, before);
+        dst.redo().unwrap();
+        assert_eq!(order(&dst), expected);
+    }
+    assert_eq!(src.bytes, original);
+    assert!(!src.can_undo());
+}

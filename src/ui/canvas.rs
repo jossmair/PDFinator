@@ -447,11 +447,17 @@ impl App {
             self.drawing_canvas(ui, page, p, rect, &response);
             return true;
         }
-        let edit = matches!(
-            self.tool,
-            Tool::Edit | Tool::Text | Tool::Image | Tool::Move
-        );
-        if edit {
+        let edit = self.workspace == Workspace::Edit
+            && matches!(
+                self.tool,
+                Tool::Edit | Tool::Text | Tool::Image | Tool::Move | Tool::Select
+            );
+        let hover = response
+            .hovered()
+            .then(|| ui.ctx().pointer_hover_pos())
+            .flatten();
+        let mut hovered_bounds: Option<(Rect, bool)> = None;
+        if edit && self.drag.is_none() {
             if let Some(objects) = self.objects.get(&page) {
                 for object in objects {
                     let target = match object.target.kind {
@@ -478,14 +484,25 @@ impl App {
                     // Inventories use user space even for added objects.
                     s.target = Target::Block(usize::MAX);
                     let bounds = screen(s.view_rect(p), self.zoom);
-                    ui.painter().rect_stroke(
-                        bounds.expand(1.),
-                        0.,
-                        Stroke::new(0.8, Color32::from_rgba_unmultiplied(48, 94, 245, 75)),
-                        StrokeKind::Outside,
-                    );
+                    let selected = self
+                        .selected
+                        .as_ref()
+                        .is_some_and(|s| s.page == page && s.target == target);
+                    if hover.is_some_and(|pos| bounds.expand(2.).contains(pos))
+                        && hovered_bounds.is_none_or(|(old, _)| bounds.area() < old.area())
+                    {
+                        hovered_bounds = Some((bounds, selected));
+                    }
                 }
             }
+        }
+        if let Some((bounds, false)) = hovered_bounds {
+            ui.painter().rect_stroke(
+                bounds.expand(1.),
+                0.,
+                Stroke::new(0.8, Color32::from_rgba_unmultiplied(48, 94, 245, 75)),
+                StrokeKind::Outside,
+            );
         }
         let point = response.interact_pointer_pos().map(|pos| {
             Pos2::new(

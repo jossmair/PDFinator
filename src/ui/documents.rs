@@ -26,7 +26,6 @@ pub(super) struct DocumentState {
     image_path: Option<PathBuf>,
     thumbnails: bool,
     page_destination: usize,
-    page_drag: Option<usize>,
     page_selection: pages::PageSelection,
     scroll_offset: Vec2,
 }
@@ -58,7 +57,6 @@ impl DocumentState {
             image_path: None,
             thumbnails: true,
             page_destination: 1,
-            page_drag: None,
             page_selection: Default::default(),
             scroll_offset: Vec2::ZERO,
         }
@@ -92,7 +90,6 @@ impl DocumentState {
         std::mem::swap(&mut self.image_path, &mut app.image_path);
         std::mem::swap(&mut self.thumbnails, &mut app.thumbnails);
         std::mem::swap(&mut self.page_destination, &mut app.page_destination);
-        std::mem::swap(&mut self.page_drag, &mut app.page_drag);
         std::mem::swap(&mut self.page_selection, &mut app.page_selection);
         std::mem::swap(&mut self.scroll_offset, &mut app.scroll_offset);
     }
@@ -198,7 +195,7 @@ impl App {
         self.activate_unchecked(index);
         true
     }
-    fn activate_unchecked(&mut self, index: usize) {
+    pub(super) fn activate_unchecked(&mut self, index: usize) {
         if index == self.active_document || index >= self.documents.len() {
             return;
         }
@@ -223,6 +220,10 @@ impl App {
         self.right_rect = Rect::NOTHING;
     }
     pub(super) fn insert_document(&mut self, editor: Editor) {
+        self.page_drag = None;
+        self.page_transfer = None;
+        self.page_tab_hover = None;
+        self.page_drop_document = None;
         if self.editor.is_some() {
             let previous = DocumentState::take(self);
             if let Some(slot) = self.documents.get_mut(self.active_document) {

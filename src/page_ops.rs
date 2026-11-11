@@ -76,6 +76,43 @@ impl Editor {
         })
     }
 
+    /// Import a complete PDF at a page boundary in one undoable transaction.
+    pub fn insert_pdf_at(
+        &mut self,
+        name: &str,
+        bytes: Vec<u8>,
+        at: usize,
+    ) -> Result<std::ops::Range<usize>> {
+        if at > self.info.pages.len() {
+            return Err("Position d’insertion incorrecte.".into());
+        }
+        let source = Self::from_bytes(bytes)?;
+        if !source.can_copy() {
+            return Err("Ce PDF interdit la copie de ses pages.".into());
+        }
+        let added = source.info.pages.len();
+        let count = self
+            .info
+            .pages
+            .len()
+            .checked_add(added)
+            .ok_or("Trop de pages à ajouter.")?;
+        self.change_pages(false, count, |doc| {
+            let pages: Vec<_> = (0..added).collect();
+            pdfcraft_organize::insert_file_pages(
+                doc,
+                &source.doc,
+                name,
+                &pages,
+                at,
+                pdfcraft_organize::FieldConflicts::Rename,
+            )
+            .map_err(|e| e.to_string())?;
+            Ok(())
+        })?;
+        Ok(at..at + added)
+    }
+
     /// Produces a new unsaved PDF; never changes the source or its history.
     pub fn extract_page_group(&self, pages: &[usize]) -> Result<Vec<u8>> {
         if !self.can_copy() {

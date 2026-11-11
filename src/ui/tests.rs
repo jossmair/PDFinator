@@ -4669,3 +4669,322 @@ fn page_context_menu_copies_selected_pages_to_a_named_open_pdf() {
     assert!(app.activate_document(0));
     assert_eq!(app.editor.as_ref().unwrap().bytes, source);
 }
+
+fn hovered_transfer_setup(
+    mode: Workspace,
+) -> (egui::Context, App, Arc<Vec<u8>>, Arc<Vec<u8>>, Pos2) {
+    let (ctx, mut app, source, _) = page_transfer_setup(mode);
+    assert!(app.activate_document(1));
+    let mut doc = pdfcraft_create::blank(420., 595., 3).unwrap();
+    for page in 0..3 {
+        pdfcraft_edit::add_content(
+            &mut doc,
+            page,
+            &Content::Text(AddedText {
+                rect: [20., 30., 300., 65.],
+                text: format!("Destination {page}"),
+                ..Default::default()
+            }),
+        )
+        .unwrap();
+    }
+    let mut editor =
+        Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap()).unwrap();
+    editor.path = Some(PathBuf::from("arrivee.pdf"));
+    let destination = editor.bytes.clone();
+    app.raster.document(editor.bytes.clone(), true, None);
+    app.editor = Some(editor);
+    assert!(app.activate_document(0));
+    let tab = named_position(&ctx, &mut app, "arrivee.pdf");
+    let start = page_test_position(&ctx, &mut app, 0);
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![
+            egui::Event::PointerMoved(start),
+            egui::Event::PointerButton {
+                pos: start,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: Modifiers::NONE,
+            },
+        ],
+    );
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::PointerMoved(start + Vec2::new(20., 15.))],
+    );
+    input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(tab)]);
+    let now = ctx.input(|i| i.time);
+    let mut out = ctx.run_ui(
+        egui::RawInput {
+            time: Some(now + 0.6),
+            events: vec![egui::Event::PointerMoved(tab)],
+            ..Default::default()
+        },
+        |ui| app.frame_ui(ui),
+    );
+    out.textures_delta.clear();
+    assert_eq!(app.active_document, 1);
+    assert!(app.foreign_page_drag());
+    assert!(app.page_drag.is_some());
+    assert_eq!(
+        app.editor.as_ref().unwrap().bytes,
+        destination,
+        "Hover must not insert pages"
+    );
+    (ctx, app, source, destination, tab)
+}
+#[test]
+fn hovering_a_tab_keeps_pages_in_hand_then_inserts_at_the_visible_boundary() {
+    for mode in [Workspace::Read, Workspace::Edit, Workspace::Pages] {
+        let (ctx, mut app, source, destination, _) = hovered_transfer_setup(mode);
+        let center = page_test_position(&ctx, &mut app, 1);
+        let pos = center
+            - if mode == Workspace::Pages {
+                Vec2::new(35., 0.)
+            } else {
+                Vec2::new(0., 25.)
+            };
+        let out = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(pos)]);
+        assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Copy);
+        assert!(out.shapes.iter().any(|s| matches!(&s.shape,
+            egui::epaint::Shape::LineSegment { stroke, .. } if stroke.width == 4. && stroke.color == icons::BLUE
+        )), "The insertion boundary must be visibly painted");
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerButton {
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: Modifiers::NONE,
+            }],
+        );
+        assert!(app.page_drag.is_none());
+        assert!(app.page_transfer.is_none());
+        let editor = app.editor.as_ref().unwrap();
+        let text: Vec<_> = (0..5)
+            .map(|p| editor.text(p).unwrap().plain_text())
+            .collect();
+        for (i, expected) in [
+            "Destination 0",
+            "Page test 0",
+            "Page test 2",
+            "Destination 1",
+            "Destination 2",
+        ]
+        .iter()
+        .enumerate()
+        {
+            assert!(text[i].contains(expected), "Page {i}: {:?}", text[i]);
+        }
+        assert_eq!(app.selected_pages(), vec![1, 2]);
+        let reopened = Editor::from_bytes((*editor.bytes).clone()).unwrap();
+        assert!(
+            reopened
+                .text(3)
+                .unwrap()
+                .plain_text()
+                .contains("Destination 1")
+        );
+        app.undo_redo(false);
+        assert_eq!(app.editor.as_ref().unwrap().bytes, destination);
+        app.undo_redo(true);
+        assert_eq!(app.editor.as_ref().unwrap().info.pages.len(), 5);
+        assert!(app.activate_document(0));
+        assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+        assert!(!app.editor.as_ref().unwrap().can_undo());
+    }
+}
+#[test]
+fn cancelling_after_hovering_another_pdf_returns_to_the_source_without_mutation() {
+    for (escape, reorder) in [(true, false), (false, false), (true, true)] {
+        let (ctx, mut app, source, destination, _) = hovered_transfer_setup(Workspace::Edit);
+        if reorder {
+            app.move_document_tab(0, 1);
+        }
+        if escape {
+            input_frame(
+                &ctx,
+                &mut app,
+                vec![egui::Event::Key {
+                    key: Key::Escape,
+                    physical_key: None,
+                    pressed: true,
+                    repeat: false,
+                    modifiers: Modifiers::NONE,
+                }],
+            );
+        }
+        let outside = app.canvas.center();
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(outside),
+                egui::Event::PointerButton {
+                    pos: outside,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: Modifiers::NONE,
+                },
+            ],
+        );
+        assert_eq!(app.active_document, usize::from(reorder));
+        assert!(app.page_transfer.is_none());
+        assert!(app.page_drag.is_none());
+        assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+        assert!(app.activate_document(usize::from(!reorder)));
+        assert_eq!(app.editor.as_ref().unwrap().bytes, destination);
+        assert!(!app.editor.as_ref().unwrap().can_undo());
+    }
+}
+
+#[test]
+fn edit_objects_are_quiet_until_hover_and_remain_discoverable_and_selectable() {
+    let (ctx, mut app) = setup();
+    app.workspace = Workspace::Edit;
+    app.tool = Tool::Edit;
+    app.fit = Fit::Manual;
+    app.zoom = 0.7;
+    app.thumbnails = false;
+    let idle = input_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::PointerMoved(Pos2::new(10., 680.))],
+    );
+    let quiet = Color32::from_rgba_unmultiplied(48, 94, 245, 75);
+    let outlines = |out: &egui::FullOutput| {
+        out.shapes
+            .iter()
+            .filter(|s| matches!(&s.shape, egui::epaint::Shape::Rect(r) if r.stroke.color == quiet))
+            .count()
+    };
+    assert_eq!(
+        outlines(&idle),
+        0,
+        "Unselected paragraphs must not all be outlined"
+    );
+    let sheet = idle
+        .shapes
+        .iter()
+        .find_map(|s| match &s.shape {
+            egui::epaint::Shape::Rect(r)
+                if r.fill == Color32::WHITE
+                    && (r.rect.width() - 595. * app.zoom).abs() < 0.5
+                    && (r.rect.height() - 842. * app.zoom).abs() < 0.5 =>
+            {
+                Some(r.rect)
+            }
+            _ => None,
+        })
+        .unwrap();
+    let selection = app.selection_for(0, Target::Block(0)).unwrap();
+    let center = selection
+        .view_rect(&app.editor.as_ref().unwrap().info.pages[0])
+        .center();
+    let pos = sheet.min + center.to_vec2() * app.zoom;
+    input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(pos)]);
+    let hovered = input_frame(&ctx, &mut app, vec![]);
+    assert_eq!(
+        outlines(&hovered),
+        1,
+        "Only the object under the pointer is hinted"
+    );
+    for pressed in [true, false] {
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerButton {
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed,
+                modifiers: Modifiers::NONE,
+            }],
+        );
+    }
+    assert!(
+        app.selected.is_some() || app.inline.is_some(),
+        "Hover discovery must lead to a working selection"
+    );
+    let selected = input_frame(&ctx, &mut app, vec![]);
+    assert_eq!(
+        outlines(&selected),
+        0,
+        "The selected object has its stronger controls instead of a duplicate hint"
+    );
+    assert!(
+        selected.shapes.iter().any(|s| matches!(&s.shape,
+            egui::epaint::Shape::Rect(r) if r.stroke.color == icons::BLUE && r.stroke.width >= 1.3
+        )),
+        "Selected objects keep a clear outline"
+    );
+}
+
+#[test]
+fn hovering_and_escape_preserve_the_destination_text_draft_and_styles() {
+    let (ctx, mut app, source, destination) = page_transfer_setup(Workspace::Edit);
+    app.activate_unchecked(1);
+    app.tool = Tool::Edit;
+    app.begin_text(&ctx, app.selection_for(0, Target::Block(0)).unwrap());
+    let inline = app.inline.as_mut().unwrap();
+    inline.selection.draft.push_str(" brouillon conservé");
+    inline.selection.size = 19.;
+    inline.selection.line_spacing = Some(1.5);
+    let draft = inline.selection.draft.clone();
+    app.activate_unchecked(0);
+    let tab = named_position(&ctx, &mut app, "arrivee.pdf");
+    let start = page_test_position(&ctx, &mut app, 0);
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![
+            egui::Event::PointerMoved(start),
+            egui::Event::PointerButton {
+                pos: start,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: Modifiers::NONE,
+            },
+        ],
+    );
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::PointerMoved(start + Vec2::new(20., 15.))],
+    );
+    input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(tab)]);
+    let now = ctx.input(|i| i.time);
+    let mut out = ctx.run_ui(
+        egui::RawInput {
+            time: Some(now + 0.6),
+            events: vec![egui::Event::PointerMoved(tab)],
+            ..Default::default()
+        },
+        |ui| app.frame_ui(ui),
+    );
+    out.textures_delta.clear();
+    assert_eq!(app.active_document, 1);
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![egui::Event::Key {
+            key: Key::Escape,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: Modifiers::NONE,
+        }],
+    );
+    assert_eq!(app.active_document, 0);
+    assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+    app.activate_unchecked(1);
+    let inline = app.inline.as_ref().unwrap();
+    assert_eq!(inline.selection.draft, draft);
+    assert_eq!(inline.selection.size, 19.);
+    assert_eq!(inline.selection.line_spacing, Some(1.5));
+    assert_eq!(app.editor.as_ref().unwrap().bytes, destination);
+    assert!(!app.editor.as_ref().unwrap().can_undo());
+}

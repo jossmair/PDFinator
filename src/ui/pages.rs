@@ -1,6 +1,15 @@
 //! Page overview and navigation. All mutations use the same transactional history as text.
 use super::*;
 
+pub(super) struct PageTransfer {
+    source: u64,
+    pages: Vec<usize>,
+    bytes: Vec<u8>,
+    name: String,
+    geometry: PageInfo,
+    preview: Option<egui::TextureHandle>,
+}
+
 #[derive(Default)]
 pub(super) struct PageSelection {
     pages: std::collections::BTreeSet<usize>,
@@ -276,16 +285,111 @@ impl App {
             }
         });
     }
+    pub(super) fn foreign_page_drag(&self) -> bool {
+        self.page_transfer
+            .as_ref()
+            .is_some_and(|t| self.editor.as_ref().is_none_or(|e| e.instance != t.source))
+    }
+    pub(super) fn cancel_page_drag(&mut self) {
+        self.page_drag = None;
+        self.page_tab_hover = None;
+        self.page_drop_document = None;
+        if let Some(transfer) = self.page_transfer.take() {
+            let source = if self
+                .editor
+                .as_ref()
+                .is_some_and(|e| e.instance == transfer.source)
+            {
+                Some(self.active_document)
+            } else {
+                self.documents
+                    .iter()
+                    .enumerate()
+                    .find_map(|(index, state)| {
+                        state
+                            .as_ref()
+                            .and_then(|state| state.editor())
+                            .filter(|e| e.instance == transfer.source)
+                            .map(|_| index)
+                    })
+            };
+            if let Some(source) = source {
+                self.activate_unchecked(source);
+            }
+        }
+    }
+    pub(super) fn hover_page_tab(&mut self, index: usize) {
+        if self.page_transfer.is_none() {
+            let pages = self.selected_pages();
+            let Some(editor) = self.editor.as_ref() else {
+                return;
+            };
+            let Some(&page) = pages.first() else { return };
+            match editor.extract_page_group(&pages) {
+                Ok(bytes) => {
+                    self.page_transfer = Some(PageTransfer {
+                        source: editor.instance,
+                        pages,
+                        bytes,
+                        name: editor.display_name(),
+                        geometry: editor.info.pages[page].clone(),
+                        preview: self.raster.thumbs.get(&page).cloned(),
+                    })
+                }
+                Err(error) => {
+                    self.cancel_page_drag();
+                    self.message = Some(error);
+                    return;
+                }
+            }
+        }
+        self.activate_unchecked(index);
+        self.thumbnails = true;
+    }
+    pub(super) fn drop_transferred_pages(&mut self, at: usize) -> bool {
+        self.page_drag = None;
+        self.page_tab_hover = None;
+        self.page_drop_document = None;
+        if !self.deselect() || !self.permit() {
+            self.page_transfer = None;
+            return false;
+        }
+        let Some(transfer) = self.page_transfer.take() else {
+            return false;
+        };
+        let result = self
+            .editor
+            .as_mut()
+            .ok_or_else(|| "Aucun PDF ouvert.".to_owned())
+            .and_then(|editor| editor.insert_pdf_at(&transfer.name, transfer.bytes, at));
+        match result {
+            Ok(pages) => {
+                self.page = pages.start;
+                self.page_destination = self.page + 1;
+                self.reset_page_views(true);
+                self.page_selection.replace(pages);
+                self.jump = Some(self.page);
+                self.message = None;
+                true
+            }
+            Err(error) => {
+                self.message = Some(error);
+                false
+            }
+        }
+    }
     pub(super) fn page_drag_input(&mut self, ctx: &egui::Context) {
         let released = ctx.input(|i| i.pointer.button_released(egui::PointerButton::Primary));
         if (self.page_drag.is_some()
             && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape)))
             || (!released && !ctx.input(|i| i.pointer.primary_down()))
         {
-            self.page_drag = None;
+            self.cancel_page_drag();
         }
     }
     pub(super) fn begin_page_drag(&mut self, page: usize) {
+        self.page_transfer = None;
+        self.page_tab_hover = None;
         if self.deselect() {
             if !self.page_selection.contains(page, self.page) {
                 self.page_selection.replace([page]);
@@ -660,11 +764,18 @@ impl App {
         let released = ctx.input(|i| i.pointer.button_released(egui::PointerButton::Primary));
         let pos = ctx.pointer_interact_pos();
         let inside = pos.is_some_and(|pos| overview.inner_rect.contains(pos));
-        let selected = self.selected_pages();
+        let foreign = self.foreign_page_drag();
+        let selected = self
+            .page_transfer
+            .as_ref()
+            .map_or_else(|| self.selected_pages(), |t| t.pages.clone());
         let target = target.filter(|_| inside).map(|mut t| {
-            t.destination = t
-                .slot
-                .saturating_sub(selected.iter().filter(|&&p| p < t.slot).count());
+            t.destination = if foreign {
+                t.slot
+            } else {
+                t.slot
+                    .saturating_sub(selected.iter().filter(|&&p| p < t.slot).count())
+            };
             t
         });
         if let Some(target) = target {
@@ -678,18 +789,25 @@ impl App {
             self.page_drag = None;
             if let Some(target) = target {
                 let before = self.editor.as_ref().map(Editor::revision);
+                if foreign {
+                    return self.drop_transferred_pages(target.destination);
+                }
+                self.page_transfer = None;
                 self.page = source;
                 self.move_current_page(target.destination);
                 return before != self.editor.as_ref().map(Editor::revision);
             }
+            self.cancel_page_drag();
         } else if let Some(pos) = pos {
-            ctx.set_cursor_icon(if self.page_drop_document.is_some() {
-                egui::CursorIcon::Copy
-            } else if inside {
-                egui::CursorIcon::Grabbing
-            } else {
-                egui::CursorIcon::NoDrop
-            });
+            ctx.set_cursor_icon(
+                if self.page_drop_document.is_some() || (foreign && inside) {
+                    egui::CursorIcon::Copy
+                } else if inside {
+                    egui::CursorIcon::Grabbing
+                } else {
+                    egui::CursorIcon::NoDrop
+                },
+            );
             let size = Vec2::new(146., 190.);
             let origin = (pos + Vec2::new(18., 18.))
                 .min(preview_bounds.max - size - Vec2::splat(4.))
@@ -721,7 +839,34 @@ impl App {
                     }
                 },
             );
-            if let Some(p) = pages.get(source) {
+            if let Some(transfer) = self.page_transfer.as_ref().filter(|_| foreign) {
+                self.paint_page_card(
+                    &painter,
+                    ghost,
+                    &transfer.geometry,
+                    usize::MAX,
+                    true,
+                    &label,
+                );
+                if let Some(texture) = &transfer.preview {
+                    let area = ghost.shrink2(Vec2::new(18., 20.));
+                    let scale = (area.width() / transfer.geometry.width)
+                        .min((area.height() - 20.) / transfer.geometry.height);
+                    let sheet = Rect::from_center_size(
+                        Pos2::new(area.center().x, area.top() + (area.height() - 20.) / 2.),
+                        Vec2::new(
+                            transfer.geometry.width * scale,
+                            transfer.geometry.height * scale,
+                        ),
+                    );
+                    painter.image(
+                        texture.id(),
+                        sheet,
+                        Rect::from_min_max(Pos2::ZERO, Pos2::new(1., 1.)),
+                        Color32::WHITE,
+                    );
+                }
+            } else if let Some(p) = pages.get(source) {
                 self.paint_page_card(&painter, ghost, p, source, true, &label);
             }
             if inside {

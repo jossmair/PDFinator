@@ -393,7 +393,7 @@ impl App {
                     ("Dessin", "Traits, formes et tableaux ; réglages à droite."),
                     (
                         "Pages",
-                        "Clic droit sur une miniature pour ajouter, tourner ou déplacer.",
+                        "Glissez vers un autre onglet, attendez son ouverture, puis déposez entre ses miniatures. Échap annule.",
                     ),
                     (
                         "Ouvrir / Enregistrer / Rechercher",

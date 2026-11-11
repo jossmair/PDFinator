@@ -177,13 +177,20 @@ impl App {
                         self.pick_open();
                     }
                     if self.page_drag.is_some() {
-                        if let Some(pos) = ctx.pointer_interact_pos() {
-                            let target = cards.iter().find(|(index, rect)| {
-                                *index != self.active_document
-                                    && strip.inner_rect.contains(pos)
-                                    && rect.contains(pos)
-                            });
-                            if let Some(&(index, rect)) = target {
+                        let now = ctx.input(|i| i.time);
+                        let target = ctx
+                            .pointer_interact_pos()
+                            .and_then(|pos| {
+                                cards.iter().find(|(_, rect)| {
+                                    strip.inner_rect.contains(pos) && rect.contains(pos)
+                                })
+                            })
+                            .map(|&(index, rect)| (index, rect));
+                        if target.is_none_or(|(index, _)| index == self.active_document) {
+                            self.page_tab_hover = None;
+                        }
+                        if let Some((index, rect)) = target {
+                            if index != self.active_document || self.foreign_page_drag() {
                                 self.page_drop_document = Some(index);
                                 ctx.set_cursor_icon(egui::CursorIcon::Copy);
                                 ui.painter().with_clip_rect(strip.inner_rect).rect_stroke(
@@ -195,13 +202,44 @@ impl App {
                                 if ctx.input(|i| {
                                     i.pointer.button_released(egui::PointerButton::Primary)
                                 }) {
-                                    self.page_drag = None;
-                                    self.copy_pages_to_document(index);
+                                    if self.page_transfer.is_some() {
+                                        self.hover_page_tab(index);
+                                        if self.foreign_page_drag() {
+                                            let at = self
+                                                .editor
+                                                .as_ref()
+                                                .map_or(0, |e| e.info.pages.len());
+                                            self.drop_transferred_pages(at);
+                                        } else {
+                                            self.cancel_page_drag();
+                                        }
+                                    } else {
+                                        self.page_drag = None;
+                                        self.copy_pages_to_document(index);
+                                    }
                                     self.page_drop_document = None;
                                     activate = None;
                                     close = None;
+                                } else if index != self.active_document {
+                                    let since = match self.page_tab_hover {
+                                        Some((previous, since)) if previous == index => since,
+                                        _ => {
+                                            self.page_tab_hover = Some((index, now));
+                                            now
+                                        }
+                                    };
+                                    if now - since >= 0.45 {
+                                        self.hover_page_tab(index);
+                                        self.page_tab_hover = None;
+                                    } else {
+                                        ctx.request_repaint_after(
+                                            std::time::Duration::from_millis(50),
+                                        );
+                                    }
                                 }
                             }
+                        } else {
+                            self.page_tab_hover = None;
                         }
                     }
                     if let Some(source) = self.tab_drag {

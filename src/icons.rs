@@ -53,7 +53,7 @@ pub enum Icon {
     Subscript,
     AlignJustify,
     Bullets,
-    Word,
+    OfficeExport,
 }
 pub const INK: Color32 = Color32::from_rgb(30, 49, 73);
 pub const BLUE: Color32 = Color32::from_rgb(55, 113, 249);
@@ -112,7 +112,7 @@ impl Icon {
             Self::Subscript => "Indice",
             Self::AlignJustify => "Justifier",
             Self::Bullets => "Puces",
-            Self::Word => "Exporter en DOCX ou ODT",
+            Self::OfficeExport => "Exporter en DOCX ou ODT",
         }
     }
     fn source(self) -> egui::ImageSource<'static> {
@@ -169,7 +169,7 @@ impl Icon {
             Self::Subscript => egui::include_image!("../assets/icons/subscript.svg"),
             Self::AlignJustify => egui::include_image!("../assets/icons/alignjustify.svg"),
             Self::Bullets => egui::include_image!("../assets/icons/bullets.svg"),
-            Self::Word => egui::include_image!("../assets/icons/word.svg"),
+            Self::OfficeExport => egui::include_image!("../assets/icons/office-export.svg"),
         }
     }
 }
@@ -376,7 +376,7 @@ mod tests {
             Icon::Subscript,
             Icon::AlignJustify,
             Icon::Bullets,
-            Icon::Word,
+            Icon::OfficeExport,
         ] {
             let loaded = egui::Image::new(icon.source())
                 .fit_to_exact_size(Vec2::splat(96.))

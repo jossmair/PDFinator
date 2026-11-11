@@ -232,6 +232,8 @@ pub struct App {
     page_destination: usize,
     page_drag: Option<usize>,
     page_drop_document: Option<usize>,
+    page_tab_hover: Option<(usize, f64)>,
+    page_transfer: Option<pages::PageTransfer>,
     page_selection: pages::PageSelection,
     scroll_offset: Vec2,
     documents: Vec<Option<documents::DocumentState>>,
@@ -291,6 +293,8 @@ impl App {
             page_destination: 1,
             page_drag: None,
             page_drop_document: None,
+            page_tab_hover: None,
+            page_transfer: None,
             page_selection: Default::default(),
             scroll_offset: Vec2::ZERO,
             documents: Vec::new(),
@@ -1012,6 +1016,9 @@ impl App {
         ctx.memory_mut(|m| m.request_focus(egui::Id::new("find")));
     }
     fn shortcuts(&mut self, ctx: &egui::Context) {
+        if self.page_drag.is_some() {
+            return;
+        }
         if ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F1)) {
             self.work.help_open = !self.work.help_open;
         }

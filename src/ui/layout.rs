@@ -133,7 +133,7 @@ impl App {
                     }
                     let export = icons::button(
                         ui,
-                        Icon::Word,
+                        Icon::OfficeExport,
                         "Exporter en DOCX ou ODT",
                         false,
                         enabled && self.word_export.is_none(),
@@ -750,8 +750,8 @@ impl App {
                 self.finish_text();
             }
         }
-        self.shortcuts(&ctx);
         self.page_drag_input(&ctx);
+        self.shortcuts(&ctx);
         for error in self.raster.poll(&ctx) {
             self.message = Some(error);
         }
