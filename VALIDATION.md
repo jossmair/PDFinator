@@ -25,6 +25,11 @@ La suite complète du fournisseur tentée hors ligne requiert un checkout
 d'édition réellement utilisées par PDFinator. Les vérifications du fournisseur
 qui dépendent de ce checkout restent hors du périmètre de cette recette.
 
+Le contrôle RustSec du 11 novembre a signalé `async-executor` 1.14.0 retiré du
+registre et l’avis RUSTSEC-2026-0486 sur `rustix` 1.1.5. Le verrouillage utilise
+maintenant 1.14.1 et 1.1.6, respectivement. Ces changements sont soumis aux mêmes
+contrôles GitHub et aux tests de l’application avant publication.
+
 ## 1.0.6 — groupes de pages
 
 **201 tests automatisés**, dont treize nouveaux scénarios : quatre simulations

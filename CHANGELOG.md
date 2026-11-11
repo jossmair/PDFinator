@@ -10,6 +10,8 @@
 - Les brouillons anciens conservent leurs limites de blocs lors de la récupération, avec leur mise en forme et leur curseur.
 - Les commandes Copier et Coller restent accessibles par clic droit et raccourci. Leurs boutons redondants sont retirés de la barre gauche.
 
+- Dépendances verrouillées mises à jour : `async-executor` 1.14.1 et `rustix` 1.1.6 après les signalements du contrôle RustSec.
+
 ## 1.0.6 — sélectionner et organiser plusieurs pages
 
 - Sélection par Ctrl, Maj et Ctrl+Maj dans les miniatures des trois espaces ; état indépendant pour chaque onglet et indication accessible des pages sélectionnées.
