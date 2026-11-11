@@ -39,6 +39,7 @@ impl App {
                     .inner_margin(12.),
             )
             .show(root, |ui| {
+                let had_viewport = self.canvas.is_positive();
                 self.canvas = ui.max_rect();
                 let Some(e) = &self.editor else {
                     ui.vertical_centered(|ui| {
@@ -64,18 +65,34 @@ impl App {
                 };
                 let pages = e.info.pages.clone();
                 let width = ui.available_width();
+                let old_zoom = self.zoom;
                 if let Some(p) = pages.get(self.page) {
                     match self.fit {
-                        Fit::Width => {
-                            self.zoom = ((self.document_width - 28.) / p.width).clamp(0.2, 4.)
-                        }
+                        Fit::Width => self.zoom = ((width - 28.) / p.width).clamp(0.2, 4.),
                         Fit::Page => {
-                            self.zoom = ((self.document_width - 28.) / p.width)
+                            self.zoom = ((width - 28.) / p.width)
                                 .min((ui.available_height() - 24.) / p.height)
                                 .clamp(0.2, 4.)
                         }
                         Fit::Manual => {}
                     }
+                }
+                if !matches!(self.fit, Fit::Manual) {
+                    if had_viewport && self.jump.is_none() && (self.zoom - old_zoom).abs() > 0.0001
+                    {
+                        let sizes: Vec<_> =
+                            pages.iter().map(|p| Vec2::new(p.width, p.height)).collect();
+                        self.scroll_offset.y = zoom_offset(
+                            self.scroll_offset,
+                            Vec2::new(width / 2., ui.available_height() / 2.),
+                            width,
+                            old_zoom,
+                            self.zoom,
+                            &sizes,
+                        )
+                        .y;
+                    }
+                    self.scroll_offset.x = 0.;
                 }
                 // Read pinch / Ctrl+wheel before laying out the scroll area. Zoom the
                 // document, not the interface, and keep the PDF point under the pointer.

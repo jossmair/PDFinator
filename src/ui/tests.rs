@@ -4056,7 +4056,7 @@ fn enter_commits_source_text_and_keeps_previous_raster_visible() {
     assert!(app.inline.as_ref().is_some_and(|i| !i.committed));
 }
 #[test]
-fn fit_width_keeps_scale_and_vertical_anchor_when_properties_recenter_the_page() {
+fn fit_width_adapts_to_properties_without_clipping_and_restores_the_reading_position() {
     let (ctx, mut app) = setup();
     app.set_workspace(&ctx, Workspace::Edit);
     app.set_tool(&ctx, Tool::Edit);
@@ -4099,20 +4099,30 @@ fn fit_width_keeps_scale_and_vertical_anchor_when_properties_recenter_the_page()
     }
     assert!(app.right_rect.is_positive());
     assert!(app.inline.is_some());
-    assert_eq!(
-        app.zoom, before.0,
-        "Opening properties changed the fit zoom"
-    );
     assert!(
-        (sheet_origin(&app).y - before.2.y).abs() < 0.1,
-        "Opening properties changed the vertical reading position"
+        app.zoom < before.0,
+        "Fit must shrink to the remaining page area"
+    );
+    let fitted_zoom = app.zoom;
+    let left = sheet_origin(&app).x;
+    let right = left + app.editor.as_ref().unwrap().info.pages[0].width * app.zoom;
+    assert!(
+        left >= app.canvas.left() && right <= app.canvas.right(),
+        "Both edges must remain visible"
+    );
+    assert_eq!(app.scroll_offset.x, 0.);
+    let before_center = (before.1.y + app.canvas.height() / 2.) / before.0;
+    let after_center = (app.scroll_offset.y + app.canvas.height() / 2.) / app.zoom;
+    assert!(
+        (before_center - after_center).abs() < 1.,
+        "Keep the same PDF point at the viewport center"
     );
     app.inline.as_mut().unwrap().selection.draft = "Exercice 2".into();
     assert!(app.commit_text_keep_focus(&ctx));
     for _ in 0..3 {
         input_frame(&ctx, &mut app, vec![]);
     }
-    assert_eq!(app.zoom, before.0);
+    assert_eq!(app.zoom, fitted_zoom);
     let blank = Pos2::new(app.canvas.right() - 30., app.canvas.bottom() - 80.);
     for pressed in [true, false] {
         input_frame(
@@ -4394,10 +4404,12 @@ fn source_free_preview_preserves_page_colour_and_does_not_edit_document() {
 }
 
 #[test]
-fn properties_recenter_the_page_in_the_visible_canvas_without_changing_zoom() {
+fn properties_recenter_the_page_in_the_visible_canvas_and_keep_manual_zoom() {
     let (ctx, mut app) = setup();
     app.workspace = Workspace::Edit;
     app.tool = Tool::Edit;
+    app.fit = Fit::Manual;
+    app.zoom = 0.8;
     input_frame(&ctx, &mut app, vec![]);
     let zoom = app.zoom;
     app.selected = app.selection_for(0, Target::Block(0));
@@ -4987,4 +4999,68 @@ fn hovering_and_escape_preserve_the_destination_text_draft_and_styles() {
     assert_eq!(inline.selection.line_spacing, Some(1.5));
     assert_eq!(app.editor.as_ref().unwrap().bytes, destination);
     assert!(!app.editor.as_ref().unwrap().can_undo());
+}
+
+#[test]
+fn fitted_page_edges_remain_visible_through_text_panel_collapse_and_expand_at_three_widths() {
+    fn check(ctx: &egui::Context, app: &mut App) -> f32 {
+        input_frame(ctx, app, vec![]);
+        let out = input_frame(ctx, app, vec![]);
+        let page = &app.editor.as_ref().unwrap().info.pages[0];
+        let size = Vec2::new(page.width, page.height) * app.zoom;
+        let (sheet, clip) = out
+            .shapes
+            .iter()
+            .find_map(|s| match &s.shape {
+                egui::epaint::Shape::Rect(r)
+                    if r.fill == Color32::WHITE
+                        && (r.rect.width() - size.x).abs() < 0.5
+                        && (r.rect.height() - size.y).abs() < 0.5 =>
+                {
+                    Some((r.rect, s.clip_rect))
+                }
+                _ => None,
+            })
+            .expect("PDF page must be painted");
+        assert!(
+            sheet.left() >= clip.left() - 0.5 && sheet.right() <= clip.right() + 0.5,
+            "Page edges {:?} must fit its actual painter clip {:?}",
+            sheet,
+            clip
+        );
+        assert_eq!(app.scroll_offset.x, 0.);
+        app.zoom
+    }
+    for width in [760., 1080., 1280.] {
+        for fit in [Fit::Width, Fit::Page] {
+            let (ctx, mut app) = setup();
+            ctx.enable_accesskit();
+            app.set_workspace(&ctx, Workspace::Edit);
+            app.set_tool(&ctx, Tool::Edit);
+            app.fit = fit;
+            let mut out = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(width, 720.))),
+                    ..Default::default()
+                },
+                |ui| app.frame_ui(ui),
+            );
+            out.textures_delta.clear();
+            let full_zoom = check(&ctx, &mut app);
+            app.begin_text(&ctx, app.selection_for(0, Target::Block(0)).unwrap());
+            let panel_zoom = check(&ctx, &mut app);
+            assert!(app.right_rect.is_positive());
+            assert!(panel_zoom <= full_zoom);
+            if matches!(fit, Fit::Width) {
+                assert!(panel_zoom < full_zoom);
+            }
+            for _ in 0..2 {
+                click_named_control(&ctx, &mut app, "Replier ›");
+                let collapsed_zoom = check(&ctx, &mut app);
+                assert!(collapsed_zoom >= panel_zoom);
+                click_named_control(&ctx, &mut app, "‹");
+                assert!((check(&ctx, &mut app) - panel_zoom).abs() < 0.001);
+            }
+        }
+    }
 }

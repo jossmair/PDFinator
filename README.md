@@ -101,7 +101,7 @@ PDF et des polices : une reproduction identique de tous les documents n’est pa
 garantie. Relisez vos résultats OCR et vos fichiers convertis.
 Les fichiers dépassant 256 Mio ne sont pas ouverts par cette version.
 
-**215 tests automatisés réussis** pour la version 1.0.9, complétés par des vérifications
+**219 tests automatisés réussis** pour la version 1.0.9, complétés par des vérifications
 d’export, de récupération et des fichiers de distribution. Cela ne couvre pas tous
 les PDF, toutes les configurations Windows ou tous les pilotes d’imprimante.
 

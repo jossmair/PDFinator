@@ -3,7 +3,6 @@ use super::*;
 pub(super) struct DocumentState {
     panel_width: f32,
     properties_collapsed: bool,
-    fit_compensation: f32,
     editor: Option<Editor>,
     raster: raster::Raster,
     objects: HashMap<usize, Vec<EditableObject>>,
@@ -34,7 +33,6 @@ impl DocumentState {
         Self {
             panel_width: 0.,
             properties_collapsed: false,
-            fit_compensation: 0.,
             editor: None,
             raster: Default::default(),
             objects: Default::default(),
@@ -67,7 +65,6 @@ impl DocumentState {
             &mut self.properties_collapsed,
             &mut app.properties_collapsed,
         );
-        std::mem::swap(&mut self.fit_compensation, &mut app.work.fit_compensation);
         std::mem::swap(&mut self.editor, &mut app.editor);
         std::mem::swap(&mut self.raster, &mut app.raster);
         std::mem::swap(&mut self.objects, &mut app.objects);

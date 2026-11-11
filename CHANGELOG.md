@@ -2,6 +2,8 @@
 
 ## 1.0.9 — édition allégée et insertion entre documents
 
+- OCR des schémas : estimation de la taille et du gras à partir de l’image, correction de la position du texte et conservation des flèches reconnues à tort comme V.
+- Ajustement à la largeur réelle à l’ouverture et au repli des propriétés : la page garde ses deux bords visibles. Conservation du point central et du zoom manuel.
 - Les encadrements passifs disparaissent ; un seul bloc est signalé discrètement au survol, avec les contrôles nets conservés sur la sélection.
 - Pictogramme d’export de document commun à DOCX et ODT, en remplacement du W.
 - Survol d’un onglet pendant le glissement pour l’ouvrir, puis dépôt entre ses miniatures avec repère d’insertion et conservation du groupe en main.

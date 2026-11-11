@@ -17,7 +17,6 @@ pub(super) struct SearchJob {
 }
 pub(super) struct Work {
     pub panel_width: f32,
-    pub fit_compensation: f32,
     pub help_open: bool,
     pub opening: Option<Receiver<Result<Editor>>>,
     pub opening_path: Option<PathBuf>,
@@ -40,7 +39,6 @@ impl Default for Work {
     fn default() -> Self {
         Self {
             panel_width: 0.,
-            fit_compensation: 0.,
             help_open: false,
             opening: None,
             opening_path: None,

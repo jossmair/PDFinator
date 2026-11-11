@@ -2,7 +2,23 @@
 
 ## 1.0.9 — survol des objets et insertion entre miniatures
 
-**215 tests**, dont cinq nouveaux scénarios : survol et insertion dans les trois
+L’OCR estime le corps et le gras à partir de l’encre et des contours des
+polices Arial installées, sans téléchargement. Les petits mots en minuscules
+ne déterminent plus seuls une taille trop petite ; les mots coupés sur deux
+lignes gardent un style cohérent. Une flèche pleine reconnue comme V reste un
+dessin. Les tests de rendu couvrent tailles, gras et position de l’encre ; un
+vrai V reste éditable. La capture fournie a aussi été contrôlée localement,
+sans être ajoutée au corpus public. Si les polices ne sont pas disponibles,
+les estimations OCR précédentes restent utilisées.
+
+Le mode « Adapter à la largeur » suit la largeur réellement disponible quand
+les propriétés s’ouvrent ou se replient, sans décalage horizontal. Les modes
+Largeur / Page entière sont vérifiés à 760, 1080 et 1280 pixels sur les limites
+de découpe du rendu. Le point central de lecture est conservé et le zoom manuel
+reste indépendant du panneau. L’ancien test imposant un zoom de largeur fixe à
+l’ouverture des propriétés est corrigé : cette exigence causait le rognage.
+
+**219 tests**, dont neuf nouveaux scénarios : survol et insertion dans les trois
 modes, annulation après changement d’onglet, conservation d’un brouillon cible
 et de ses styles, découverte/sélection des objets sans encadrements permanents,
 et insertion transactionnelle aux frontières de début, milieu et fin avec
@@ -27,7 +43,7 @@ comportements vérifiés ; il ne certifie pas tous les PDF ou matériels Windows
 
 ## 1.0.7 — insertion et stabilité de l'édition
 
-La suite PDFinator compte **207 tests**, avec six nouveaux scénarios ciblés.
+La suite PDFinator compte **207 tests**, avec neuf nouveaux scénarios ciblés.
 Les simulations vérifient le tracé d'un cadre avec les réglages déjà ouverts,
 l'absence de création au clic simple, le point central et le focus lors du zoom,
 et le placement du curseur au premier clic avant la saisie.
