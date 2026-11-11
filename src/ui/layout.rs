@@ -133,7 +133,7 @@ impl App {
                     }
                     let export = icons::button(
                         ui,
-                        Icon::Word,
+                        Icon::OfficeExport,
                         "Exporter en DOCX ou ODT",
                         false,
                         enabled && self.word_export.is_none(),
@@ -252,7 +252,6 @@ impl App {
                         self.fit == Fit::Width,
                         enabled,
                     ) {
-                        self.work.fit_compensation = 0.;
                         self.fit = Fit::Width;
                     }
                     if action(
@@ -262,7 +261,6 @@ impl App {
                         self.fit == Fit::Page,
                         enabled,
                     ) {
-                        self.work.fit_compensation = 0.;
                         self.fit = Fit::Page;
                     }
                 });
@@ -750,8 +748,8 @@ impl App {
                 self.finish_text();
             }
         }
-        self.shortcuts(&ctx);
         self.page_drag_input(&ctx);
+        self.shortcuts(&ctx);
         for error in self.raster.poll(&ctx) {
             self.message = Some(error);
         }
@@ -806,8 +804,7 @@ impl App {
             0.
         };
         let delta = pane - self.work.panel_width;
-        if delta.abs() > 0.1 {
-            self.work.fit_compensation += delta;
+        if delta.abs() > 0.1 && matches!(self.fit, Fit::Manual) {
             if let Some(page) = self
                 .editor
                 .as_ref()
@@ -821,7 +818,6 @@ impl App {
             }
         }
         self.work.panel_width = pane;
-        self.document_width = (remaining + self.work.fit_compensation).max(1.);
         if self.workspace == Workspace::Pages && self.editor.is_some() {
             self.pages_canvas(root);
         } else {

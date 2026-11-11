@@ -1,5 +1,14 @@
 # Changements PDFinator
 
+## 1.0.9 — édition allégée et insertion entre documents
+
+- OCR des schémas : estimation de la taille et du gras à partir de l’image, correction de la position du texte et conservation des flèches reconnues à tort comme V.
+- Ajustement à la largeur réelle à l’ouverture et au repli des propriétés : la page garde ses deux bords visibles. Conservation du point central et du zoom manuel.
+- Les encadrements passifs disparaissent ; un seul bloc est signalé discrètement au survol, avec les contrôles nets conservés sur la sélection.
+- Pictogramme d’export de document commun à DOCX et ODT, en remplacement du W.
+- Survol d’un onglet pendant le glissement pour l’ouvrir, puis dépôt entre ses miniatures avec repère d’insertion et conservation du groupe en main.
+- Échap ou dépôt hors cible annule et revient au document source ; les brouillons du PDF survolé sont conservés. Le source garde ses pages et l’ajout s’annule dans la destination en une fois.
+
 ## 1.0.8 — pages entre onglets et audit
 
 - Déposer des miniatures sur un autre onglet copie les pages sélectionnées à la fin du PDF cible, dans Lecture, Modifier et Pages.

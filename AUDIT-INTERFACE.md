@@ -14,12 +14,10 @@ source conserve ses pages et son historique. L’onglet cible est encadré et le
 curseur indique la copie ; le PDF d’arrivée s’ouvre sur les pages ajoutées.
 Une annulation retire tout l’ajout. Le clic droit des miniatures propose aussi
 « Copier vers un autre PDF ». Échap et un dépôt hors des cibles ne copient rien.
-Le transfert ne change pas les onglets au simple survol.
-
-Cette première interaction n’insère pas à un emplacement précis dans le PDF
-cible pendant le même geste. Après le dépôt, les pages ajoutées sont sélectionnées
-et peuvent être réordonnées. Un survol activant l’onglet puis un repère entre ses
-miniatures est une amélioration suivante, pas une fonction déjà validée.
+Depuis la 1.0.9, maintenir le survol d’un onglet ouvre le PDF cible en gardant
+les pages en main. Un repère entre ses miniatures permet l’insertion à une
+position choisie. Échap ou le dépôt hors cible annule et revient au source ; les
+brouillons et styles du document survolé ne sont pas validés par le survol.
 
 L’aide « ? » utilisait la couleur de texte du thème clair sur la barre sombre :
 sa couleur devient blanche pour rendre la commande lisible.
@@ -28,13 +26,13 @@ sa couleur devient blanche pour rendre la commande lisible.
 
 | Priorité | Constat / besoin | Recommandation |
 | --- | --- | --- |
-| P1 visuel | Les cadres de tous les blocs occupent beaucoup la page dans la capture. | Contour net sur la sélection, discret au survol ; éviter de cadrer en permanence tous les paragraphes. Tester la découverte des objets avant de supprimer ces repères. |
-| P1 visuel | Le pictogramme W désigne une commande qui exporte aussi en ODT. | Employer un pictogramme d’export de document commun, en gardant le choix DOCX / ODT. |
+| P1 visuel | Les cadres de tous les blocs occupent beaucoup la page dans la capture. | Contour net sur la sélection, discret au survol ; éviter de cadrer en permanence tous les paragraphes. Corrigé en 1.0.9 : découverte et sélection contrôlées par simulation. |
+| P1 visuel | Le pictogramme W désigne une commande qui exporte aussi en ODT. | Corrigé en 1.0.9 : pictogramme commun, choix DOCX / ODT conservé. |
 | P1 accessibilité | Les croix d’onglets portent le nom générique « Fermer » ; leur info-bulle nomme le document. | Nom accessible « Fermer [document] », puis recette clavier et NVDA. Un nom accessible ne prouve pas à lui seul le fonctionnement avec NVDA. |
 | P1 fonctionnel | La conversion Office et l’édition des structures PDF complexes restent limitées au corpus testé. | Ajouter des régressions avec vérification du rendu, Word en complément de LibreOffice ; ne pas promettre une reconstruction parfaite de tout PDF. |
 | P1 performances | La lecture de fichiers reste limitée à 256 Mio et les copies de pages s’exécutent dans le fil d’interface. | Mesurer plusieurs centaines de pages et les images lourdes, puis rendre les grosses opérations asynchrones ; éviter de relever la limite sans mesure mémoire. |
 | P1 recette | Imprimantes réelles, Word, NVDA, postes verrouillés et mises à l’échelle multiples ne sont pas intégralement validés. | Recette matérielle dédiée, distincte des tests automatisés. |
-| P2 pages | Le dépôt sur onglet ajoute en fin, sans choisir immédiatement un interstice. | Survol de l’onglet puis dépôt entre miniatures, avec repère et annulation sûrs. |
+| P2 pages | Le dépôt sur onglet ajoute en fin, sans choisir immédiatement un interstice. | Corrigé en 1.0.9 : survol, repère et insertion ; Échap et dépôt hors cible vérifiés. |
 
 ## Ce que je simplifierais, et ce que je conserverais
 

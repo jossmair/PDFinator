@@ -41,6 +41,7 @@ fn fixture() -> (Vec<u8>, Vec<u8>) {
             text: "label".into(),
             rect,
             size: 14.,
+            bold: false,
             color: [0.; 3],
             words: vec![rect],
         })
@@ -106,24 +107,28 @@ fn image_becomes_separate_positioned_text_blocks_and_a_clean_diagram_at_every_ro
                     rect: [80., 335., 120., 365.],
                     text: "A".into(),
                     size: 14.,
+                    bold: false,
                     ..Default::default()
                 },
                 AddedText {
                     rect: [400., 335., 440., 365.],
                     text: "B".into(),
                     size: 14.,
+                    bold: false,
                     ..Default::default()
                 },
                 AddedText {
                     rect: [80., 170., 210., 200.],
                     text: "5 cm".into(),
                     size: 14.,
+                    bold: false,
                     ..Default::default()
                 },
                 AddedText {
                     rect: [320., 170., 455., 200.],
                     text: "Été : œ, l’été".into(),
                     size: 14.,
+                    bold: false,
                     ..Default::default()
                 },
             ];
@@ -282,6 +287,7 @@ fn an_old_invisible_ocr_layer_is_replaced_without_duplicate_text_and_undo_restor
             text: "Real editable text".into(),
             rect: [80., 300., 330., 330.],
             size: 14.,
+            bold: false,
             ..Default::default()
         }],
     )

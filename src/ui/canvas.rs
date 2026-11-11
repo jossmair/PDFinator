@@ -39,6 +39,7 @@ impl App {
                     .inner_margin(12.),
             )
             .show(root, |ui| {
+                let had_viewport = self.canvas.is_positive();
                 self.canvas = ui.max_rect();
                 let Some(e) = &self.editor else {
                     ui.vertical_centered(|ui| {
@@ -64,18 +65,34 @@ impl App {
                 };
                 let pages = e.info.pages.clone();
                 let width = ui.available_width();
+                let old_zoom = self.zoom;
                 if let Some(p) = pages.get(self.page) {
                     match self.fit {
-                        Fit::Width => {
-                            self.zoom = ((self.document_width - 28.) / p.width).clamp(0.2, 4.)
-                        }
+                        Fit::Width => self.zoom = ((width - 28.) / p.width).clamp(0.2, 4.),
                         Fit::Page => {
-                            self.zoom = ((self.document_width - 28.) / p.width)
+                            self.zoom = ((width - 28.) / p.width)
                                 .min((ui.available_height() - 24.) / p.height)
                                 .clamp(0.2, 4.)
                         }
                         Fit::Manual => {}
                     }
+                }
+                if !matches!(self.fit, Fit::Manual) {
+                    if had_viewport && self.jump.is_none() && (self.zoom - old_zoom).abs() > 0.0001
+                    {
+                        let sizes: Vec<_> =
+                            pages.iter().map(|p| Vec2::new(p.width, p.height)).collect();
+                        self.scroll_offset.y = zoom_offset(
+                            self.scroll_offset,
+                            Vec2::new(width / 2., ui.available_height() / 2.),
+                            width,
+                            old_zoom,
+                            self.zoom,
+                            &sizes,
+                        )
+                        .y;
+                    }
+                    self.scroll_offset.x = 0.;
                 }
                 // Read pinch / Ctrl+wheel before laying out the scroll area. Zoom the
                 // document, not the interface, and keep the PDF point under the pointer.
@@ -447,11 +464,17 @@ impl App {
             self.drawing_canvas(ui, page, p, rect, &response);
             return true;
         }
-        let edit = matches!(
-            self.tool,
-            Tool::Edit | Tool::Text | Tool::Image | Tool::Move
-        );
-        if edit {
+        let edit = self.workspace == Workspace::Edit
+            && matches!(
+                self.tool,
+                Tool::Edit | Tool::Text | Tool::Image | Tool::Move | Tool::Select
+            );
+        let hover = response
+            .hovered()
+            .then(|| ui.ctx().pointer_hover_pos())
+            .flatten();
+        let mut hovered_bounds: Option<(Rect, bool)> = None;
+        if edit && self.drag.is_none() {
             if let Some(objects) = self.objects.get(&page) {
                 for object in objects {
                     let target = match object.target.kind {
@@ -478,14 +501,25 @@ impl App {
                     // Inventories use user space even for added objects.
                     s.target = Target::Block(usize::MAX);
                     let bounds = screen(s.view_rect(p), self.zoom);
-                    ui.painter().rect_stroke(
-                        bounds.expand(1.),
-                        0.,
-                        Stroke::new(0.8, Color32::from_rgba_unmultiplied(48, 94, 245, 75)),
-                        StrokeKind::Outside,
-                    );
+                    let selected = self
+                        .selected
+                        .as_ref()
+                        .is_some_and(|s| s.page == page && s.target == target);
+                    if hover.is_some_and(|pos| bounds.expand(2.).contains(pos))
+                        && hovered_bounds.is_none_or(|(old, _)| bounds.area() < old.area())
+                    {
+                        hovered_bounds = Some((bounds, selected));
+                    }
                 }
             }
+        }
+        if let Some((bounds, false)) = hovered_bounds {
+            ui.painter().rect_stroke(
+                bounds.expand(1.),
+                0.,
+                Stroke::new(0.8, Color32::from_rgba_unmultiplied(48, 94, 245, 75)),
+                StrokeKind::Outside,
+            );
         }
         let point = response.interact_pointer_pos().map(|pos| {
             Pos2::new(

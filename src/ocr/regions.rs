@@ -7,6 +7,7 @@ pub struct Block {
     /// Initially pixels; the desktop converts this to display points once.
     pub rect: [f32; 4],
     pub size: f64,
+    pub bold: bool,
     pub color: [f64; 3],
     pub words: Vec<[f32; 4]>,
 }
@@ -47,6 +48,7 @@ pub(super) fn blocks(lines: &[Line]) -> Vec<Block> {
                     text: word.text,
                     rect: word.rect,
                     size: (height * 1.15) as f64,
+                    bold: false,
                     color: [0.; 3],
                     words: vec![word.rect],
                 });

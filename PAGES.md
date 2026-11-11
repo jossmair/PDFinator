@@ -44,9 +44,11 @@ champ AcroForm simple lors du déplacement, les copies indépendantes, la
 réouverture et l'historique. Les rendus des copies et extractions sont comparés
 pixel par pixel à leurs sources. Cela ne valide pas toutes les structures de
 formulaires, actions JavaScript, portfolios, liens externes ou documents balisés.
-Pour copier des pages dans un autre PDF ouvert, déposez les miniatures sur son
-onglet. L’onglet cible est encadré ; les pages s’ajoutent à la fin et restent
-sélectionnées. Le source ne perd aucune page. Le clic droit propose aussi
-« Copier vers un autre PDF ». Annuler dans le PDF d’arrivée retire cet ajout en
-une fois. Échap annule le glissement. Le dépôt entre miniatures de deux documents
-pendant le même geste reste une amélioration ultérieure.
+Pour copier des pages dans un autre PDF ouvert, glissez les miniatures vers son
+onglet et maintenez le pointeur dessus un court instant. Le PDF cible s’ouvre
+sans perdre les pages en main. Déposez ensuite avant ou après une miniature,
+en suivant le repère d’insertion bleu. Le source ne perd aucune page et le groupe
+reste sélectionné à l’arrivée. Déposer directement sur un onglet ajoute en fin.
+Le clic droit propose aussi « Copier vers un autre PDF ». Annuler dans le PDF
+d’arrivée retire l’ajout en une fois. Échap ou un dépôt hors cible annule le
+transfert et revient au source, sans valider les brouillons du document survolé.

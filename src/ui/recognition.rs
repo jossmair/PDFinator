@@ -730,6 +730,7 @@ mod tests {
                 text: "Reconnu".into(),
                 rect: [60., 350., 150., 380.],
                 size: 14.,
+                bold: false,
                 color: [0.; 3],
                 words: vec![],
             }],
@@ -888,7 +889,7 @@ fn recognize(
             .join(" ");
     }
     result.lines.retain(|line| !line.words.is_empty());
-    let mut blocks = result.blocks();
+    let mut blocks = result.styled_blocks(&image.rgba, image.width, image.height);
     let cleaned =
         pdfinator::ocr::erase_letters(&image.rgba, image.width, image.height, &mut blocks)?;
     let png = pdfinator::ocr::encode_png(&cleaned, image.width, image.height)?;
@@ -922,7 +923,7 @@ impl Session {
                     ];
                     block.size = (block.size / detected.scale as f64).clamp(3., 96.);
                     let measured = Family::Helvetica
-                        .width(&block.text, block.size, false, false)
+                        .width(&block.text, block.size, block.bold, false)
                         .max(1.);
                     let available = (block.rect[2] - block.rect[0] + 3.) as f64;
                     block.size = block.size.min(block.size * available / measured).max(3.);
@@ -1363,13 +1364,14 @@ impl App {
             .filter(|b| !b.text.trim().is_empty())
             .map(|block| AddedText {
                 rect: to_rect([
-                    block.rect[0] - 0.5,
-                    block.rect[1] - 1.,
+                    block.rect[0],
+                    block.rect[1],
                     block.rect[2] + 4.,
                     block.rect[3] + 1.,
                 ]),
                 text: block.text.clone(),
                 size: block.size,
+                bold: block.bold,
                 color: block.color,
                 ..Default::default()
             })

@@ -1,5 +1,6 @@
 //! Local image recognition. No process, service, download or network access.
 use crate::document::Result;
+mod appearance;
 #[cfg(any(windows, test))]
 mod enhancement;
 mod regions;
@@ -32,6 +33,11 @@ pub struct Recognition {
 impl Recognition {
     pub fn blocks(&self) -> Vec<Block> {
         regions::blocks(&self.lines)
+    }
+    pub fn styled_blocks(&self, rgba: &[u8], width: u32, height: u32) -> Vec<Block> {
+        let mut blocks = self.blocks();
+        appearance::refine(rgba, width, height, &self.lines, &mut blocks);
+        blocks
     }
     pub fn text(&self) -> String {
         self.lines
@@ -85,11 +91,11 @@ pub fn recognize(rgba: &[u8], width: u32, height: u32) -> Result<Recognition> {
     Err("La reconnaissance locale nécessite Windows 10 ou 11.".into())
 }
 
-/// A downward arrowhead is sometimes read as Y: its upper half is a solid
+/// A downward arrowhead is sometimes read as Y or V: its upper half is a solid
 /// triangle, unlike the two separate arms of Y. Some also have an attached stem.
 #[cfg(any(windows, test))]
 fn attached_arrow(rgba: &[u8], width: u32, height: u32, word: &Word) -> bool {
-    if word.text != "Y" || word.rect.iter().any(|v| !v.is_finite()) {
+    if !matches!(word.text.as_str(), "Y" | "V") || word.rect.iter().any(|v| !v.is_finite()) {
         return false;
     }
     let h = (word.rect[3] - word.rect[1]).ceil().max(1.) as u32;
@@ -384,6 +390,30 @@ fn windows_recognize(rgba: &[u8], width: u32, height: u32) -> Result<Recognition
 #[cfg(test)]
 mod arrow_tests {
     use super::*;
+    #[test]
+    fn a_filled_arrow_is_not_turned_into_v_but_a_real_v_label_is_kept() {
+        let mut rgba = vec![255; 100 * 100 * 4];
+        let word = Word {
+            text: "V".into(),
+            rect: [40., 60., 60., 80.],
+        };
+        for y in 60..80 {
+            let half = 10 - (y - 60) / 2;
+            for x in 50 - half..50 + half {
+                let at = (y * 100 + x) * 4;
+                rgba[at..at + 3].fill(0);
+            }
+        }
+        assert!(attached_arrow(&rgba, 100, 100, &word));
+        rgba.fill(255);
+        for y in 60..80 {
+            for x in [40 + (y - 60) / 2, 59 - (y - 60) / 2] {
+                let at = (y * 100 + x) * 4;
+                rgba[at..at + 3].fill(0);
+            }
+        }
+        assert!(!attached_arrow(&rgba, 100, 100, &word));
+    }
     #[test]
     fn an_arrow_stem_is_kept_as_graphics_while_a_real_y_remains_editable() {
         let mut rgba = vec![255; 100 * 100 * 4];
