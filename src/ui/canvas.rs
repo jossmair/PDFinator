@@ -1,5 +1,32 @@
 use super::*;
 impl App {
+    pub(super) fn zoom_document(&mut self, zoom: f32) {
+        let old = self.zoom;
+        let new = zoom.clamp(0.2, 4.);
+        if let Some(editor) = &self.editor
+            && self.canvas.is_positive()
+        {
+            let pages: Vec<_> = editor
+                .info
+                .pages
+                .iter()
+                .map(|p| Vec2::new(p.width, p.height))
+                .collect();
+            self.scroll_offset = zoom_offset(
+                self.scroll_offset,
+                self.canvas.size() / 2.,
+                self.canvas.width(),
+                old,
+                new,
+                &pages,
+            );
+        }
+        self.zoom = new;
+        self.fit = Fit::Manual;
+        if let Some(inline) = self.inline.as_mut().filter(|inline| !inline.committed) {
+            inline.focus = true;
+        }
+    }
     pub(super) fn document_canvas(&mut self, root: &mut egui::Ui) {
         let ctx = root.ctx().clone();
         let mut visible = Vec::new();
@@ -128,6 +155,23 @@ impl App {
                     {
                         ctx.set_cursor_icon(if surfaces.iter().any(|r| r.contains(pos)) {
                             egui::CursorIcon::Text
+                        } else {
+                            egui::CursorIcon::Default
+                        });
+                    }
+                }
+                if self.tool == Tool::Text
+                    && self.inline.is_none()
+                    && self.selected.is_none()
+                    && !self.printing.open
+                    && self.recognition.is_none()
+                {
+                    if let Some(pos) = ctx.pointer_hover_pos().filter(|pos| {
+                        scroll.inner_rect.contains(*pos)
+                            && ctx.layer_id_at(*pos) == Some(ui.layer_id())
+                    }) {
+                        ctx.set_cursor_icon(if surfaces.iter().any(|r| r.contains(pos)) {
+                            egui::CursorIcon::Crosshair
                         } else {
                             egui::CursorIcon::Default
                         });
@@ -452,23 +496,21 @@ impl App {
         if response.drag_started_by(egui::PointerButton::Primary) && self.tool == Tool::Text {
             if let Some(start) = ui.input(|i| i.pointer.press_origin()) {
                 let q = (start - rect.min) / self.zoom;
-                if self.hit(page, p, Pos2::new(q.x, q.y)).is_none() {
-                    let selection = Selection::text(
-                        page,
-                        Target::New,
-                        [
-                            q.x as f64,
-                            (p.height - q.y) as f64,
-                            q.x as f64,
-                            (p.height - q.y) as f64,
-                        ],
-                        String::new(),
-                        14.,
-                        [0.; 3],
-                        false,
-                    );
-                    self.begin_drag(ui.ctx(), selection, DragMode::Create, start, rect, size);
-                }
+                let selection = Selection::text(
+                    page,
+                    Target::New,
+                    [
+                        q.x as f64,
+                        (p.height - q.y) as f64,
+                        q.x as f64,
+                        (p.height - q.y) as f64,
+                    ],
+                    String::new(),
+                    14.,
+                    [0.; 3],
+                    false,
+                );
+                self.begin_drag(ui.ctx(), selection, DragMode::Create, start, rect, size);
             }
         }
         if response.drag_started() && self.tool == Tool::Move {
@@ -559,21 +601,12 @@ impl App {
                     }
                     self.selected = Some(s.clone());
                     if matches!(self.tool, Tool::Edit | Tool::Text) && !s.is_image {
+                        let relative = point - s.view_rect(p).min;
                         self.begin_text(ui.ctx(), s);
+                        if let Some(inline) = &mut self.inline {
+                            inline.initial_pointer = Some(relative);
+                        }
                     }
-                } else if self.tool == Tool::Text {
-                    let x = point.x.max(0.) as f64;
-                    let y = (p.height - point.y) as f64;
-                    let s = Selection::text(
-                        page,
-                        Target::New,
-                        [x, y - 24., (x + 250.).min(p.width as f64), y],
-                        String::new(),
-                        14.,
-                        [0.; 3],
-                        false,
-                    );
-                    self.begin_text(ui.ctx(), s);
                 } else {
                     self.deselect();
                 }

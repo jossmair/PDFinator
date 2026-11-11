@@ -1,5 +1,15 @@
 # Changements PDFinator
 
+## 1.0.7 — insertion et édition du texte
+
+- Un nouvel encadré se trace par glisser-déposer avec l'outil Texte. Le clic simple sert à sélectionner ou reprendre l'édition.
+- Les réglages déjà ouverts restent en place pendant le tracé pour garder la page et le pointeur alignés.
+- Regroupement des fragments natifs d'une même ligne dessinés après les lignes suivantes, avec une recherche bornée et conservation des limites des paragraphes marqués.
+- Le premier clic place le curseur dans le texte à l'endroit visé. Les retours des réglages restaurent la sélection avant la mise en page du champ.
+- Les boutons de zoom conservent le point central du PDF et le focus d'édition.
+- Les brouillons anciens conservent leurs limites de blocs lors de la récupération, avec leur mise en forme et leur curseur.
+- Les commandes Copier et Coller restent accessibles par clic droit et raccourci. Leurs boutons redondants sont retirés de la barre gauche.
+
 ## 1.0.6 — sélectionner et organiser plusieurs pages
 
 - Sélection par Ctrl, Maj et Ctrl+Maj dans les miniatures des trois espaces ; état indépendant pour chaque onglet et indication accessible des pages sélectionnées.

@@ -302,6 +302,154 @@ fn sheet_origin(app: &App) -> Pos2 {
         app.canvas.top() - app.scroll_offset.y,
     )
 }
+
+#[test]
+fn text_insertion_requires_a_drag_and_keeps_an_existing_property_panel_during_placement() {
+    let (ctx, mut app) = setup();
+    app.set_workspace(&ctx, Workspace::Edit);
+    app.set_tool(&ctx, Tool::Text);
+    app.fit = Fit::Manual;
+    app.zoom = 0.65;
+    input_frame(&ctx, &mut app, vec![]);
+    let blank = sheet_origin(&app) + Vec2::new(90., 330.) * app.zoom;
+    for pressed in [true, false] {
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(blank),
+                pointer_button(blank, egui::PointerButton::Primary, pressed),
+            ],
+        );
+    }
+    assert!(
+        app.inline.is_none() && app.selected.is_none(),
+        "A single click must not invent a default-sized text frame"
+    );
+    app.begin_text(&ctx, app.selection_for(0, Target::Block(0)).unwrap());
+    for _ in 0..3 {
+        input_frame(&ctx, &mut app, vec![]);
+    }
+    assert!(app.right_rect.is_positive());
+    let origin = sheet_origin(&app);
+    let start = origin + Vec2::new(90., 330.) * app.zoom;
+    let end = origin + Vec2::new(330., 430.) * app.zoom;
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![
+            egui::Event::PointerMoved(start),
+            pointer_button(start, egui::PointerButton::Primary, true),
+        ],
+    );
+    input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(end)]);
+    input_frame(&ctx, &mut app, vec![]);
+    assert!(
+        app.right_rect.is_positive(),
+        "Placement must keep the already open panel"
+    );
+    assert!(
+        (sheet_origin(&app) - origin).length() < 0.2,
+        "The page moved under the held pointer"
+    );
+    input_frame(
+        &ctx,
+        &mut app,
+        vec![pointer_button(end, egui::PointerButton::Primary, false)],
+    );
+    let p = &app.editor.as_ref().unwrap().info.pages[0];
+    let selection = app.selected.as_ref().unwrap();
+    assert!(matches!(selection.target, Target::New));
+    assert!((selection.view_rect(p).size() - Vec2::new(240., 100.)).length() < 0.2);
+}
+
+#[test]
+fn zoom_buttons_keep_the_pdf_point_at_the_canvas_center_during_text_editing() {
+    let (ctx, mut app) = setup();
+    ctx.enable_accesskit();
+    app.set_workspace(&ctx, Workspace::Edit);
+    app.fit = Fit::Manual;
+    app.zoom = 1.5;
+    app.begin_text(&ctx, app.selection_for(0, Target::Block(0)).unwrap());
+    for _ in 0..200 {
+        input_frame(&ctx, &mut app, vec![]);
+        if app
+            .inline
+            .as_ref()
+            .is_some_and(|i| i.screen.is_positive() && !i.focus)
+        {
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    app.scroll_offset = Vec2::new(120., 220.);
+    for _ in 0..2 {
+        input_frame(&ctx, &mut app, vec![]);
+    }
+    let point = (app.canvas.center() - sheet_origin(&app)) / app.zoom;
+    for label in ["Augmenter le zoom", "Réduire le zoom"] {
+        click_named_control(&ctx, &mut app, label);
+        input_frame(&ctx, &mut app, vec![]);
+        let after = (app.canvas.center() - sheet_origin(&app)) / app.zoom;
+        assert!(
+            (after - point).length() < 1.,
+            "{label}: {point:?} became {after:?}"
+        );
+        assert!(app.inline.is_some());
+        assert!(
+            ctx.memory(|memory| memory.has_focus(egui::Id::new("direct-text"))),
+            "Zoom controls must return to the text caret"
+        );
+    }
+}
+
+#[test]
+fn clicking_the_start_of_source_text_places_the_caret_there_before_typing() {
+    let (ctx, mut app) = setup();
+    app.set_workspace(&ctx, Workspace::Edit);
+    app.set_tool(&ctx, Tool::Edit);
+    app.fit = Fit::Manual;
+    app.zoom = 1.;
+    input_frame(&ctx, &mut app, vec![]);
+    let p = &app.editor.as_ref().unwrap().info.pages[0];
+    let r = app.selection_for(0, Target::Block(0)).unwrap().view_rect(p);
+    let pos = sheet_origin(&app) + Vec2::new(r.left() + 1., r.center().y) * app.zoom;
+    for pressed in [true, false] {
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(pos),
+                pointer_button(pos, egui::PointerButton::Primary, pressed),
+            ],
+        );
+    }
+    for _ in 0..200 {
+        input_frame(&ctx, &mut app, vec![]);
+        if app
+            .inline
+            .as_ref()
+            .is_some_and(|i| i.screen.is_positive() && !i.focus)
+        {
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    let cursor = app.inline.as_ref().unwrap().cursor.unwrap();
+    assert!(
+        cursor.primary.index.0 <= 1,
+        "Clicking the start jumped to {cursor:?}"
+    );
+    input_frame(&ctx, &mut app, vec![egui::Event::Text("Début ".into())]);
+    assert!(
+        app.inline
+            .as_ref()
+            .unwrap()
+            .selection
+            .draft
+            .starts_with("Début ")
+    );
+}
 #[test]
 fn reading_cursor_is_an_ibeam_over_text_and_an_arrow_over_blank_page_and_margin() {
     let (ctx, mut app) = setup();
@@ -1995,12 +2143,7 @@ fn rail_commands_fit_small_windows_and_pages_only_exposes_relevant_actions() {
                 );
             }
             if workspace == Workspace::Edit {
-                for label in [
-                    "Copier le bloc · Ctrl+C",
-                    "Coller le bloc · Ctrl+V",
-                    "Dessin",
-                    "Ajouter une page blanche",
-                ] {
+                for label in ["Dessin", "Ajouter une page blanche"] {
                     let bounds = update
                         .nodes
                         .iter()

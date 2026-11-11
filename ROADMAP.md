@@ -79,6 +79,7 @@ autres outils Ergonatus plutôt que d’alourdir PDFinator.
 
 - 1.0.5 : croix de déplacement des objets, fractions Unicode et visibilité des équations DOCX ; corpus de 14 rendus Office contrôlés.
 - 1.0.6 : sélection et opérations groupées de pages, extraction vers un nouveau PDF et treize régressions ciblées. Voir `PAGES.md` pour le périmètre.
+- 1.0.7 : insertion par tracé, regroupement de fragments natifs intercalés, curseur initial, zoom centré et barre gauche allégée.
 
 Ces avancées couvrent des cas précis ; les autres points des lots restent ouverts.
 

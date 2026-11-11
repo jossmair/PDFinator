@@ -383,6 +383,10 @@ impl App {
                     ),
                     ("Main", "Glissez la page pour déplacer la vue."),
                     (
+                        "Insérer du texte",
+                        "Glissez sur la page pour tracer le cadre, puis saisissez le texte.",
+                    ),
+                    (
                         "Modifier le texte",
                         "Cliquez un texte ; double-cliquez une image pour l’OCR.",
                     ),

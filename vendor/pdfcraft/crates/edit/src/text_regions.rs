@@ -27,14 +27,15 @@ fn frame_row_rect(row: &[usize], lines: &[TextLine]) -> Option<[f64; 4]> {
     row.iter().filter_map(|i| lines.get(*i)).map(TextLine::frame_rect).reduce(union)
 }
 
-pub(super) fn group_blocks(lines: &[TextLine]) -> Vec<TextBlock> {
-    group_layout(lines, true)
+pub(super) fn group_blocks(doc: &Document, lines: &[TextLine]) -> Vec<TextBlock> {
+    let legacy = doc.root().is_some_and(|root| doc.get(root).as_dict().is_some_and(|d| d.get(b"PNLegacyTextGrouping") == Some(&Object::Bool(true))));
+    group_layout(lines, true, !legacy)
 }
 
 /// Exporters currently represent a block with one style. Keep their style boundaries until
 /// they support rich runs, while edit selection may encompass the complete visual region.
 pub(super) fn group_reading_blocks(lines: &[TextLine]) -> Vec<TextBlock> {
-    group_layout(lines, false)
+    group_layout(lines, false, false)
 }
 
 /// Text-space units → user space along the baseline. It is the vertical scale ([`Origin::k`])
@@ -60,18 +61,19 @@ fn same_style(a: &TextLine, b: &TextLine) -> bool {
         && (a.size - b.size).abs() < 0.01
 }
 
-fn group_layout(lines: &[TextLine], mixed: bool) -> Vec<TextBlock> {
+fn group_layout(lines: &[TextLine], mixed: bool, rejoin_native: bool) -> Vec<TextBlock> {
     // Tagged paragraphs keep superscript/subscript runs on their logical baseline.
     // Ts changes the glyph position, not the paragraph row that owns the run.
     let baseline = |line: &TextLine| line.frame_origin().1 - if line.scope.is_some() { line.origin.state.rise * line.origin.k } else { 0.0 };
     let mut rows: Vec<Vec<usize>> = Vec::new();
     for (i, line) in lines.iter().enumerate() {
-        let joins = rows.last().and_then(|r| r.last()).and_then(|i| lines.get(*i)).is_some_and(|prev| {
-            let gap = line.frame_rect()[0] - prev.frame_rect()[2];
-            // OCR words (invisible text over a scan) join only across a word space: a wider gap
-            // is a table cell or a tab stop, which a rewrite would close up.
-            let scanned = !mixed || (invisible(prev) == invisible(line) && (!invisible(line) || gap < prev.size.max(line.size) * 0.6));
-            scanned
+        let joins = |row: &Vec<usize>| {
+            row.last().and_then(|i| lines.get(*i)).is_some_and(|prev| {
+                let gap = line.frame_rect()[0] - prev.frame_rect()[2];
+                // OCR words (invisible text over a scan) join only across a word space: a wider gap
+                // is a table cell or a tab stop, which a rewrite would close up.
+                let scanned = !mixed || (invisible(prev) == invisible(line) && (!invisible(line) || gap < prev.size.max(line.size) * 0.6));
+                scanned
                 && (mixed || same_style(prev, line))
                 && same_plane(prev, line)
                 && (baseline(prev) - baseline(line)).abs() < prev.size.min(line.size) * 0.2
@@ -85,8 +87,17 @@ fn group_layout(lines: &[TextLine], mixed: bool) -> Vec<TextBlock> {
                     || !same_style(prev, line)
                     || prev.text.ends_with(char::is_whitespace)
                     || line.text.starts_with(char::is_whitespace))
-        });
-        if joins && let Some(row) = rows.last_mut() {
+            })
+        };
+        // Native producers sometimes paint style runs after the following line.
+        // Rejoin their original row without joining separately owned editor frames.
+        // Bound the look-back so large documents keep linear grouping work.
+        let matching = if mixed && rejoin_native {
+            rows.iter().enumerate().rev().take(32).find(|(_, row)| joins(row)).map(|(i, _)| i)
+        } else {
+            rows.len().checked_sub(1).filter(|i| rows.get(*i).is_some_and(&joins))
+        };
+        if let Some(row) = matching.and_then(|i| rows.get_mut(i)) {
             row.push(i);
         } else {
             rows.push(vec![i]);

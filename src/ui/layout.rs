@@ -98,25 +98,6 @@ impl App {
                         }
                     });
                 }
-                if self.workspace == Workspace::Edit {
-                    let copy = self.selected.as_ref().is_some_and(|s| {
-                        !s.is_image && matches!(s.target, Target::Block(_) | Target::Added(_))
-                    }) && self.editor.as_ref().is_some_and(Editor::can_copy);
-                    rail_row(ui, cell, |ui| {
-                        if action(ui, Icon::Copy, "Copier le bloc · Ctrl+C", false, copy) {
-                            self.copy_selected_block(&ctx);
-                        }
-                        if action(
-                            ui,
-                            Icon::Paste,
-                            "Coller le bloc · Ctrl+V",
-                            false,
-                            enabled && (self.copied_block.is_some() || self.copied_image.is_some()),
-                        ) {
-                            self.paste_copied_block();
-                        }
-                    });
-                }
                 if !tools.is_empty() {
                     ui.separator();
                 }
@@ -257,12 +238,10 @@ impl App {
                 });
                 rail_row(ui, cell, |ui| {
                     if action(ui, Icon::Minus, "Réduire le zoom", false, enabled) {
-                        self.zoom = (self.zoom / 1.2).max(0.2);
-                        self.fit = Fit::Manual;
+                        self.zoom_document(self.zoom / 1.2);
                     }
                     if action(ui, Icon::Plus, "Augmenter le zoom", false, enabled) {
-                        self.zoom = (self.zoom * 1.2).min(4.);
-                        self.fit = Fit::Manual;
+                        self.zoom_document(self.zoom * 1.2);
                     }
                 });
                 rail_row(ui, cell, |ui| {
@@ -429,7 +408,7 @@ impl App {
         if self
             .drag
             .as_ref()
-            .is_some_and(|d| matches!(d.mode, DragMode::Create))
+            .is_some_and(|d| matches!(d.mode, DragMode::Create) && self.work.panel_width < 1.)
         {
             return;
         }

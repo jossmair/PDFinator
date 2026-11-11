@@ -157,7 +157,7 @@ pub fn text_edit_layout(doc: &Document, page: usize, block: usize, text: &str, s
     // This runs on every keystroke: read the page once for the paragraphs, the untouched runs
     // and the rewrite, which starts from the same unchanged page.
     let lines = text_lines(doc, page)?;
-    let original = group_blocks(&lines);
+    let original = group_blocks(doc, &lines);
     let source = original.get(block).ok_or(EditError::Invalid("text block does not exist".into()))?;
     if text == source.editor_text && *style == BlockStyle::default() {
         return Ok(TextEditLayout { source_rect: source.rect, draft_rect: Some(source.rect), overflow: false });
@@ -2022,7 +2022,7 @@ fn on_same_baseline(line: &TextLine, target: &TextLine) -> bool {
 /// The paragraphs on a page (0-based).
 pub fn text_blocks(doc: &Document, page: usize) -> Result<Vec<TextBlock>, EditError> {
     let lines = text_lines(doc, page)?;
-    Ok(group_blocks(&lines))
+    Ok(group_blocks(doc, &lines))
 }
 
 /// Remove a paragraph's glyphs for a temporary editor background. Numeric TJ adjustments
@@ -2030,7 +2030,7 @@ pub fn text_blocks(doc: &Document, page: usize) -> Result<Vec<TextBlock>, EditEr
 /// Call this on a clone: it is a preview operation, not a document edit.
 pub fn clear_block(doc: &mut Document, page: usize, block: usize) -> Result<(), EditError> {
     let lines = text_lines(doc, page)?;
-    let blocks = group_blocks(&lines);
+    let blocks = group_blocks(doc, &lines);
     let target = blocks.get(block).ok_or_else(|| EditError::Invalid("the paragraph no longer exists".into()))?;
     let targets: Vec<&TextLine> = target.lines.iter().filter_map(|i| lines.get(*i)).collect();
     let mut drops = coincident_ops(&lines, &targets);
@@ -2227,7 +2227,7 @@ pub fn formatting_data(doc: &Document, page: usize, index: usize) -> Result<Opti
 /// Read all editor paragraph metadata with one content-stream parse per page.
 pub fn formatting_all(doc: &Document, page: usize) -> Result<std::collections::HashMap<usize, String>, EditError> {
     let lines = text_lines(doc, page)?;
-    let blocks = group_blocks(&lines);
+    let blocks = group_blocks(doc, &lines);
     let p = page_dict(doc, page)?;
     let streams = content_streams(doc, &p.dict);
     let pieces = Pieces::join(&streams.iter().map(|(_, data)| data.as_slice()).collect::<Vec<_>>());
@@ -2255,7 +2255,7 @@ pub fn rewrite_formatted_block(
     data: &str,
 ) -> Result<LineEdit, EditError> {
     let lines = text_lines(doc, page)?;
-    let blocks = group_blocks(&lines);
+    let blocks = group_blocks(doc, &lines);
     let block = blocks.get(index).ok_or_else(|| EditError::Invalid("the selected paragraph no longer exists".into()))?;
     let members: Vec<_> = block.lines.iter().filter_map(|i| lines.get(*i)).collect();
     let mut dropped = coincident_ops(&lines, &members);
@@ -2308,7 +2308,7 @@ fn rewrite_block_from(
     style: &BlockStyle,
     max_glyphs: usize,
 ) -> Result<LineEdit, EditError> {
-    let blocks = group_blocks(&lines);
+    let blocks = group_blocks(doc, &lines);
     let b = blocks.get(block).cloned().ok_or_else(|| EditError::Invalid(format!("page {} has no paragraph {}", page + 1, block + 1)))?;
     let members: Vec<&TextLine> = b.lines.iter().map(|i| &lines[*i]).collect();
     // One clipping run is enough: rewriting the paragraph would drop its mask with the rest.
@@ -2732,7 +2732,7 @@ pub(crate) fn selectable_blocks(
     let p = page_dict(doc, page)?;
     let streams = content_streams(doc, &p.dict);
     let lines = text_lines(doc, page)?;
-    Ok(group_blocks(&lines)
+    Ok(group_blocks(doc, &lines)
         .into_iter()
         .enumerate()
         .filter(|(_, b)| {
@@ -2803,7 +2803,7 @@ pub(crate) fn translate_blocks(doc: &mut Document, page: usize, indexes: &[usize
     let p = page_dict(doc, page)?;
     let streams = content_streams(doc, &p.dict);
     let lines = text_lines(doc, page)?;
-    let blocks = group_blocks(&lines);
+    let blocks = group_blocks(doc, &lines);
     let mut selected = std::collections::BTreeSet::new();
     for index in indexes {
         let b = blocks.get(*index).ok_or_else(|| EditError::Invalid("a selected paragraph no longer exists".into()))?;
