@@ -108,6 +108,35 @@ impl Editor {
     pub fn dirty(&self) -> bool {
         self.revision != self.saved_revision
     }
+    /// Old draft block indexes must use the grouping with which they were captured.
+    pub fn legacy_text_grouping(&self) -> bool {
+        self.doc.root().is_some_and(|root| {
+            self.doc.get(root).as_dict().is_some_and(|d| {
+                d.get(b"PNLegacyTextGrouping") == Some(&pdfcraft_cos::Object::Bool(true))
+            })
+        })
+    }
+    pub fn restore_text_grouping(&mut self, legacy: bool) -> Result<()> {
+        if legacy == self.legacy_text_grouping() {
+            return Ok(());
+        }
+        let root = self
+            .doc
+            .root()
+            .ok_or("Structure du document récupéré introuvable.")?;
+        self.doc
+            .update_dict(root, |d| {
+                if legacy {
+                    d.set(
+                        b"PNLegacyTextGrouping".to_vec(),
+                        pdfcraft_cos::Object::Bool(true),
+                    );
+                } else {
+                    d.remove(b"PNLegacyTextGrouping");
+                }
+            })
+            .map_err(|e| e.to_string())
+    }
     /// A generated document has never been saved, even before its first edit.
     pub fn from_generated_bytes(bytes: Vec<u8>, name: String) -> Result<Self> {
         let mut editor = Self::from_bytes(bytes)?;

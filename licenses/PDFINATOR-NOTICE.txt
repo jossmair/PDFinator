@@ -19,5 +19,7 @@ interface française eframe, validation des permissions et des substitutions de 
 tests et lancement indépendant. Correctifs locaux du moteur dans crates/edit/src/text.rs
 et text_regions.rs : texte marqué PNText, formatage de caractères, barré, fond coloré,
 exposants/indices, regroupement des lignes avec Ts et suppression des décorations
-de la version précédente. Ces modifications ne proviennent pas du fournisseur.
+de la version précédente. Regroupement borné des fragments natifs intercalés
+dans l'ordre de dessin, en conservant les limites des paragraphes marqués.
+Ces modifications ne proviennent pas du fournisseur.
 Ni affiliation ni approbation par ArtCraft ou Adobe.

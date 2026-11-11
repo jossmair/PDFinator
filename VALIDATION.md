@@ -1,5 +1,35 @@
 # Validation de PDFinator
 
+## 1.0.7 — insertion et stabilité de l'édition
+
+La suite PDFinator compte **207 tests**, avec six nouveaux scénarios ciblés.
+Les simulations vérifient le tracé d'un cadre avec les réglages déjà ouverts,
+l'absence de création au clic simple, le point central et le focus lors du zoom,
+et le placement du curseur au premier clic avant la saisie.
+
+Le corpus natif reproduit un paragraphe dont la dernière partie est peinte après
+la ligne suivante. Le test échoue avant le correctif et vérifie ensuite une seule
+zone d'édition, la correction du texte, le voisin intact, l'annulation et la
+réouverture. Un contrôle conserve les colonnes distantes et les cadres marqués
+indépendants. La recherche est limitée aux 32 lignes récentes et garde les règles
+d'alignement, de plan et d'espacement existantes.
+
+La récupération conserve la stratégie de regroupement des brouillons de version 1.
+Le nouveau format de brouillon, version 2, enregistre cette stratégie. Un test
+restaure l'ancien index d'un fragment, son gras et son curseur, puis vérifie les
+textes voisins et la réouverture après correction. Un état invalide rétablit
+également le modèle précédent avant de proposer le texte de secours.
+
+La suite complète du fournisseur tentée hors ligne requiert un checkout
+`craft-docpath` absent du cache. Les tests de regroupement passent par les API
+d'édition réellement utilisées par PDFinator. Les vérifications du fournisseur
+qui dépendent de ce checkout restent hors du périmètre de cette recette.
+
+Le contrôle RustSec du 11 novembre a signalé `async-executor` 1.14.0 retiré du
+registre et l’avis RUSTSEC-2026-0486 sur `rustix` 1.1.5. Le verrouillage utilise
+maintenant 1.14.1 et 1.1.6, respectivement. Ces changements sont soumis aux mêmes
+contrôles GitHub et aux tests de l’application avant publication.
+
 ## 1.0.6 — groupes de pages
 
 **201 tests automatisés**, dont treize nouveaux scénarios : quatre simulations

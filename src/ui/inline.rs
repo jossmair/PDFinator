@@ -19,6 +19,8 @@ pub struct Inline {
     pub view: PageInfo,
     pub screen: Rect,
     pub reflow: bool,
+    pub(super) initial_pointer: Option<Vec2>,
+    pub(super) legacy_grouping: bool,
 }
 impl Inline {
     pub fn new(
@@ -101,6 +103,8 @@ impl Inline {
                 .ok_or("Page introuvable.")?,
             screen: Rect::NOTHING,
             reflow: false,
+            initial_pointer: None,
+            legacy_grouping: editor.legacy_text_grouping(),
         })
     }
     pub fn changed(&self) -> bool {
@@ -570,6 +574,18 @@ impl Inline {
         // The UI text widget collapses a selection when a property control takes
         // focus. Restore its last focused caret/selection before returning to it.
         let id = egui::Id::new("direct-text");
+        if self.focus {
+            if self.cursor.is_none() {
+                self.cursor = self.initial_pointer.take().map(|point| {
+                    egui::text::CCursorRange::one(galley.cursor_from_pos(point * zoom))
+                });
+            }
+            if let Some(cursor) = self.cursor {
+                let mut state = egui::TextEdit::load_state(ui.ctx(), id).unwrap_or_default();
+                state.cursor.set_char_range(Some(cursor));
+                state.store(ui.ctx(), id);
+            }
+        }
         let mut buffer = self.selection.draft.clone();
         let mut layouter = |ui: &egui::Ui, text: &dyn egui::TextBuffer, wrap: f32| {
             self.layout_ready(ui, text.as_str(), zoom, wrap)

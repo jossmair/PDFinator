@@ -120,6 +120,8 @@ pub(super) mod fonts {
 #[derive(Clone, Serialize, Deserialize)]
 pub(super) struct Snapshot {
     version: u32,
+    #[serde(default)]
+    grouping_revision: u8,
     selection: Selection,
     original: String,
     caret: Option<[usize; 2]>,
@@ -133,7 +135,8 @@ pub(super) struct Snapshot {
 impl Snapshot {
     pub fn capture(inline: &inline::Inline, zoom: f32, scroll: Vec2, collapsed: bool) -> Self {
         Self {
-            version: 1,
+            version: 2,
+            grouping_revision: u8::from(!inline.legacy_grouping),
             selection: inline.selection.clone(),
             original: inline.original.clone(),
             caret: inline
@@ -152,7 +155,8 @@ impl Snapshot {
     }
     pub fn comment(selection: Selection, zoom: f32, scroll: Vec2, collapsed: bool) -> Self {
         Self {
-            version: 1,
+            version: 2,
+            grouping_revision: 1,
             selection,
             original: String::new(),
             caret: None,
@@ -188,21 +192,37 @@ impl Snapshot {
         })
     }
     pub fn restore(self, app: &mut App, ctx: &egui::Context) -> Result<()> {
-        if self.version != 1 {
+        let previous_doc = app.editor.as_ref().map(|editor| editor.doc.clone());
+        let result = self.restore_inner(app, ctx);
+        if result.is_err()
+            && let (Some(editor), Some(previous)) = (&mut app.editor, previous_doc)
+        {
+            editor.doc = previous;
+        }
+        result
+    }
+    fn restore_inner(self, app: &mut App, ctx: &egui::Context) -> Result<()> {
+        if !matches!(self.version, 1 | 2) || self.grouping_revision > 1 {
             return Err("Version de brouillon non prise en charge.".into());
         }
         let e = app
             .editor
-            .as_ref()
+            .as_mut()
             .ok_or("Document récupéré indisponible")?;
         let s = &self.selection;
+        if matches!(s.target, Target::Block(_)) {
+            e.restore_text_grouping(self.version == 1 || self.grouping_revision == 0)?;
+        }
         let page = e
             .info
             .pages
             .get(s.page)
             .ok_or("Page du brouillon introuvable")?;
         let valid_target = match s.target {
-            Target::Block(i) => e.blocks(s.page)?.get(i).is_some(),
+            Target::Block(i) => e
+                .blocks(s.page)?
+                .get(i)
+                .is_some_and(|block| block.editor_text == self.original),
             Target::Added(i) => e.added(s.page).get(i).is_some(),
             Target::New => true,
             Target::Comment(i) => e
@@ -286,6 +306,7 @@ impl Snapshot {
         };
         app.tool = if comment { Tool::Comment } else { Tool::Edit };
         app.selected = Some(self.selection);
+        app.blocks.clear();
         app.inline = restored;
         Ok(())
     }
@@ -338,6 +359,87 @@ impl App {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn old_native_drafts_restore_their_original_grouping_before_targeting_a_block() {
+        use pdfcraft_cos::{Dict, Object, Stream};
+        let ctx = egui::Context::default();
+        prime(&ctx);
+        let mut doc = pdfcraft_create::blank(420., 595., 1).unwrap();
+        let page = pdfcraft_model::pages(&doc)[0].obj;
+        let mut font = Dict::new();
+        font.set(b"Type".to_vec(), Object::name("Font"));
+        font.set(b"Subtype".to_vec(), Object::name("Type1"));
+        font.set(b"BaseFont".to_vec(), Object::name("Helvetica"));
+        let mut fonts = Dict::new();
+        fonts.set(b"F1".to_vec(), Object::Ref(doc.add(font)));
+        let mut resources = Dict::new();
+        resources.set(b"Font".to_vec(), Object::Dict(fonts));
+        let stream = doc.add(Stream::flate(Dict::new(), b"BT /F1 12 Tf 50 500 Td (Un texte ) Tj ET BT /F1 12 Tf 50 485 Td (Suite du paragraphe) Tj ET BT /F1 12 Tf 101 500 Td (proche) Tj ET BT /F1 12 Tf 300 400 Td (Voisin intact) Tj ET"));
+        doc.update_dict(page, |d| {
+            d.set(b"Resources".to_vec(), Object::Dict(resources));
+            d.set(b"Contents".to_vec(), Object::Ref(stream));
+        })
+        .unwrap();
+        let bytes = pdfcraft_cos::write_full(&doc, &Default::default()).unwrap();
+        let mut old = App::from_context(&ctx, None);
+        let mut editor = Editor::from_bytes(bytes.clone()).unwrap();
+        editor.restore_text_grouping(true).unwrap();
+        old.install_opened(editor);
+        old.workspace = Workspace::Edit;
+        let s = old.selection_for(0, Target::Block(1)).unwrap();
+        assert_eq!(s.draft, "proche");
+        old.begin_text(&ctx, s);
+        old.inline.as_mut().unwrap().selection.draft = "neuf".into();
+        old.fonts = typography::FontBook::discover();
+        old.font_variant(&ctx, true, false);
+        let inline = old.inline.as_mut().unwrap();
+        inline.cursor = Some(egui::text::CCursorRange::one(egui::text::CCursor::new(2)));
+        let mut snapshot =
+            serde_json::to_value(Snapshot::capture(inline, 1., Vec2::ZERO, false)).unwrap();
+        snapshot["version"] = 1.into();
+        snapshot
+            .as_object_mut()
+            .unwrap()
+            .remove("grouping_revision");
+        let snapshot: Snapshot = serde_json::from_value(snapshot).unwrap();
+
+        let fresh_ctx = egui::Context::default();
+        prime(&fresh_ctx);
+        let mut recovered = App::from_context(&fresh_ctx, None);
+        recovered.install_opened(Editor::from_bytes(bytes.clone()).unwrap());
+        let modern = recovered.editor.as_ref().unwrap().blocks(0).unwrap();
+        assert_eq!(modern.len(), 2);
+        recovered.blocks.insert(0, modern);
+        let mut invalid = snapshot.clone();
+        invalid.selection.page = 99;
+        assert!(invalid.restore(&mut recovered, &fresh_ctx).is_err());
+        assert!(!recovered.editor.as_ref().unwrap().legacy_text_grouping());
+        let mut invalid = snapshot.clone();
+        invalid.original = "Une autre cible".into();
+        assert!(invalid.restore(&mut recovered, &fresh_ctx).is_err());
+        assert!(!recovered.editor.as_ref().unwrap().legacy_text_grouping());
+        snapshot.restore(&mut recovered, &fresh_ctx).unwrap();
+        assert!(recovered.blocks.is_empty());
+        assert_eq!(recovered.editor.as_ref().unwrap().bytes.as_ref(), &bytes);
+        let inline = recovered.inline.as_ref().unwrap();
+        assert_eq!(inline.original, "proche");
+        assert_eq!(inline.selection.draft, "neuf");
+        assert_eq!(inline.selection.active_format().bold, Some(true));
+        assert_eq!(inline.cursor.unwrap().primary.index.0, 2);
+        assert!(recovered.finish_text(), "{:?}", recovered.message);
+        let e = recovered.editor.as_ref().unwrap();
+        let text = e.text(0).unwrap().plain_text();
+        for kept in ["neuf", "Un texte", "Suite du paragraphe", "Voisin intact"] {
+            assert!(text.contains(kept), "{text}");
+        }
+        let e = Editor::from_bytes(e.bytes.as_ref().clone()).unwrap();
+        assert!(
+            e.blocks(0)
+                .unwrap()
+                .iter()
+                .any(|b| b.editor_text == "neuf" && b.bold)
+        );
+    }
     fn prime(ctx: &egui::Context) {
         let mut output = ctx.run_ui(Default::default(), |_| {});
         output.textures_delta.clear();
