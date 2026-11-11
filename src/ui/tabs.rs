@@ -27,6 +27,7 @@ impl App {
     }
     pub(super) fn tabs(&mut self, root: &mut egui::Ui) {
         let ctx = root.ctx().clone();
+        self.page_drop_document = None;
         if self.tab_drag.is_some() && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape))
         {
             self.tab_drag = None;
@@ -67,7 +68,7 @@ impl App {
                     ui.add_space(8.);
                     let help = ui
                         .add(
-                            egui::Button::new("?")
+                            egui::Button::new(egui::RichText::new("?").color(Color32::WHITE))
                                 .frame(false)
                                 .min_size(Vec2::new(25., 28.)),
                         )
@@ -145,10 +146,12 @@ impl App {
                                     cards.push((index, frame.response.rect));
                                 }
                             });
-                            if self.tab_drag.is_some() {
+                            if self.tab_drag.is_some() || self.page_drag.is_some() {
                                 if let Some(pos) = ui.ctx().pointer_hover_pos() {
                                     let bounds = ui.clip_rect();
-                                    let delta = if pos.x < bounds.left() + 26. {
+                                    let delta = if pos.y < bounds.top() || pos.y > bounds.bottom() {
+                                        0.
+                                    } else if pos.x < bounds.left() + 26. {
                                         1.
                                     } else if pos.x > bounds.right() - 26. {
                                         -1.
@@ -172,6 +175,34 @@ impl App {
                     });
                     if add.on_hover_text("Ouvrir un autre PDF · Ctrl+O").clicked() {
                         self.pick_open();
+                    }
+                    if self.page_drag.is_some() {
+                        if let Some(pos) = ctx.pointer_interact_pos() {
+                            let target = cards.iter().find(|(index, rect)| {
+                                *index != self.active_document
+                                    && strip.inner_rect.contains(pos)
+                                    && rect.contains(pos)
+                            });
+                            if let Some(&(index, rect)) = target {
+                                self.page_drop_document = Some(index);
+                                ctx.set_cursor_icon(egui::CursorIcon::Copy);
+                                ui.painter().with_clip_rect(strip.inner_rect).rect_stroke(
+                                    rect.shrink(1.),
+                                    6.,
+                                    Stroke::new(2., icons::BLUE),
+                                    StrokeKind::Inside,
+                                );
+                                if ctx.input(|i| {
+                                    i.pointer.button_released(egui::PointerButton::Primary)
+                                }) {
+                                    self.page_drag = None;
+                                    self.copy_pages_to_document(index);
+                                    self.page_drop_document = None;
+                                    activate = None;
+                                    close = None;
+                                }
+                            }
+                        }
                     }
                     if let Some(source) = self.tab_drag {
                         if let Some(pos) = ctx.pointer_hover_pos() {

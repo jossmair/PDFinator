@@ -4479,3 +4479,193 @@ fn image_movement_uses_a_cross_and_preserves_resize_cursors_and_margin_arrow() {
         );
     }
 }
+
+fn page_transfer_setup(mode: Workspace) -> (egui::Context, App, Arc<Vec<u8>>, Arc<Vec<u8>>) {
+    let (ctx, mut app) = page_test_setup(mode);
+    app.editor.as_mut().unwrap().path = Some(PathBuf::from("depart.pdf"));
+    let source = app.editor.as_ref().unwrap().bytes.clone();
+    let doc =
+        pdfcraft_create::from_text("Destination", "Voisin intact", (595., 842.), 14.).unwrap();
+    let mut editor =
+        Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap()).unwrap();
+    editor.path = Some(PathBuf::from("arrivee.pdf"));
+    let destination = editor.bytes.clone();
+    app.insert_document(editor);
+    app.set_workspace(&ctx, mode);
+    assert!(app.activate_document(0));
+    app.page_selection.replace([0, 2]);
+    (ctx, app, source, destination)
+}
+fn named_position(ctx: &egui::Context, app: &mut App, label: &str) -> Pos2 {
+    let out = input_frame(ctx, app, vec![]);
+    let bounds = out
+        .platform_output
+        .accesskit_update
+        .as_ref()
+        .unwrap()
+        .nodes
+        .iter()
+        .find(|(_, n)| n.label() == Some(label))
+        .unwrap_or_else(|| panic!("Missing {label}"))
+        .1
+        .bounds()
+        .unwrap();
+    Pos2::new(
+        (bounds.x0 + bounds.x1) as f32 / 2.,
+        (bounds.y0 + bounds.y1) as f32 / 2.,
+    )
+}
+#[test]
+fn dragging_pages_to_another_pdf_tab_copies_the_group_in_all_workspaces_and_undoes() {
+    for mode in [Workspace::Read, Workspace::Edit, Workspace::Pages] {
+        let (ctx, mut app, source, destination) = page_transfer_setup(mode);
+        let tab = named_position(&ctx, &mut app, "arrivee.pdf");
+        let start = page_test_position(&ctx, &mut app, 0);
+        let button = |pos, pressed| egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: Modifiers::NONE,
+        };
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerMoved(start), button(start, true)],
+        );
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerMoved(start + Vec2::new(20., 15.))],
+        );
+        assert_eq!(app.page_drag, Some(0));
+        let out = input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(tab)]);
+        assert_eq!(app.page_drop_document, Some(1));
+        assert_eq!(out.platform_output.cursor_icon, egui::CursorIcon::Copy);
+        assert_eq!(
+            app.active_document, 0,
+            "Hover must not change tabs or lose the drag"
+        );
+        assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+        input_frame(&ctx, &mut app, vec![button(tab, false)]);
+        assert_eq!(app.active_document, 1);
+        assert!(app.page_drag.is_none());
+        assert!(app.tab_drag.is_none());
+        assert_eq!(app.selected_pages(), vec![1, 2]);
+        let editor = app.editor.as_ref().unwrap();
+        assert_eq!(editor.info.pages.len(), 3);
+        assert!(
+            editor
+                .text(0)
+                .unwrap()
+                .plain_text()
+                .contains("Voisin intact")
+        );
+        assert!(editor.text(1).unwrap().plain_text().contains("Page test 0"));
+        assert!(editor.text(2).unwrap().plain_text().contains("Page test 2"));
+        let reopened = Editor::from_bytes((*editor.bytes).clone()).unwrap();
+        assert_eq!(reopened.info.pages.len(), 3);
+        assert!(
+            reopened
+                .text(2)
+                .unwrap()
+                .plain_text()
+                .contains("Page test 2")
+        );
+        app.undo_redo(false);
+        assert_eq!(app.editor.as_ref().unwrap().bytes, destination);
+        assert!(!app.editor.as_ref().unwrap().can_undo());
+        app.undo_redo(true);
+        assert_eq!(app.editor.as_ref().unwrap().info.pages.len(), 3);
+        assert!(app.activate_document(0));
+        assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+        assert!(!app.editor.as_ref().unwrap().can_undo());
+        assert!(
+            app.page_drag.is_none(),
+            "The source session must not retain a phantom drag"
+        );
+    }
+}
+#[test]
+fn escape_and_drops_outside_other_tabs_leave_both_pdfs_unchanged() {
+    for cancel in [true, false] {
+        let (ctx, mut app, source, destination) = page_transfer_setup(Workspace::Edit);
+        let tab = named_position(&ctx, &mut app, "arrivee.pdf");
+        let start = page_test_position(&ctx, &mut app, 0);
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(start),
+                egui::Event::PointerButton {
+                    pos: start,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: Modifiers::NONE,
+                },
+            ],
+        );
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![egui::Event::PointerMoved(start + Vec2::new(20., 15.))],
+        );
+        input_frame(&ctx, &mut app, vec![egui::Event::PointerMoved(tab)]);
+        if cancel {
+            input_frame(
+                &ctx,
+                &mut app,
+                vec![egui::Event::Key {
+                    key: Key::Escape,
+                    physical_key: None,
+                    pressed: true,
+                    repeat: false,
+                    modifiers: Modifiers::NONE,
+                }],
+            );
+        }
+        let outside = if cancel { tab } else { app.canvas.center() };
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(outside),
+                egui::Event::PointerButton {
+                    pos: outside,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: Modifiers::NONE,
+                },
+            ],
+        );
+        assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+        assert!(app.page_drag.is_none());
+        assert!(app.activate_document(1));
+        assert_eq!(app.editor.as_ref().unwrap().bytes, destination);
+    }
+}
+#[test]
+fn page_context_menu_copies_selected_pages_to_a_named_open_pdf() {
+    let (ctx, mut app, source, _) = page_transfer_setup(Workspace::Edit);
+    let pos = page_test_position(&ctx, &mut app, 0);
+    for pressed in [true, false] {
+        input_frame(
+            &ctx,
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(pos),
+                egui::Event::PointerButton {
+                    pos,
+                    button: egui::PointerButton::Secondary,
+                    pressed,
+                    modifiers: Modifiers::NONE,
+                },
+            ],
+        );
+    }
+    click_named_control(&ctx, &mut app, "Copier vers un autre PDF ⏵");
+    click_named_control(&ctx, &mut app, "Copier dans arrivee.pdf");
+    assert_eq!(app.active_document, 1);
+    assert_eq!(app.editor.as_ref().unwrap().info.pages.len(), 3);
+    assert!(app.activate_document(0));
+    assert_eq!(app.editor.as_ref().unwrap().bytes, source);
+}

@@ -233,6 +233,28 @@ impl App {
                     ui.close();
                 }
             }
+            if self.documents.len() > 1 {
+                let mut copy_to = None;
+                ui.add_enabled_ui(self.editor.as_ref().is_some_and(Editor::can_copy), |ui| {
+                    ui.menu_button("Copier vers un autre PDF", |ui| {
+                        for index in 0..self.documents.len() {
+                            if index != self.active_document
+                                && ui
+                                    .button(format!("Copier dans {}", self.document_label(index)))
+                                    .clicked()
+                            {
+                                copy_to = Some(index);
+                                ui.close();
+                            }
+                        }
+                    });
+                });
+                if let Some(index) = copy_to {
+                    self.copy_pages_to_document(index);
+                    ui.close();
+                    return;
+                }
+            }
             ui.separator();
             let mut destination = page + 1;
             let key = egui::Id::new(("page-menu-position", page));
@@ -425,6 +447,52 @@ impl App {
             }
         });
     }
+    /// Copy, rather than remove, pages when dropping on another document tab.
+    pub(super) fn copy_pages_to_document(&mut self, destination: usize) {
+        if destination == self.active_document || destination >= self.documents.len() {
+            return;
+        }
+        if !self.deselect() {
+            return;
+        }
+        let source = self.active_document;
+        let selected = self.selected_pages();
+        let extracted = self
+            .editor
+            .as_ref()
+            .ok_or_else(|| "Aucun document ouvert.".to_owned())
+            .and_then(|editor| editor.extract_page_group(&selected));
+        let bytes = match extracted {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                self.message = Some(error);
+                return;
+            }
+        };
+        let name = self.document_label(source);
+        self.page_drag = None;
+        if !self.activate_document(destination) || !self.deselect() || !self.permit() {
+            return;
+        }
+        let first = self.editor.as_ref().map_or(0, |e| e.info.pages.len());
+        let result = self
+            .editor
+            .as_mut()
+            .ok_or_else(|| "Aucun document ouvert.".to_owned())
+            .and_then(|editor| editor.append_pdfs(&[(&name, bytes)]));
+        match result {
+            Ok(added) => {
+                self.page = first;
+                self.page_destination = first + 1;
+                self.reset_page_views(true);
+                self.page_selection.replace(first..first + added);
+                self.thumbnails = true;
+                self.jump = Some(first);
+                self.message = None;
+            }
+            Err(error) => self.message = Some(error),
+        }
+    }
     pub(super) fn pick_append_pdfs(&mut self) {
         if self.workspace != Workspace::Pages || !self.finish_text() || !self.permit() {
             return;
@@ -615,7 +683,9 @@ impl App {
                 return before != self.editor.as_ref().map(Editor::revision);
             }
         } else if let Some(pos) = pos {
-            ctx.set_cursor_icon(if inside {
+            ctx.set_cursor_icon(if self.page_drop_document.is_some() {
+                egui::CursorIcon::Copy
+            } else if inside {
                 egui::CursorIcon::Grabbing
             } else {
                 egui::CursorIcon::NoDrop
@@ -637,7 +707,12 @@ impl App {
                 Color32::from_black_alpha(26),
             );
             let label = target.map_or_else(
-                || format!("{} page(s)", selected.len()),
+                || {
+                    self.page_drop_document.map_or_else(
+                        || format!("{} page(s)", selected.len()),
+                        |_| format!("Copier {} page(s)", selected.len()),
+                    )
+                },
                 |t| {
                     if selected.len() > 1 {
                         format!("{} pages → {}", selected.len(), t.destination + 1)
