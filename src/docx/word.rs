@@ -417,7 +417,16 @@ impl Writer {
             }
         }
     }
-    fn page(&mut self, page: &Page) -> String {
+    fn page(&mut self, page: &Page, depth: usize) -> Result<String> {
+        let flow = if depth == 0 {
+            body_without_footers(page)
+        } else {
+            None
+        };
+        let page = flow.as_ref().unwrap_or(page);
+        if depth > 12 {
+            return Err("La disposition contient trop de colonnes imbriquées.".into());
+        }
         let mut body = String::new();
         let mut current = page.margin[1];
         let mut i = 0;
@@ -434,7 +443,11 @@ impl Writer {
             } else {
                 body.push_str(&format!("<w:tbl><w:tblPr><w:tblW w:w=\"{}\" w:type=\"dxa\"/><w:tblLayout w:type=\"fixed\"/><w:tblBorders><w:top w:val=\"nil\"/><w:left w:val=\"nil\"/><w:bottom w:val=\"nil\"/><w:right w:val=\"nil\"/><w:insideH w:val=\"nil\"/><w:insideV w:val=\"nil\"/></w:tblBorders><w:tblCellMar><w:top w:w=\"0\" w:type=\"dxa\"/><w:left w:w=\"0\" w:type=\"dxa\"/><w:bottom w:w=\"0\" w:type=\"dxa\"/><w:right w:w=\"0\" w:type=\"dxa\"/></w:tblCellMar></w:tblPr><w:tblGrid>", twips(width)));
                 let edges: Vec<_> = std::iter::once(left)
-                    .chain(row.iter().skip(1).map(|a| a[0].rect()[0]))
+                    .chain(row.iter().skip(1).map(|a| {
+                        a.iter()
+                            .map(|item| item.rect()[0])
+                            .fold(f64::INFINITY, f64::min)
+                    }))
                     .chain(std::iter::once(left + width))
                     .collect();
                 for x in edges.windows(2) {
@@ -445,17 +458,19 @@ impl Writer {
                 for (n, items) in row.iter().enumerate() {
                     let cell_width = edges[n + 1] - edges[n];
                     body.push_str(&format!("<w:tc><w:tcPr><w:tcW w:w=\"{}\" w:type=\"dxa\"/><w:vAlign w:val=\"top\"/></w:tcPr>", twips(cell_width)));
-                    let mut column_y = current;
-                    for item in items {
-                        let rect = item.rect();
-                        body.push_str(&self.item(
-                            item,
-                            edges[n],
-                            cell_width,
-                            (rect[1] - column_y).max(0.),
-                        ));
-                        column_y = column_y.max(rect[1]) + height(item);
-                    }
+                    let child = Page {
+                        width: page.width,
+                        height: page.height,
+                        margin: [edges[n], current, page.width - edges[n + 1], 0.],
+                        items: items.iter().map(|i| (*i).clone()).collect(),
+                        decorations: vec![],
+                        fonts: vec![],
+                    };
+                    body.push_str(&self.page(&child, depth + 1)?);
+                    let column_y = items
+                        .iter()
+                        .map(|i| i.rect()[1] + height(i))
+                        .fold(current, f64::max);
                     bottom = bottom.max(column_y);
                     body.push_str("</w:tc>");
                 }
@@ -472,16 +487,54 @@ impl Writer {
                 "<wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\">",
                 "<wp:anchor distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\" simplePos=\"0\" relativeHeight=\"0\" behindDoc=\"1\" locked=\"1\" layoutInCell=\"0\" allowOverlap=\"1\"><wp:simplePos x=\"0\" y=\"0\"/><wp:positionH relativeFrom=\"page\"><wp:posOffset>0</wp:posOffset></wp:positionH><wp:positionV relativeFrom=\"page\"><wp:posOffset>0</wp:posOffset></wp:positionV>"
             ).replace("<wp:docPr", "<wp:wrapNone/><wp:docPr").replace("</wp:inline>", "</wp:anchor>");
-            if let Some(at) = body.find("</w:pPr>") {
-                body.insert_str(at + 8, &drawing);
+            let drawing = drawing.replacen(
+                "<wp:posOffset>0</wp:posOffset>",
+                &format!(
+                    "<wp:posOffset>{}</wp:posOffset>",
+                    twips(decoration.rect[0]) * 635
+                ),
+                1,
+            );
+            let drawing = drawing.replace(
+                "relativeHeight=\"0\"",
+                &format!("relativeHeight=\"{}\"", self.images),
+            );
+            let drawing = drawing.replacen(
+                "<wp:positionV relativeFrom=\"page\"><wp:posOffset>0</wp:posOffset>",
+                &format!(
+                    "<wp:positionV relativeFrom=\"page\"><wp:posOffset>{}</wp:posOffset>",
+                    twips(decoration.rect[1]) * 635
+                ),
+                1,
+            );
+            let drawing = if (decoration.rect[2] - decoration.rect[0])
+                * (decoration.rect[3] - decoration.rect[1])
+                < page.width * page.height * 0.9
+            {
+                drawing.replace("behindDoc=\"1\"", "behindDoc=\"0\"")
+            } else {
+                drawing
+            };
+            if let Some(at) = body.find("</w:p>") {
+                body.insert_str(at, &drawing);
             }
         }
-        body
+        Ok(body)
     }
 }
-fn section(p: &Page) -> String {
+fn section(p: &Page, footer: Option<usize>) -> String {
+    let reference = footer.map_or_else(String::new, |i| {
+        format!("<w:footerReference w:type=\"default\" r:id=\"footer{i}\"/>")
+    });
+    let edge = p
+        .items
+        .iter()
+        .filter(|i| is_footer(p, i))
+        .map(|i| p.height - i.rect()[3])
+        .fold(f64::INFINITY, f64::min);
+    let footer_edge = if edge.is_finite() { twips(edge) } else { 0 };
     format!(
-        "<w:sectPr><w:type w:val=\"nextPage\"/><w:pgSz w:w=\"{}\" w:h=\"{}\"{}/><w:pgMar w:top=\"{}\" w:right=\"{}\" w:bottom=\"{}\" w:left=\"{}\" w:header=\"0\" w:footer=\"0\" w:gutter=\"0\"/></w:sectPr>",
+        "<w:sectPr>{reference}<w:type w:val=\"nextPage\"/><w:pgSz w:w=\"{}\" w:h=\"{}\"{}/><w:pgMar w:top=\"{}\" w:right=\"{}\" w:bottom=\"{}\" w:left=\"{}\" w:header=\"0\" w:footer=\"{footer_edge}\" w:gutter=\"0\"/></w:sectPr>",
         twips(p.width),
         twips(p.height),
         if p.width > p.height {
@@ -494,6 +547,16 @@ fn section(p: &Page) -> String {
         twips(p.margin[3]),
         twips(p.margin[0])
     )
+}
+fn section_break(content: &mut String, properties: &str) {
+    if let Some(at) = content
+        .rfind("</w:pPr>")
+        .filter(|_| content.ends_with("</w:p>"))
+    {
+        content.insert_str(at, properties);
+    } else {
+        content.push_str(&format!("<w:p><w:pPr><w:spacing w:after=\"0\" w:line=\"20\" w:lineRule=\"exact\"/>{properties}</w:pPr></w:p>"));
+    }
 }
 pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
     let mut w = Writer {
@@ -548,12 +611,52 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
     w.relationships.push_str("<Relationship Id=\"fonts\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable\" Target=\"fontTable.xml\"/>");
     w.zip.add("word/settings.xml", br#"<?xml version="1.0"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:embedTrueTypeFonts/><w:embedSystemFonts/><w:saveSubsetFonts/></w:settings>"#, true);
     w.relationships.push_str("<Relationship Id=\"settings\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings\" Target=\"settings.xml\"/>");
+    let footers = pages
+        .iter()
+        .any(|p| p.items.iter().any(|i| is_footer(p, i)));
+    let mut footer_types = String::new();
     for (i, page) in pages.iter().enumerate() {
-        body.push_str(&w.page(page));
+        if footers {
+            let content = page
+                .items
+                .iter()
+                .filter(|item| is_footer(page, item))
+                .filter_map(|i| {
+                    if let Item::Paragraph(p) = i {
+                        Some(paragraph(
+                            p,
+                            page.margin[0],
+                            page.width - page.margin[0] - page.margin[2],
+                            0.,
+                            false,
+                        ))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<String>();
+            let xml = format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><w:ftr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\">{}</w:ftr>",
+                if content.is_empty() {
+                    "<w:p/>"
+                } else {
+                    &content
+                }
+            );
+            w.zip
+                .add(&format!("word/footer{i}.xml"), xml.as_bytes(), true);
+            w.relationships.push_str(&format!("<Relationship Id=\"footer{i}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer\" Target=\"footer{i}.xml\"/>"));
+            footer_types.push_str(&format!("<Override PartName=\"/word/footer{i}.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml\"/>"));
+        }
+        let mut content = w.page(page, 0)?;
         if i + 1 < pages.len() {
-            body.push_str(&format!("<w:p><w:pPr><w:spacing w:after=\"0\" w:line=\"20\" w:lineRule=\"exact\"/>{}</w:pPr></w:p>", section(page)));
+            // A separate section-break paragraph can overflow a full page.
+            // Attach the break to the last existing body paragraph instead.
+            section_break(&mut content, &section(page, footers.then_some(i)));
+            body.push_str(&content);
         } else {
-            body.push_str(&section(page));
+            body.push_str(&content);
+            body.push_str(&section(page, footers.then_some(i)));
         }
     }
     if w.images > 60000 {
@@ -563,7 +666,9 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><w:document xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><w:body>{body}</w:body></w:document>"
     );
     w.zip.add("word/document.xml", document.as_bytes(), true);
-    w.zip.add("[Content_Types].xml", br#"<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="odttf" ContentType="application/vnd.openxmlformats-officedocument.obfuscatedFont"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/></Types>"#, true);
+    let content_types = r#"<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="odttf" ContentType="application/vnd.openxmlformats-officedocument.obfuscatedFont"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/></Types>"#.replace("</Types>", &format!("{footer_types}</Types>"));
+    w.zip
+        .add("[Content_Types].xml", content_types.as_bytes(), true);
     w.zip.add("_rels/.rels", br#"<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="document" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>"#, true);
     w.zip.add("word/styles.xml", br#"<?xml version="1.0" encoding="UTF-8"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:before="0" w:after="0"/><w:widowControl w:val="0"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>"#, true);
     w.zip.add("word/numbering.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?><w:numbering xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:abstractNum w:abstractNumId=\"1\"><w:multiLevelType w:val=\"singleLevel\"/><w:lvl w:ilvl=\"0\"><w:start w:val=\"1\"/><w:numFmt w:val=\"bullet\"/><w:lvlText w:val=\"•\"/><w:lvlJc w:val=\"left\"/><w:pPr><w:tabs><w:tab w:val=\"num\" w:pos=\"240\"/></w:tabs><w:ind w:left=\"240\" w:hanging=\"240\"/></w:pPr><w:rPr><w:rFonts w:ascii=\"Arial\" w:hAnsi=\"Arial\"/></w:rPr></w:lvl></w:abstractNum><w:num w:numId=\"1\"><w:abstractNumId w:val=\"1\"/></w:num></w:numbering>".as_bytes(), true);
@@ -579,6 +684,60 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
 #[cfg(test)]
 mod math_layout_tests {
     use super::*;
+    #[test]
+    fn anchored_illustration_keeps_source_position_without_an_inline_paragraph() {
+        let mut writer = Writer {
+            zip: Zip::default(),
+            relationships: String::new(),
+            images: 0,
+        };
+        let page = Page {
+            width: 600.,
+            height: 840.,
+            margin: [40.; 4],
+            items: vec![Item::Paragraph(Paragraph {
+                rect: [40., 40., 200., 55.],
+                runs: vec![],
+                align: "left",
+                spacing: None,
+            })],
+            decorations: vec![
+                Picture {
+                    rect: [0., 0., 600., 840.],
+                    bytes: vec![],
+                },
+                Picture {
+                    rect: [300., 200., 400., 350.],
+                    bytes: vec![],
+                },
+            ],
+            fonts: vec![],
+        };
+        let xml = writer.page(&page, 0).unwrap();
+        assert_eq!(xml.matches("<w:p>").count(), 1);
+        assert!(
+            xml.find("name=\"Illustration 1\"").unwrap()
+                < xml.find("name=\"Illustration 2\"").unwrap(),
+            "Paper must precede the title illustration"
+        );
+        assert!(xml.contains("relativeHeight=\"2\""));
+        assert!(!xml.contains("wp:inline") && !xml.contains("w:txbxContent"));
+        assert!(xml.contains("<wp:posOffset>3810000</wp:posOffset>"));
+        assert!(xml.contains("<wp:posOffset>2540000</wp:posOffset>"));
+        assert!(xml.contains("<wp:extent cx=\"1270000\" cy=\"1905000\"/>"));
+    }
+    #[test]
+    fn full_page_section_break_does_not_add_a_line() {
+        let mut content = "<w:p><w:pPr></w:pPr><w:r><w:drawing/></w:r></w:p>".to_string();
+        section_break(&mut content, "<w:sectPr/>");
+        assert_eq!(content.matches("<w:p>").count(), 1);
+        assert!(content.contains("<w:pPr><w:sectPr/></w:pPr>"));
+        let mut table =
+            "<w:tbl><w:tr><w:tc><w:p><w:pPr></w:pPr></w:p></w:tc></w:tr></w:tbl>".to_string();
+        section_break(&mut table, "<w:sectPr/>");
+        assert!(table.contains("</w:tbl><w:p><w:pPr>"));
+        assert_eq!(table.matches("<w:sectPr/>").count(), 1);
+    }
     #[test]
     fn math_only_cells_include_a_text_carrier_for_writer_layout() {
         let numerator = Run {

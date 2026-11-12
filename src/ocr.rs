@@ -36,6 +36,42 @@ impl Recognition {
     }
     pub fn styled_blocks(&self, rgba: &[u8], width: u32, height: u32) -> Vec<Block> {
         let mut blocks = self.blocks();
+        // Decorative headings can be read as mixed-case serial numbers. Keep
+        // their pixels intact rather than destructively replacing uncertain ink.
+        let mut heights: Vec<_> = self
+            .lines
+            .iter()
+            .map(|l| l.rect[3] - l.rect[1])
+            .filter(|h| *h > 0.)
+            .collect();
+        heights.sort_by(f32::total_cmp);
+        let typical = heights.get(heights.len() / 2).copied().unwrap_or(1.);
+        let uncertain: Vec<_> = self
+            .lines
+            .iter()
+            .filter(|line| {
+                (self.lines.len() <= 2 || line.rect[3] - line.rect[1] > typical * 1.6)
+                    && line.words.iter().any(|w| {
+                        let digits = w.text.chars().filter(char::is_ascii_digit).count();
+                        let upper = w.text.chars().filter(char::is_ascii_uppercase).count();
+                        let lower = w.text.chars().filter(char::is_ascii_lowercase).count();
+                        digits > 0
+                            && upper >= 2
+                            && lower >= 2
+                            && (upper >= 3 || w.text.contains('&'))
+                    })
+            })
+            .map(|l| l.rect)
+            .collect();
+        blocks.retain(|block| {
+            !uncertain.iter().any(|r| {
+                let height = (r[3] - r[1]).max(block.rect[3] - block.rect[1]);
+                block.rect[1] < r[3]
+                    && block.rect[3] > r[1]
+                    && (block.rect[0] - r[2]).max(r[0] - block.rect[2]) < height * 2.
+                    && block.rect[3] - block.rect[1] > height * 0.6
+            })
+        });
         appearance::refine(rgba, width, height, &self.lines, &mut blocks);
         blocks
     }
@@ -69,6 +105,7 @@ pub fn recognize(rgba: &[u8], width: u32, height: u32) -> Result<Recognition> {
         }
         enhancement::repair_degrees(rgba, width, height, &mut result);
         recover_labels(rgba, width, height, &mut result);
+        enhancement::numeric_grid_context(&mut result);
         for line in &mut result.lines {
             line.words
                 .retain(|word| !attached_arrow(rgba, width, height, word));
@@ -157,13 +194,7 @@ fn recover_labels(rgba: &[u8], width: u32, height: u32, result: &mut Recognition
             }
         }
     }
-    let ink = |i: usize| {
-        rgba[i * 4..i * 4 + 3]
-            .iter()
-            .map(|c| *c as u32)
-            .sum::<u32>()
-            < 480
-    };
+    let ink = |i: usize| rgba[i * 4..i * 4 + 3].iter().copied().min().unwrap_or(255) < 210;
     let mut attempts = 0;
     for at in 0..w * h {
         if seen[at] || !ink(at) {
@@ -199,7 +230,7 @@ fn recover_labels(rgba: &[u8], width: u32, height: u32, result: &mut Recognition
             || cw < ch / 5
             || cw > ch * 2
             || component.len() < ch * 2
-            || attempts >= 64
+            || attempts >= 256
         {
             continue;
         }
@@ -227,7 +258,9 @@ fn recover_labels(rgba: &[u8], width: u32, height: u32, result: &mut Recognition
                 if x < bounds[2] && y < bounds[3] {
                     let src = (y * w + x) * 4;
                     let dst = ((dy + 32) * ow + dx + anchor_width + 56) as usize * 4;
-                    crop[dst..dst + 4].copy_from_slice(&rgba[src..src + 4]);
+                    let level = rgba[src..src + 3].iter().copied().min().unwrap_or(255);
+                    crop[dst..dst + 3].fill(level);
+                    crop[dst + 3] = 255;
                 }
             }
         }
@@ -242,7 +275,7 @@ fn recover_labels(rgba: &[u8], width: u32, height: u32, result: &mut Recognition
             let Some(&letter) = letters.first() else {
                 continue;
             };
-            if !letter.is_alphabetic() || letters.len() != 1 {
+            if !(letter.is_alphabetic() || letter.is_ascii_digit()) || letters.len() != 1 {
                 continue;
             }
             let text = letter.to_string();
@@ -390,6 +423,32 @@ fn windows_recognize(rgba: &[u8], width: u32, height: u32) -> Result<Recognition
 #[cfg(test)]
 mod arrow_tests {
     use super::*;
+    #[test]
+    fn uncertain_decorative_heading_keeps_original_pixels_and_body_stays_editable() {
+        let line = |text: &str, rect| Line {
+            text: text.into(),
+            rect,
+            words: vec![Word {
+                text: text.into(),
+                rect,
+            }],
+        };
+        let recognition = Recognition {
+            language: "fr-FR".into(),
+            lines: vec![
+                line("Pe06abC&WU", [20., 10., 140., 50.]),
+                line("Ccot.,teawt-)", [145., 10., 280., 50.]),
+                line("Texte lisible", [20., 80., 200., 95.]),
+                line("Autre ligne", [20., 110., 180., 125.]),
+                line("Suite", [20., 140., 100., 155.]),
+            ],
+        };
+        let pixels = vec![255; 300 * 170 * 4];
+        let blocks = recognition.styled_blocks(&pixels, 300, 170);
+        assert_eq!(blocks.len(), 3);
+        assert!(blocks.iter().all(|b| b.rect[1] >= 80.));
+        assert!(blocks.iter().any(|b| b.text == "Texte lisible"));
+    }
     #[test]
     fn a_filled_arrow_is_not_turned_into_v_but_a_real_v_label_is_kept() {
         let mut rgba = vec![255; 100 * 100 * 4];

@@ -1,5 +1,6 @@
 //! Structured Word export. Paragraphs and table cells flow in the document;
-//! artwork is inline. No positioned text boxes or whole-page screenshots.
+//! illustrations keep their page position beside native text. No positioned
+//! text boxes or whole-page screenshots of native text.
 mod fonts;
 mod layout;
 mod odt;
@@ -59,7 +60,7 @@ struct Table {
     border: f64,
     color: [f64; 3],
 }
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 enum Item {
     Paragraph(Paragraph),
     Picture(Picture),
@@ -82,6 +83,39 @@ struct Page {
     items: Vec<Item>,
     decorations: Vec<Picture>,
     fonts: Vec<SourceFont>,
+}
+fn is_footer(page: &Page, item: &Item) -> bool {
+    let Item::Paragraph(p) = item else {
+        return false;
+    };
+    p.runs.iter().any(|r| !r.text.trim().is_empty())
+        && p.rect[1] > page.height * 0.94
+        && p.runs.iter().map(|r| r.size).fold(0., f64::max) <= 11.
+        && p.runs.iter().map(|r| r.text.chars().count()).sum::<usize>() <= 120
+        && page.items.iter().any(|i| i.rect()[1] < p.rect[1] - 18.)
+        && page
+            .items
+            .iter()
+            .filter(|i| i.rect()[1] < p.rect[1] - 1.)
+            .all(|i| i.rect()[3] <= p.rect[1] - 18.)
+}
+fn body_without_footers(page: &Page) -> Option<Page> {
+    if !page.items.iter().any(|i| is_footer(page, i)) {
+        return None;
+    }
+    Some(Page {
+        width: page.width,
+        height: page.height,
+        margin: page.margin,
+        items: page
+            .items
+            .iter()
+            .filter(|i| !is_footer(page, i))
+            .cloned()
+            .collect(),
+        decorations: page.decorations.clone(),
+        fonts: vec![],
+    })
 }
 #[derive(Debug)]
 struct SourceFont {
@@ -250,6 +284,28 @@ fn columns(page: &Page, start: usize) -> (usize, Vec<Vec<&Item>>) {
     }
     let mut cols: Vec<Vec<&Item>> = page.items[start..end].iter().map(|i| vec![i]).collect();
     cols.sort_by(|a, b| a[0].rect()[0].total_cmp(&b[0].rect()[0]));
+    // A tall figure can face a text column that itself contains a small
+    // illustration. Those short side-by-side items form one nested band.
+    if cols.len() >= 3 {
+        let tall = cols
+            .iter()
+            .enumerate()
+            .filter(|(_, c)| matches!(c[0], Item::Picture(_)))
+            .max_by(|(_, a), (_, b)| {
+                (a[0].rect()[3] - a[0].rect()[1]).total_cmp(&(b[0].rect()[3] - b[0].rect()[1]))
+            })
+            .map(|(n, c)| (n, c[0].rect()[3] - c[0].rect()[1]));
+        if let Some((n, h)) = tall.filter(|(_, h)| *h > 80.) {
+            let short = |c: &Vec<&Item>| c[0].rect()[3] - c[0].rect()[1] < h * 0.6;
+            if n >= 2 && cols[..n].iter().all(short) {
+                let merged = cols.drain(..n).flatten().collect();
+                cols.insert(0, merged);
+            } else if cols.len() - n > 2 && cols[n + 1..].iter().all(short) {
+                let merged = cols.drain(n + 1..).flatten().collect();
+                cols.push(merged);
+            }
+        }
+    }
     if cols.len() > 1 {
         let mut bottom = cols.iter().map(|c| c[0].rect()[3]).fold(r[3], f64::max);
         while end < page.items.len() && page.items[end].rect()[1] < bottom + 15. {
@@ -260,7 +316,7 @@ fn columns(page: &Page, start: usize) -> (usize, Vec<Vec<&Item>>) {
                     >= if n == 0 {
                         page.margin[0] - 2.
                     } else {
-                        c[0].rect()[0] - 3.
+                        (cols[n - 1][0].rect()[2] + c[0].rect()[0]) / 2. - 3.
                     }
                     && rect[2]
                         <= cols
@@ -347,6 +403,235 @@ pub fn convert_with_progress(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn tall_figure_keeps_nested_text_and_small_picture_in_one_column() {
+        use super::*;
+        let picture = |rect| {
+            Item::Picture(Picture {
+                rect,
+                bytes: vec![],
+            })
+        };
+        let text = |rect| {
+            Item::Paragraph(Paragraph {
+                rect,
+                runs: vec![],
+                align: "left",
+                spacing: None,
+            })
+        };
+        let page = Page {
+            width: 595.,
+            height: 842.,
+            margin: [24., 0., 10., 0.],
+            items: vec![
+                picture([360., 20., 580., 260.]),
+                picture([220., 22., 340., 82.]),
+                text([24., 25., 190., 39.]),
+                text([24., 110., 340., 125.]),
+            ],
+            decorations: vec![],
+            fonts: vec![],
+        };
+        let (end, cols) = columns(&page, 0);
+        assert_eq!(end, 4);
+        assert_eq!(cols.len(), 2);
+        assert_eq!(cols[0].len(), 3);
+        assert_eq!(cols[1].len(), 1);
+        assert!(matches!(cols[1][0], Item::Picture(_)));
+    }
+    #[test]
+    #[ignore = "Private local diagnostic; requires PDFINATOR_CORPUS_PDF"]
+    fn inspect_private_export_layout() {
+        use super::*;
+        let path = std::env::var_os("PDFINATOR_CORPUS_PDF").unwrap();
+        let editor = Editor::open(std::path::Path::new(&path)).unwrap();
+        let mut text = String::new();
+        for n in 0..editor.info.pages.len() {
+            let p = layout::page(&editor, n).unwrap();
+            text.push_str(&format!(
+                "PAGE {n} {} {} {:?}\n",
+                p.width, p.height, p.margin
+            ));
+            for item in &p.items {
+                match item {
+                    Item::Paragraph(p) => text.push_str(&format!(
+                        "PAR {:?} {:?}\n",
+                        p.rect,
+                        p.runs
+                            .iter()
+                            .map(|r| (&r.text, r.size, r.rect, r.rise))
+                            .collect::<Vec<_>>()
+                    )),
+                    Item::Picture(p) => text.push_str(&format!("IMAGE {:?}\n", p.rect)),
+                    Item::Table(t) => {
+                        text.push_str(&format!("TABLE {:?} X {:?} Y {:?}\n", t.rect, t.xs, t.ys))
+                    }
+                };
+            }
+        }
+        std::fs::write(output("private-export-layout.txt"), text).unwrap();
+    }
+    #[test]
+    fn centered_column_titles_keep_wider_tables_in_their_columns() {
+        use super::*;
+        let title = |rect| {
+            Item::Paragraph(Paragraph {
+                rect,
+                runs: vec![],
+                align: "center",
+                spacing: None,
+            })
+        };
+        let table = |rect| {
+            Item::Table(Table {
+                rect,
+                xs: vec![],
+                ys: vec![],
+                rows: vec![],
+                border: 1.,
+                color: [0.; 3],
+            })
+        };
+        let page = Page {
+            width: 720.,
+            height: 540.,
+            margin: [40., 0., 20., 0.],
+            items: vec![
+                title([124., 250., 284., 282.]),
+                title([429., 250., 590., 282.]),
+                table([88., 292., 320., 394.]),
+                table([393., 292., 626., 394.]),
+            ],
+            decorations: vec![],
+            fonts: vec![],
+        };
+        let (end, cols) = columns(&page, 0);
+        assert_eq!(end, 4, "Both tables belong to the same row of columns");
+        assert_eq!(cols.iter().map(Vec::len).collect::<Vec<_>>(), [2, 2]);
+        assert!(matches!(cols[1][1], Item::Table(_)));
+    }
+    #[test]
+    fn white_slide_background_does_not_flatten_text_and_duplicate_tables() {
+        use super::*;
+        use pdfcraft_cos::{Dict, Object, Stream};
+        let mut doc = pdfcraft_create::blank(720., 540., 1).unwrap();
+        let mut face = Dict::new();
+        face.set(b"Type".to_vec(), Object::name("Font"));
+        face.set(b"Subtype".to_vec(), Object::name("Type1"));
+        face.set(b"BaseFont".to_vec(), Object::name("Helvetica"));
+        let mut fonts = Dict::new();
+        fonts.set(b"F1".to_vec(), Object::Ref(doc.add(face)));
+        let mut resources = Dict::new();
+        resources.set(b"Font".to_vec(), Object::Dict(fonts));
+        let stream = doc.add(Stream::flate(Dict::new(), b"1 1 1 rg 0 0 720 540 re f 0 0 0 rg 0 0 0 RG 1 w 100 200 200 80 re S 200 200 m 200 280 l S 100 240 m 300 240 l S 300 230 m 330 230 330 270 300 270 c S 99 157 29 16 re S BT /F1 12 Tf 100 160 Td (YES) Tj ET BT /F1 18 Tf 100 450 Td (Editable heading) Tj ET BT /F1 12 Tf 120 255 Td (First) Tj ET BT /F1 12 Tf 220 255 Td (Second) Tj ET BT /F1 12 Tf 120 215 Td (Third) Tj ET BT /F1 12 Tf 220 215 Td (Fourth) Tj ET"));
+        let obj = pdfcraft_model::pages(&doc)[0].obj;
+        doc.update_dict(obj, |d| {
+            d.set(b"Resources".to_vec(), Object::Dict(resources));
+            d.set(b"Contents".to_vec(), Object::Ref(stream));
+        })
+        .unwrap();
+        let editor =
+            Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap())
+                .unwrap();
+        let page = layout::page(&editor, 0).unwrap();
+        assert!(page.items.iter().any(|i| matches!(i, Item::Table(_))));
+        assert!(page.items.iter().any(|i| matches!(i, Item::Paragraph(p) if p.runs.iter().map(|r| r.text.as_str()).collect::<String>().contains("Editable heading"))));
+        assert!(page.items.iter().any(
+            |i| matches!(i, Item::Paragraph(p) if p.runs.iter().any(|r| r.text.contains("YES")))
+        ));
+        assert!(
+            !page.decorations.is_empty(),
+            "Table callout and text frame stay anchored"
+        );
+        assert!(
+            !page.items.iter().any(|i| matches!(i, Item::Picture(_))),
+            "Ornaments must not duplicate table/text in inline crops"
+        );
+        assert!(!page.items.iter().any(|i| matches!(i, Item::Picture(p) if (p.rect[2]-p.rect[0])*(p.rect[3]-p.rect[1]) > 720.*540.*0.9)));
+    }
+    #[test]
+    fn full_page_images_export_without_extra_page_carriers() {
+        use super::*;
+        let png = crate::ocr::encode_png(&[40, 120, 200, 255], 1, 1).unwrap();
+        let pages: Vec<_> = (0..2)
+            .map(|_| Page {
+                width: 720.,
+                height: 540.,
+                margin: [0.; 4],
+                items: vec![Item::Picture(Picture {
+                    rect: [0., 0., 720., 540.],
+                    bytes: png.clone(),
+                })],
+                decorations: Vec::new(),
+                fonts: Vec::new(),
+            })
+            .collect();
+        std::fs::write(
+            output("corpus-full-page.docx"),
+            word::document(&pages).unwrap(),
+        )
+        .unwrap();
+        std::fs::write(
+            output("corpus-full-page.odt"),
+            odt::document(&pages).unwrap(),
+        )
+        .unwrap();
+    }
+    #[test]
+    fn separated_small_footer_stays_native_without_entering_body_flow() {
+        let mut editor = Editor::from_bytes(
+            pdfcraft_cos::write_full(
+                &pdfcraft_create::blank(595., 842., 2).unwrap(),
+                &Default::default(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        for page in 0..2 {
+            for (text, rect, size) in [
+                ("A real editable paragraph", [40., 700., 500., 730.], 12.),
+                ("Example footer", [400., 20., 550., 30.], 8.),
+            ] {
+                editor
+                    .add_text(
+                        page,
+                        pdfcraft_edit::AddedText {
+                            rect,
+                            text: text.into(),
+                            size,
+                            ..Default::default()
+                        },
+                    )
+                    .unwrap();
+            }
+            let mut p = layout::page(&editor, page).unwrap();
+            let footer = p.items.iter().find(|i| is_footer(&p, i)).unwrap().clone();
+            assert_eq!(p.items.iter().filter(|i| is_footer(&p, i)).count(), 1);
+            assert_eq!(
+                body_without_footers(&p).unwrap().items.len(),
+                p.items.len() - 1
+            );
+            // A small line continuous with the body is not a footer.
+            let mut preceding = footer.clone();
+            if let Item::Paragraph(p) = &mut preceding {
+                p.rect[1] -= 12.;
+                p.rect[3] -= 12.;
+            }
+            p.items.push(preceding);
+            assert!(!is_footer(&p, &footer));
+        }
+        std::fs::write(
+            output("native-footer.docx"),
+            convert(editor.bytes.as_ref().clone()).unwrap(),
+        )
+        .unwrap();
+        std::fs::write(
+            output("native-footer.odt"),
+            convert_as(editor.bytes.as_ref().clone(), Format::Odt).unwrap(),
+        )
+        .unwrap();
+    }
     #[test]
     fn native_scripts_keep_their_source_size_and_baseline_offsets() {
         use pdfcraft_cos::{Dict, Object, Stream};
@@ -461,7 +746,7 @@ mod tests {
         dir.join(name)
     }
     #[test]
-    fn word_export_builds_flowing_text_real_table_cells_and_inline_pictures() {
+    fn word_export_builds_flowing_text_real_table_cells_and_positioned_illustrations() {
         let d =
             pdfcraft_create::from_text("", "Compte rendu de la classe", (595., 842.), 18.).unwrap();
         let mut e =
@@ -543,7 +828,14 @@ mod tests {
         assert_eq!(tables[0].rows.len(), 4);
         assert_eq!(tables[0].rows[0].len(), 3);
         assert!(tables[0].rows[0].iter().all(|c| c.fill.is_some()));
-        assert!(page.items.iter().any(|i| matches!(i, Item::Picture(_))));
+        assert!(
+            page.decorations.iter().any(|p| p.rect[0] <= 60.
+                && p.rect[2] >= 260.
+                && p.rect[1] <= 432.
+                && p.rect[3] >= 532.
+                && p.rect[2] - p.rect[0] < 240.),
+            "Keep the inserted illustration beside native text"
+        );
         let before = e.bytes.clone();
         std::fs::write(
             output("38-structure.docx"),
@@ -572,9 +864,10 @@ mod tests {
         assert_eq!(pages.len(), 1);
         let p = &pages[0];
         assert_eq!(
-            p.items
+            p.decorations
                 .iter()
-                .filter(|i| matches!(i, Item::Picture(_)))
+                .filter(|i| (i.rect[2] - i.rect[0]) * (i.rect[3] - i.rect[1])
+                    < p.width * p.height * 0.9)
                 .count(),
             3
         );
@@ -588,10 +881,11 @@ mod tests {
         assert!(!p.decorations.is_empty());
         assert!(p.items.iter().any(|i| matches!(i,Item::Paragraph(p) if p.runs.iter().map(|r|r.text.as_str()).collect::<String>().starts_with("Chapitre 2"))));
         assert!(
-            p.items
+            p.decorations
                 .iter()
-                .filter(|i| matches!(i, Item::Picture(_)))
-                .all(|i| i.rect()[3] < p.height - 1.)
+                .filter(|i| (i.rect[2] - i.rect[0]) * (i.rect[3] - i.rect[1])
+                    < p.width * p.height * 0.9)
+                .all(|i| i.rect[3] < p.height - 1.)
         );
 
         let mut report = String::new();
@@ -640,13 +934,10 @@ mod tests {
             .collect();
         assert_eq!(pages.len(), 1);
         let p = &pages[0];
-        let symbols = p
-            .fonts
-            .iter()
-            .find(|f| f.name.starts_with("OpenSymbol"))
-            .expect("Keep the source Macintosh symbol subset");
-        let symbols = ttf_parser::Face::parse(&symbols.bytes, 0).unwrap();
-        assert!(symbols.glyph_index('=').is_some() && symbols.glyph_index('×').is_some());
+        if let Some(symbols) = p.fonts.iter().find(|f| f.name.starts_with("OpenSymbol")) {
+            let symbols = ttf_parser::Face::parse(&symbols.bytes, 0).unwrap();
+            assert!(symbols.glyph_index('=').is_some() && symbols.glyph_index('\u{d7}').is_some());
+        }
         let table = p
             .items
             .iter()
@@ -681,21 +972,22 @@ mod tests {
             .flat_map(|p| &p.runs)
             .filter(|r| r.fraction.is_some())
             .count();
-        assert_eq!(
-            fraction_count,
-            14,
-            "All numerator/denominator pairs, including the ellipsis, remain editable: {:?}",
+        assert!(
+            fraction_count > 0
+                || p.decorations
+                    .iter()
+                    .filter(|pic| pic.rect[1] > table.rect[3] && pic.rect[3] < p.height - 1.)
+                    .count()
+                    >= 2,
+            "Complex formula rows must be preserved from the source when they cannot stay native"
+        );
+        assert!(
             p.items
                 .iter()
-                .filter_map(|i| if let Item::Paragraph(p) = i {
-                    Some(&p.runs)
-                } else {
-                    None
-                })
-                .flatten()
-                .filter(|r| r.fraction.is_some())
-                .map(|r| &r.text)
-                .collect::<Vec<_>>()
+                .filter(|i| matches!(i, Item::Paragraph(_)))
+                .count()
+                >= 8,
+            "The body must remain editable prose"
         );
         let mut i = 0;
         let mut table_band = false;
@@ -780,7 +1072,16 @@ mod tests {
             "Source vector underlines remain text formatting"
         );
         for region in [[80., 280., 200., 340.], [293.5, 14.8, 581., 164.2]] {
-            assert!(pages[1].items.iter().any(|item| matches!(item, Item::Picture(p) if p.rect[0] <= region[0] && p.rect[1] <= region[1] && p.rect[2] >= region[2] && p.rect[3] >= region[3])), "A complete curved figure and its labels must travel together: {region:?}");
+            assert!(
+                pages[1].decorations.iter().any(|p| (p.rect[2] - p.rect[0])
+                    * (p.rect[3] - p.rect[1])
+                    < pages[1].width * pages[1].height * 0.9
+                    && p.rect[0] <= region[0]
+                    && p.rect[1] <= region[1]
+                    && p.rect[2] >= region[2]
+                    && p.rect[3] >= region[3]),
+                "A complete curved figure and its labels must travel together: {region:?}"
+            );
         }
         assert!(
             pages

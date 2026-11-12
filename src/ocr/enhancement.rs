@@ -2,6 +2,57 @@
 //! always return to the original image; the enhanced pixels are never saved.
 use super::{Line, Recognition};
 
+/// An isolated 1 is often read as I/l. Change it only inside a numeric grid
+/// supported by at least three existing digits on both its row and column.
+pub(super) fn numeric_grid_context(result: &mut Recognition) {
+    let digits: Vec<_> = result
+        .lines
+        .iter()
+        .flat_map(|l| &l.words)
+        .filter(|w| w.text.len() == 1 && w.text.bytes().all(|b| b.is_ascii_digit()))
+        .map(|w| {
+            [
+                (w.rect[0] + w.rect[2]) / 2.,
+                (w.rect[1] + w.rect[3]) / 2.,
+                w.rect[3] - w.rect[1],
+            ]
+        })
+        .collect();
+    for line in &mut result.lines {
+        for word in &mut line.words {
+            if !matches!(word.text.as_str(), "I" | "l") {
+                continue;
+            }
+            let (x, y, h) = (
+                (word.rect[0] + word.rect[2]) / 2.,
+                (word.rect[1] + word.rect[3]) / 2.,
+                word.rect[3] - word.rect[1],
+            );
+            let row = digits
+                .iter()
+                .filter(|d| {
+                    (d[1] - y).abs() < h * 0.6 && (d[0] - x).abs() > h && (d[0] - x).abs() < h * 30.
+                })
+                .count();
+            let col = digits
+                .iter()
+                .filter(|d| {
+                    (d[0] - x).abs() < h * 0.6 && (d[1] - y).abs() > h && (d[1] - y).abs() < h * 30.
+                })
+                .count();
+            if row >= 3 && col >= 3 {
+                word.text = "1".into();
+            }
+        }
+        line.text = line
+            .words
+            .iter()
+            .map(|w| w.text.as_str())
+            .collect::<Vec<_>>()
+            .join(" ");
+    }
+}
+
 pub(super) fn prepare(
     rgba: &[u8],
     width: u32,
@@ -241,6 +292,44 @@ pub(super) fn repair_degrees(rgba: &[u8], width: u32, height: u32, result: &mut 
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn numeric_grid_corrects_a_one_without_changing_a_diagram_label() {
+        let mut result = super::Recognition {
+            language: "fr-FR".into(),
+            lines: vec![],
+        };
+        for y in 0..4 {
+            for x in 0..4 {
+                let text = if x == 2 && y == 2 { "I" } else { "2" };
+                let rect = [
+                    x as f32 * 40.,
+                    y as f32 * 40.,
+                    x as f32 * 40. + 10.,
+                    y as f32 * 40. + 18.,
+                ];
+                result.lines.push(crate::ocr::Line {
+                    text: text.into(),
+                    rect,
+                    words: vec![crate::ocr::Word {
+                        text: text.into(),
+                        rect,
+                    }],
+                });
+            }
+        }
+        let rect = [300., 300., 310., 318.];
+        result.lines.push(crate::ocr::Line {
+            text: "I".into(),
+            rect,
+            words: vec![crate::ocr::Word {
+                text: "I".into(),
+                rect,
+            }],
+        });
+        super::numeric_grid_context(&mut result);
+        assert_eq!(result.lines[10].text, "1");
+        assert_eq!(result.lines.last().unwrap().text, "I");
+    }
     use super::*;
     use crate::ocr::Word;
     #[cfg(windows)]

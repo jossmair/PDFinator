@@ -51,6 +51,17 @@ en laissant visibles les cinq avis de non-maintenance suivis ci-dessus.
 
 ## Procédure de mise à jour
 
+Les correctifs de la version 1.0.10 dans les sources vendored portent sur
+`crates/fonts/src/pdf.rs` et `crates/edit/src/text.rs` : lecture bornée de
+l’encodage déclaré dans l’en-tête Type 1, priorité d’Encoding/ToUnicode,
+caractères superposés et déplacement des couches de faux gras. Aucun programme
+PostScript n’est exécuté. Les régressions synthétiques se trouvent dans
+`tests/type1_encoding.rs` et `tests/overprinted_text.rs`.
+
+La comparaison locale avec Tesseract reste un outil d’évaluation privé : ce
+moteur, ses modèles et ses bibliothèques ne sont pas ajoutés au produit ni
+aux distributions. L’OCR distribué utilise toujours l’API Windows locale.
+
 1. Identifier la version/révision cible et ses notes de sécurité auprès du fournisseur.
 2. Comparer les sources et préserver ou reporter chaque correctif local pertinent ;
    ne pas remplacer tout `vendor/` par un téléchargement non revu.

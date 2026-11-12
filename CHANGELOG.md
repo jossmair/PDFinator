@@ -1,5 +1,18 @@
 # Changements PDFinator
 
+## 1.0.10 — texte mathématique, OCR et exports Office
+
+- Lecture de l’encodage incorporé des polices Type 1 : les signes mathématiques restent dans le bloc éditable et après modification.
+- Les glyphes dessinés deux fois au même emplacement ne deviennent plus deux caractères. Le déplacement suit aussi les couches superposées du faux gras.
+- Les fonds blancs ne transforment plus les pages en illustrations ; les tableaux restent structurés et les colonnes avec titres centrés restent côte à côte.
+- Pagination DOCX/ODT : suppression des paragraphes de rupture superflus, marge de tolérance pour les avances de police et regroupement des petits exposants avec leur ligne.
+- Conservation des schémas dont le cadre interne PDF est démesuré ; regroupement des éléments voisins et maintien des flèches de tableaux hors du flux de texte.
+- OCR local : récupération des chiffres isolés et colorés, reconnaissance du contexte des grilles numériques. Les titres décoratifs manifestement mal reconnus restent dans l’image au lieu d’être remplacés par des caractères fantaisistes.
+- Les illustrations sont ancrées à leur position sur la page à côté des paragraphes natifs ; leurs marges ne recopient plus les fragments de texte voisins.
+- Les mentions isolées en bas de page deviennent des pieds de page natifs. Déclaration des polices ODT non incorporées et de leur famille de remplacement ; suppression du suffixe technique Identity-H/Identity-V dans les noms.
+- Les blocs mathématiques complexes conservent leur dessin original dans les exports Office. Ces blocs deviennent des images ; les paragraphes courants et les tableaux restent modifiables.
+- Outil de diagnostic du corpus et régressions synthétiques supplémentaires. Les documents privés et leurs rendus ne sont pas distribués.
+
 ## 1.0.9 — édition allégée et insertion entre documents
 
 - OCR des schémas : estimation de la taille et du gras à partir de l’image, correction de la position du texte et conservation des flèches reconnues à tort comme V.
