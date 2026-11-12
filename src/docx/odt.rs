@@ -21,6 +21,39 @@ fn rgb(c: [f64; 3]) -> String {
         (c[2].clamp(0., 1.) * 255.).round() as u8
     )
 }
+fn declare_families(pages: &[Page]) -> String {
+    fn visit(runs: &[Run], names: &mut std::collections::BTreeSet<String>) {
+        for r in runs {
+            names.insert(r.font.clone());
+            if let Some(f) = &r.fraction {
+                visit(&f.numerator, names);
+                visit(&f.denominator, names);
+            }
+        }
+    }
+    let mut names = std::collections::BTreeSet::new();
+    for p in pages {
+        for item in &p.items {
+            match item {
+                Item::Paragraph(p) => visit(&p.runs, &mut names),
+                Item::Table(t) => {
+                    for cell in t.rows.iter().flatten() {
+                        for p in &cell.paragraphs {
+                            visit(&p.runs, &mut names);
+                        }
+                    }
+                }
+                Item::Picture(_) => {}
+            }
+        }
+    }
+    names.into_iter().filter(|n| !pages.iter().flat_map(|p| &p.fonts).any(|f| &f.name==n)).map(|name| {
+        let lower=name.to_lowercase();
+        let generic=if lower.contains("courier") || lower.contains("mono") { "modern" }
+            else if ["arial","helvetica","sans","calibri","aptos","verdana","tahoma"].iter().any(|s| lower.contains(s)) { "swiss" } else { "roman" };
+        format!("<style:font-face style:name=\"{}\" svg:font-family=\"{}\" style:font-family-generic=\"{generic}\"/>",xml(&name.replace(' ',"_20_")),xml(&name))
+    }).collect()
+}
 fn text(s: &str) -> String {
     s.split('\n')
         .map(|line| {
@@ -384,7 +417,16 @@ impl Writer {
             Item::Table(t) => self.table(t, left, before),
         }
     }
-    fn page(&mut self, p: &Page) -> String {
+    fn page(&mut self, p: &Page, depth: usize) -> Result<String> {
+        let flow = if depth == 0 {
+            body_without_footers(p)
+        } else {
+            None
+        };
+        let p = flow.as_ref().unwrap_or(p);
+        if depth > 12 {
+            return Err("La disposition contient trop de colonnes imbriquées.".into());
+        }
         let mut body = String::new();
         let mut i = 0;
         let mut current = p.margin[1];
@@ -403,7 +445,11 @@ impl Writer {
                     self.count
                 ));
                 let edges: Vec<_> = std::iter::once(left)
-                    .chain(cols.iter().skip(1).map(|c| c[0].rect()[0]))
+                    .chain(cols.iter().skip(1).map(|c| {
+                        c.iter()
+                            .map(|item| item.rect()[0])
+                            .fold(f64::INFINITY, f64::min)
+                    }))
                     .chain(std::iter::once(left + width))
                     .collect();
                 for x in edges.windows(2) {
@@ -423,17 +469,19 @@ impl Writer {
                 let mut bottom = current;
                 for (n, col) in cols.iter().enumerate() {
                     body.push_str(&format!("<table:table-cell table:style-name=\"{cell}\">"));
-                    let mut cy = current;
-                    for item in col {
-                        let r = item.rect();
-                        body.push_str(&self.item(
-                            item,
-                            edges[n],
-                            edges[n + 1] - edges[n],
-                            (r[1] - cy).max(0.),
-                        ));
-                        cy = cy.max(r[1]) + flow_height(item);
-                    }
+                    let child = Page {
+                        width: p.width,
+                        height: p.height,
+                        margin: [edges[n], current, p.width - edges[n + 1], 0.],
+                        items: col.iter().map(|i| (*i).clone()).collect(),
+                        decorations: vec![],
+                        fonts: vec![],
+                    };
+                    body.push_str(&self.page(&child, depth + 1)?);
+                    let cy = col
+                        .iter()
+                        .map(|i| i.rect()[1] + flow_height(i))
+                        .fold(current, f64::max);
                     bottom = bottom.max(cy);
                     body.push_str("</table:table-cell>");
                 }
@@ -448,15 +496,16 @@ impl Writer {
             self.images.push(name.clone());
             let graphic = self.style("graphic", "<style:graphic-properties style:wrap=\"run-through\" style:run-through=\"background\" style:horizontal-pos=\"from-left\" style:horizontal-rel=\"page\" style:vertical-pos=\"from-top\" style:vertical-rel=\"page\"/>");
             let frame = format!(
-                "<draw:frame draw:style-name=\"{graphic}\" draw:name=\"Decor{}\" text:anchor-type=\"page\" svg:x=\"0pt\" svg:y=\"0pt\" svg:width=\"{}pt\" svg:height=\"{}pt\"><draw:image xlink:href=\"{name}\" xlink:type=\"simple\"/></draw:frame>",
+                "<draw:frame draw:style-name=\"{graphic}\" draw:name=\"Decor{}\" draw:z-index=\"{}\" text:anchor-type=\"page\" svg:x=\"{}pt\" svg:y=\"{}pt\" svg:width=\"{}pt\" svg:height=\"{}pt\"><draw:image xlink:href=\"{name}\" xlink:type=\"simple\"/></draw:frame>",
                 self.images.len(),
-                p.width,
-                p.height
+                self.images.len(),
+                decoration.rect[0],
+                decoration.rect[1],
+                decoration.rect[2] - decoration.rect[0],
+                decoration.rect[3] - decoration.rect[1]
             );
-            if let Some(at) = body.find("<text:p")
-                && let Some(end) = body[at..].find('>')
-            {
-                body.insert_str(at + end + 1, &frame);
+            if let Some(at) = body.find("</text:p>") {
+                body.insert_str(at, &frame);
             }
         }
         // Writer otherwise inserts its default-size trailing paragraph after a
@@ -465,7 +514,7 @@ impl Writer {
             let tail = self.style("paragraph", "<style:paragraph-properties fo:line-height=\"0.1pt\" fo:margin-top=\"0pt\" fo:margin-bottom=\"0pt\"/><style:text-properties fo:font-size=\"1pt\"/>");
             body.push_str(&format!("<text:p text:style-name=\"{tail}\"/>"));
         }
-        body
+        Ok(body)
     }
 }
 pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
@@ -483,7 +532,8 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
     );
     let mut layouts = String::new();
     let mut masters = String::new();
-    let mut font_decls = String::new();
+    let mut footer_styles = String::new();
+    let mut font_decls = declare_families(pages);
     let mut font_manifest = String::new();
     for (i, font) in pages.iter().flat_map(|p| &p.fonts).enumerate() {
         let name = format!("Fonts/font{i}.ttf");
@@ -493,13 +543,69 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
     }
     let mut body = String::new();
     for (i, p) in pages.iter().enumerate() {
+        let mut footer = String::new();
+        let mut footer_edge = p.margin[3];
+        let mut footer_height: f64 = 0.;
+        for item in p.items.iter().filter(|item| is_footer(p, item)) {
+            if let Item::Paragraph(text) = item {
+                footer_edge = (p.height - text.rect[3]).max(0.);
+                footer_height += paragraph_height(text);
+                let start = w.styles.len();
+                footer.push_str(&w.paragraph(
+                    text,
+                    p.margin[0],
+                    p.width - p.margin[0] - p.margin[2],
+                    0.,
+                    false,
+                ));
+                footer_styles.push_str(&w.styles[start..]);
+            }
+        }
         layouts.push_str(&format!("<style:page-layout style:name=\"PL{i}\"><style:page-layout-properties fo:page-width=\"{}pt\" fo:page-height=\"{}pt\" style:print-orientation=\"{}\" fo:margin-left=\"{}pt\" fo:margin-top=\"{}pt\" fo:margin-right=\"{}pt\" fo:margin-bottom=\"{}pt\"/></style:page-layout>", p.width, p.height, if p.width > p.height { "landscape" } else { "portrait" }, p.margin[0], p.margin[1], p.margin[2], p.margin[3]));
-        masters.push_str(&format!(
-            "<style:master-page style:name=\"MP{i}\" style:page-layout-name=\"PL{i}\"/>"
-        ));
-        w.styles.push_str(&format!("<style:style style:name=\"Page{i}\" style:family=\"paragraph\" style:master-page-name=\"MP{i}\"><style:paragraph-properties fo:margin-top=\"0pt\" fo:margin-bottom=\"0pt\" fo:line-height=\"0.1pt\"{} /><style:text-properties fo:font-size=\"1pt\"/></style:style>", if i == 0 { "" } else { " fo:break-before=\"page\"" }));
-        body.push_str(&format!("<text:p text:style-name=\"Page{i}\"/>"));
-        body.push_str(&w.page(p));
+        if !footer.is_empty() {
+            let end = layouts.rfind("</style:page-layout>").unwrap();
+            layouts.insert_str(end,&format!("<style:footer-style><style:header-footer-properties fo:min-height=\"{footer_height}pt\" fo:margin-top=\"0pt\" style:dynamic-spacing=\"false\"/></style:footer-style>"));
+            let start = layouts.rfind("<style:page-layout ").unwrap();
+            let part = layouts[start..].replace(
+                &format!("fo:margin-bottom=\"{}pt\"", p.margin[3]),
+                &format!("fo:margin-bottom=\"{footer_edge}pt\""),
+            );
+            layouts.replace_range(start.., &part);
+        }
+        masters.push_str(&format!("<style:master-page style:name=\"MP{i}\" style:page-layout-name=\"PL{i}\">{}</style:master-page>",if footer.is_empty(){ String::new() }else{ format!("<style:footer>{footer}</style:footer>") }));
+        let content = w.page(p, 0)?;
+        let prefix = "<text:p text:style-name=\"";
+        if let Some(rest) = content.strip_prefix(prefix)
+            && let Some(end) = rest.find('"')
+        {
+            // Carry the page style on the first actual paragraph. Even a
+            // 0.1pt empty carrier can push a page-sized image onto a new page.
+            let marker = format!(
+                "<style:style style:name=\"{}\" style:family=\"paragraph\">",
+                &rest[..end]
+            );
+            let properties = w
+                .styles
+                .split_once(&marker)
+                .and_then(|(_, rest)| rest.split_once("</style:style>"))
+                .map(|(properties, _)| properties)
+                .ok_or("Le style du premier paragraphe est introuvable.")?;
+            let properties = if i == 0 {
+                properties.to_string()
+            } else {
+                properties.replacen(
+                    "<style:paragraph-properties",
+                    "<style:paragraph-properties fo:break-before=\"page\"",
+                    1,
+                )
+            };
+            w.styles.push_str(&format!("<style:style style:name=\"Page{i}\" style:family=\"paragraph\" style:master-page-name=\"MP{i}\">{properties}</style:style>"));
+            body.push_str(&format!("{prefix}Page{i}{}", &rest[end..]));
+        } else {
+            w.styles.push_str(&format!("<style:style style:name=\"Page{i}\" style:family=\"paragraph\" style:master-page-name=\"MP{i}\"><style:paragraph-properties fo:margin-top=\"0pt\" fo:margin-bottom=\"0pt\" fo:line-height=\"0.1pt\"{} /><style:text-properties fo:font-size=\"1pt\"/></style:style>", if i == 0 { "" } else { " fo:break-before=\"page\"" }));
+            body.push_str(&format!("<text:p text:style-name=\"Page{i}\"/>"));
+            body.push_str(&content);
+        }
     }
     let namespaces = "xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\" xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\" xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\"";
     let content = format!(
@@ -507,7 +613,7 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
         w.styles
     );
     let styles = format!(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:document-styles {namespaces} office:version=\"1.3\"><office:font-face-decls>{font_decls}</office:font-face-decls><office:styles><style:default-style style:family=\"paragraph\"><style:paragraph-properties fo:margin-top=\"0pt\" fo:margin-bottom=\"0pt\"/></style:default-style></office:styles><office:automatic-styles>{layouts}</office:automatic-styles><office:master-styles>{masters}</office:master-styles></office:document-styles>"
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:document-styles {namespaces} office:version=\"1.3\"><office:font-face-decls>{font_decls}</office:font-face-decls><office:styles><style:default-style style:family=\"paragraph\"><style:paragraph-properties fo:margin-top=\"0pt\" fo:margin-bottom=\"0pt\"/></style:default-style></office:styles><office:automatic-styles>{layouts}{footer_styles}</office:automatic-styles><office:master-styles>{masters}</office:master-styles></office:document-styles>"
     );
     w.zip.add("content.xml", content.as_bytes(), true);
     w.zip.add("styles.xml", styles.as_bytes(), true);
@@ -530,6 +636,85 @@ pub(super) fn document(pages: &[Page]) -> Result<Vec<u8>> {
 #[cfg(test)]
 mod fraction_geometry_tests {
     use super::*;
+    #[test]
+    fn unavailable_pdf_font_has_a_declared_serif_family_instead_of_default_sans() {
+        let font = super::super::layout::font("ABCDEF+Erewhon-Regular-Identity-H");
+        assert_eq!(font, "Erewhon");
+        let run = Run {
+            text: "Editable body".into(),
+            font,
+            size: 12.,
+            color: [0.; 3],
+            bold: false,
+            italic: false,
+            underline: false,
+            strike: false,
+            script: 0,
+            baseline: None,
+            rise: None,
+            background: None,
+            rect: None,
+            fraction: None,
+        };
+        let page = Page {
+            width: 595.,
+            height: 842.,
+            margin: [40.; 4],
+            items: vec![Item::Paragraph(Paragraph {
+                rect: [40., 40., 300., 55.],
+                runs: vec![run],
+                align: "left",
+                spacing: None,
+            })],
+            decorations: vec![],
+            fonts: vec![],
+        };
+        let declared = declare_families(&[page]);
+        assert!(declared.contains(
+            "style:name=\"Erewhon\" svg:font-family=\"Erewhon\" style:font-family-generic=\"roman\""
+        ));
+        assert!(!declared.contains("Identity"));
+    }
+    #[test]
+    fn anchored_illustration_keeps_source_position_without_an_inline_paragraph() {
+        let mut writer = Writer {
+            zip: Zip::default(),
+            styles: String::new(),
+            count: 0,
+            images: vec![],
+            formulas: vec![],
+        };
+        let page = Page {
+            width: 600.,
+            height: 840.,
+            margin: [40.; 4],
+            items: vec![Item::Paragraph(Paragraph {
+                rect: [40., 40., 200., 55.],
+                runs: vec![],
+                align: "left",
+                spacing: None,
+            })],
+            decorations: vec![
+                Picture {
+                    rect: [0., 0., 600., 840.],
+                    bytes: vec![],
+                },
+                Picture {
+                    rect: [300., 200., 400., 350.],
+                    bytes: vec![],
+                },
+            ],
+            fonts: vec![],
+        };
+        let xml = writer.page(&page, 0).unwrap();
+        assert_eq!(xml.matches("<text:p ").count(), 1);
+        assert!(
+            xml.find("draw:name=\"Decor1\"").unwrap() < xml.find("draw:name=\"Decor2\"").unwrap()
+        );
+        assert!(xml.contains("draw:z-index=\"2\""));
+        assert!(xml.contains("text:anchor-type=\"page\" svg:x=\"300pt\" svg:y=\"200pt\" svg:width=\"100pt\" svg:height=\"150pt\""));
+        assert!(!xml.contains("text:anchor-type=\"as-char\""));
+    }
     #[test]
     fn a_wide_source_bar_does_not_stretch_the_odt_formula_glyphs() {
         let numerator = Run {

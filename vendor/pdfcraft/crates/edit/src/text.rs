@@ -1137,12 +1137,28 @@ pub fn text_lines(doc: &Document, page: usize) -> Result<Vec<TextLine>, EditErro
                 // only across a word space, not across a table cell or a tab stop.
                 && (s.state.render_mode != 3 || gap < pen.size * 0.6)
         });
-        if joins && let Some(l) = lines.last_mut() {
+        // Producers sometimes paint one glyph twice (fill then outline, or
+        // simulated bold). Keep both operators for editing, but one character.
+        let repeated = lines.last().is_some_and(|l| {
+            l.stream == si
+                && l.scope == s.scope
+                && l.text == s.text
+                && !s.text.trim().is_empty()
+                && l.origin.state.render_mode < 3
+                && s.state.render_mode < 3
+                && same_font(l, &s.font, s.face.as_deref())
+                && l.rect.iter().zip(s.rect).all(|(a, b)| (a - b).abs() <= 0.25)
+        });
+        if (joins || repeated)
+            && let Some(l) = lines.last_mut()
+        {
             let gap = last.map_or(0.0, |(_, pen)| pen.continues(&s, 0.0).1);
-            if gap - s.tracking > l.size * s.state.scale.abs() * 0.2 && !l.text.ends_with(' ') && !s.text.starts_with(' ') {
+            if !repeated && gap - s.tracking > l.size * s.state.scale.abs() * 0.2 && !l.text.ends_with(' ') && !s.text.starts_with(' ') {
                 l.text.push(' ');
             }
-            l.text.push_str(&s.text);
+            if !repeated {
+                l.text.push_str(&s.text);
+            }
             l.rect = [l.rect[0].min(s.rect[0]), l.rect[1].min(s.rect[1]), l.rect[2].max(s.rect[2]), l.rect[3].max(s.rect[3])];
             l.frame = union(l.frame, s.frame);
             l.ink.extend(s.ink.iter().copied());
@@ -2805,13 +2821,18 @@ pub(crate) fn translate_blocks(doc: &mut Document, page: usize, indexes: &[usize
     let lines = text_lines(doc, page)?;
     let blocks = group_blocks(doc, &lines);
     let mut selected = std::collections::BTreeSet::new();
+    let mut targets = Vec::new();
     for index in indexes {
         let b = blocks.get(*index).ok_or_else(|| EditError::Invalid("a selected paragraph no longer exists".into()))?;
         for line in &b.lines {
             let l = lines.get(*line).ok_or_else(|| EditError::Invalid("a selected text line no longer exists".into()))?;
             selected.extend(l.ops.iter().copied());
+            targets.push(l);
         }
     }
+    // Moving only one pass of simulated bold leaves a second copy behind.
+    // Use the same coincident-text contract as replacement and deletion.
+    selected.extend(coincident_ops(&lines, &targets));
     let res = p.dict.get(b"Resources").map(|r| doc.resolve(r)).and_then(|r| r.as_dict().cloned()).unwrap_or_default();
     let fonts = res.get(b"Font").map(|r| doc.resolve(r)).and_then(|r| r.as_dict().cloned()).unwrap_or_default();
     let pieces = Pieces::join(&streams.iter().map(|(_, d)| d.as_slice()).collect::<Vec<_>>());

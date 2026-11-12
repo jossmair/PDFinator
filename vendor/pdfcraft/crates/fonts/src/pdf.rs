@@ -1143,6 +1143,65 @@ pub fn glyph_unicode(name: &str) -> Option<char> {
     chars.next().filter(|_| chars.len() == 0)
 }
 
+// Read the declarative encoding in a Type 1 clear-text header, never execute
+// PostScript or inspect the encrypted charstrings. PDF Encoding/ToUnicode still
+// take precedence. Bounded decoding and tokenisation keep hostile fonts finite.
+fn type1_encoding(doc: &Document, font: &Dict) -> Option<HashMap<u32, String>> {
+    if font.name(b"Subtype") != Some(b"Type1") {
+        return None;
+    }
+    let descriptor = dict(doc, font.get(b"FontDescriptor"))?;
+    let object = doc.resolve(descriptor.get(b"FontFile")?);
+    let Object::Stream(stream) = object.as_ref() else {
+        return None;
+    };
+    let data = stream.decoded_within(8 * 1024 * 1024).ok()?;
+    let header = data.get(..data.len().min(256 * 1024))?;
+    let words: Vec<_> = Lexer::new(header)
+        .take(65_536)
+        .take_while(|t| *t != Tok::Word(b"eexec"))
+        .filter_map(|t| match t {
+            Tok::Word(w) => Some(w),
+            _ => None,
+        })
+        .collect();
+    let start = words.iter().position(|w| *w == b"/Encoding")?;
+    let declaration = words.get(start.checked_add(1)?..)?;
+    if declaration.first().copied() == Some(b"StandardEncoding") {
+        return Some(
+            crate::encodings::STANDARD
+                .iter()
+                .enumerate()
+                .filter_map(|(code, u)| char::from_u32(*u).filter(|_| *u != 0).map(|c| (code as u32, c.to_string())))
+                .collect(),
+        );
+    }
+    if declaration.get(..2)? != [b"256".as_slice(), b"array".as_slice()] {
+        return None;
+    }
+    let end = declaration.iter().position(|w| *w == b"def")?;
+    let mut encoding = HashMap::new();
+    for entry in declaration.get(..end)?.windows(4) {
+        let [dup, code, name, put] = entry else {
+            continue;
+        };
+        if *dup != b"dup" || *put != b"put" {
+            continue;
+        }
+        let Some(code) = std::str::from_utf8(code).ok().and_then(|s| s.parse::<u8>().ok()) else {
+            continue;
+        };
+        let Some(name) = name.strip_prefix(b"/") else {
+            continue;
+        };
+        if let Some(text) = glyph_text(&String::from_utf8_lossy(name)) {
+            encoding.insert(u32::from(code), text);
+        } else {
+            encoding.remove(&u32::from(code));
+        }
+    }
+    Some(encoding)
+}
 /// Code → Unicode for a font: its ToUnicode CMap, else (simple fonts) its encoding.
 fn unicode_map(doc: &Document, font: &Dict, composite: bool) -> Unicode {
     let mut out = Unicode::default();
@@ -1183,6 +1242,11 @@ fn unicode_map(doc: &Document, font: &Dict, composite: bool) -> Unicode {
             if let Some(c) = char::from_u32(*u).filter(|_| *u != 0) {
                 out.encoding.insert(code as u32, c.to_string());
             }
+        }
+        if base_name.is_none()
+            && let Some(builtin) = type1_encoding(doc, font)
+        {
+            out.encoding = builtin;
         }
         if let Some(Object::Dict(d)) = enc.as_deref()
             && let Some(diffs) = d.get(b"Differences").map(|x| doc.resolve(x)).and_then(|x| x.as_array().cloned())

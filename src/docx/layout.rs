@@ -33,8 +33,122 @@ fn view_rect(p: &pdfcraft_render::PageInfo, r: [f64; 4]) -> [f64; 4] {
         a[1].max(b[1]) as f64,
     ]
 }
+fn white_paper(e: &Editor, index: usize, target: crate::selection::Target) -> bool {
+    let Ok(bytes) = e.selection_preview(index, &[target], true, false) else {
+        return false;
+    };
+    let page = &e.info.pages[index];
+    let mut renderer = pdfcraft_render::PageRenderer::new(bytes, Default::default());
+    let raster = renderer.render(pdfcraft_render::RenderRequest {
+        page: index,
+        scale: (1024. / page.width.max(page.height)).min(1.),
+        ..Default::default()
+    });
+    raster.error.is_none()
+        && raster
+            .rgba
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .all(|pixel| pixel[3] == 0 || pixel[..3].iter().all(|c| *c >= 254))
+}
+// Some producers give every tiny Form a page-sized BBox. Measure its actual
+// ink in isolation instead of dropping its geometry or flattening the page.
+fn form_ink_rect(e: &Editor, page: usize, image: usize) -> Option<[f64; 4]> {
+    let target = crate::selection::Target::Object(pdfcraft_edit::ObjectTarget {
+        kind: pdfcraft_edit::ObjectKind::Image,
+        index: image,
+    });
+    let bytes = e.selection_preview(page, &[target], true, false).ok()?;
+    let info = &e.info.pages[page];
+    let scale = (1536. / info.width.max(info.height)).min(2.);
+    let mut renderer = pdfcraft_render::PageRenderer::new(bytes, Default::default());
+    let raster = renderer.render(pdfcraft_render::RenderRequest {
+        page,
+        scale,
+        ..Default::default()
+    });
+    if raster.error.is_some() {
+        return None;
+    }
+    let mut rect = [raster.width, raster.height, 0, 0];
+    for (n, px) in raster.rgba.as_chunks::<4>().0.iter().enumerate() {
+        if px[3] > 0 && px[..3].iter().any(|v| *v < 245) {
+            let x = n as u32 % raster.width;
+            let y = n as u32 / raster.width;
+            rect = [
+                rect[0].min(x),
+                rect[1].min(y),
+                rect[2].max(x + 1),
+                rect[3].max(y + 1),
+            ];
+        }
+    }
+    (rect[2] > rect[0] && rect[3] > rect[1]).then(|| {
+        [
+            rect[0] as f64 * info.width as f64 / raster.width as f64,
+            rect[1] as f64 * info.height as f64 / raster.height as f64,
+            rect[2] as f64 * info.width as f64 / raster.width as f64,
+            rect[3] as f64 * info.height as f64 / raster.height as f64,
+        ]
+    })
+}
+fn visible_header(
+    e: &Editor,
+    index: usize,
+    p: &pdfcraft_render::PageInfo,
+    t: &Table,
+    top: f64,
+) -> bool {
+    if top < 0. || t.rect[1] - top < 4. {
+        return false;
+    }
+    let scale = (2048. / p.width.max(p.height)).min(1.5);
+    let mut renderer = pdfcraft_render::PageRenderer::new(e.bytes.clone(), Default::default());
+    let image = renderer.render(pdfcraft_render::RenderRequest {
+        page: index,
+        scale,
+        ..Default::default()
+    });
+    if image.error.is_some() {
+        return false;
+    }
+    let ink = |x: i32, y: i32| -> bool {
+        if x < 0 || y < 0 || x >= image.width as i32 || y >= image.height as i32 {
+            return false;
+        }
+        let at = (y as usize * image.width as usize + x as usize) * 4;
+        image
+            .rgba
+            .get(at..at + 3)
+            .is_some_and(|v| v.iter().copied().min().unwrap_or(255) < 235)
+    };
+    let s = scale as f64;
+    let (x0, x1, y0, y1) = (
+        (t.rect[0] * s).round() as i32,
+        (t.rect[2] * s).round() as i32,
+        (top * s).round() as i32,
+        (t.rect[1] * s).round() as i32,
+    );
+    if x1 <= x0 || y1 <= y0 {
+        return false;
+    }
+    let horizontal = (-2..=2)
+        .any(|d| (x0..x1).filter(|x| ink(*x, y0 + d)).count() as f64 / (x1 - x0) as f64 > 0.75);
+    horizontal
+        && t.xs.iter().all(|x| {
+            let x = (x * s).round() as i32;
+            (-2..=2).any(|d| {
+                (y0..y1).filter(|y| ink(x + d, *y)).count() as f64 / (y1 - y0) as f64 > 0.7
+            })
+        })
+}
 pub(super) fn font(name: &str) -> String {
     let name = name.split_once('+').map_or(name, |(_, n)| n);
+    let name = name
+        .strip_suffix("-Identity-H")
+        .or_else(|| name.strip_suffix("-Identity-V"))
+        .unwrap_or(name);
     let lower = name.to_lowercase();
     if lower.contains("times") {
         "Times New Roman".into()
@@ -54,8 +168,9 @@ pub(super) fn font(name: &str) -> String {
             .replace("Bold", "")
             .replace("Italic", "")
             .replace("Regular", "")
-            .trim()
-            .to_string()
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 }
 fn paragraphs(e: &Editor, index: usize) -> Result<Vec<Paragraph>> {
@@ -210,6 +325,164 @@ fn groups(rects: &[[f64; 4]]) -> Vec<Vec<usize>> {
     }
     groups
 }
+fn figure_groups(rects: &[[f64; 4]]) -> Vec<Vec<usize>> {
+    let padded: Vec<_> = rects
+        .iter()
+        .map(|r| [r[0] - 8., r[1] - 8., r[2] + 8., r[3] + 8.])
+        .collect();
+    groups(&padded)
+}
+fn complex_math(p: &Paragraph, dense: bool) -> bool {
+    let fractions: Vec<_> = p
+        .runs
+        .iter()
+        .filter_map(|r| r.fraction.as_ref().map(|f| (r, f)))
+        .collect();
+    let scripts = p
+        .runs
+        .iter()
+        .filter(|r| r.rise.is_some() || r.script != 0)
+        .count()
+        + p.runs
+            .iter()
+            .flat_map(|r| r.text.chars())
+            .filter(|c| matches!(c, '²' | '³' | '⁴' | '⁵' | '⁶' | '⁷' | '⁸' | '⁹'))
+            .count();
+    fractions.len() >= 2
+        || fractions.iter().any(|(r, f)| {
+            dense
+                || r.size < 10.
+                || [&f.numerator, &f.denominator].into_iter().any(|rs| {
+                    rs.iter()
+                        .flat_map(|r| r.text.chars())
+                        .filter(|c| !c.is_whitespace())
+                        .count()
+                        >= 3
+                })
+        })
+        || (scripts >= 2
+            && p.runs
+                .iter()
+                .flat_map(|r| r.text.chars())
+                .any(|c| "+=×÷√".contains(c)))
+        || p.runs.iter().any(|r| {
+            r.text.chars().any(|c| "()[]{}".contains(c))
+                && r.rect
+                    .is_some_and(|b| b[3] > b[1] && r.size > (b[3] - b[1]) * 1.8)
+        })
+}
+fn preserve_complex_math(e: &Editor, page: usize, items: &mut Vec<Item>) -> Result<()> {
+    fn run_bounds(runs: &[Run], rect: &mut [f64; 4]) {
+        for r in runs {
+            if let Some(b) = r.rect {
+                *rect = union(*rect, b);
+            }
+            if let Some(f) = &r.fraction {
+                run_bounds(&f.numerator, rect);
+                run_bounds(&f.denominator, rect);
+            }
+        }
+    }
+    let dense = items
+        .iter()
+        .filter(|i| matches!(i,Item::Paragraph(p) if p.runs.iter().any(|r| r.fraction.is_some())))
+        .count()
+        >= 6;
+    let candidates: Vec<_> = items
+        .iter()
+        .filter_map(|i| {
+            if let Item::Paragraph(p) = i {
+                complex_math(p, dense).then(|| {
+                    let mut r = p.rect;
+                    run_bounds(&p.runs, &mut r);
+                    r
+                })
+            } else {
+                None
+            }
+        })
+        .collect();
+    if candidates.is_empty() {
+        return Ok(());
+    }
+    if candidates.len() > 512 {
+        return Err("La page contient trop de blocs mathématiques complexes.".into());
+    }
+    let info = &e.info.pages[page];
+    let mut renderer = pdfcraft_render::PageRenderer::new(e.bytes.clone(), Default::default());
+    let raster = renderer.render(pdfcraft_render::RenderRequest {
+        page,
+        scale: (4096. / info.width.max(info.height)).min(3.),
+        ..Default::default()
+    });
+    if let Some(error) = raster.error {
+        return Err(error);
+    }
+    let sx = raster.width as f64 / info.width as f64;
+    let sy = raster.height as f64 / info.height as f64;
+    let rects: Vec<_> = groups(&candidates)
+        .into_iter()
+        .filter_map(|g| g.into_iter().map(|i| candidates[i]).reduce(union))
+        .map(|mut r| {
+            // Numerators can sit above the paragraph baseline. Preserve the
+            // complete intersecting text block instead of erasing its top or
+            // leaving a second, shifted native fragment over the source ink.
+            for _ in 0..items.len().min(512) {
+                let before = r;
+                for item in items.iter() {
+                    if let Item::Paragraph(p) = item {
+                        let b = p.rect;
+                        if r[0] < b[2] && b[0] < r[2] && r[1] < b[3] && b[1] < r[3] {
+                            r = union(r, b);
+                        }
+                    }
+                }
+                if before == r {
+                    break;
+                }
+            }
+            [
+                (r[0] - 1.).max(0.),
+                (r[1] - 1.).max(0.),
+                (r[2] + 1.).min(info.width as f64),
+                (r[3] + 1.).min(info.height as f64),
+            ]
+        })
+        .collect();
+    let mut pictures = Vec::new();
+    let mut preserved_pixels = 0u64;
+    for r in &rects {
+        let x0 = (r[0] * sx).floor() as u32;
+        let x1 = (r[2] * sx).ceil().min(raster.width as f64) as u32;
+        let y0 = (r[1] * sy).floor() as u32;
+        let y1 = (r[3] * sy).ceil().min(raster.height as f64) as u32;
+        if x1 <= x0 || y1 <= y0 {
+            continue;
+        }
+        preserved_pixels += u64::from(x1 - x0) * u64::from(y1 - y0);
+        if preserved_pixels > 32 * 1024 * 1024 {
+            return Err(
+                "Les blocs mathématiques de cette page dépassent le budget de conversion.".into(),
+            );
+        }
+        let mut rgba = Vec::new();
+        for y in y0..y1 {
+            rgba.extend_from_slice(
+                &raster.rgba[((y * raster.width + x0) * 4) as usize
+                    ..((y * raster.width + x1) * 4) as usize],
+            );
+        }
+        pictures.push(Item::Picture(Picture {
+            rect: *r,
+            bytes: crate::ocr::encode_png(&rgba, x1 - x0, y1 - y0)?,
+        }));
+    }
+    items.retain(
+        |i| !matches!(i,Item::Paragraph(p) if rects.iter().any(|r| contains(*r,center(p.rect)))),
+    );
+    items.extend(pictures);
+    Ok(())
+}
 fn split_rows(p: &Paragraph) -> Vec<Paragraph> {
     let count = p
         .runs
@@ -262,7 +535,24 @@ fn join_lines(mut input: Vec<Paragraph>, gap: f64) -> Vec<Paragraph> {
         let row = rows.iter_mut().rev().take(12).find(|row| {
             let bounds = row.iter().map(|p| p.rect).reduce(union).unwrap();
             let overlap = bounds[3].min(p.rect[3]) - bounds[1].max(p.rect[1]);
-            overlap > (bounds[3] - bounds[1]).min(p.rect[3] - p.rect[1]) * 0.35
+            let row_size = row
+                .iter()
+                .flat_map(|p| &p.runs)
+                .map(|r| r.size)
+                .fold(1., f64::max);
+            let small = if size < row_size { &p } else { &row[0] };
+            let script = size.min(row_size) <= size.max(row_size) * 0.8
+                && size.min(row_size) >= size.max(row_size) * 0.4
+                && small
+                    .runs
+                    .iter()
+                    .map(|r| r.text.chars().count())
+                    .sum::<usize>()
+                    <= 3
+                && ((bounds[1] + bounds[3] - p.rect[1] - p.rect[3]) / 2.).abs()
+                    < size.max(row_size) * 1.2
+                && (p.rect[0] - bounds[2]).max(bounds[0] - p.rect[2]) < size.min(row_size) * 0.75;
+            (overlap > (bounds[3] - bounds[1]).min(p.rect[3] - p.rect[1]) * 0.35 || script)
                 && (p.rect[0] - bounds[2]).max(bounds[0] - p.rect[2]) < gap * size
         });
         if let Some(row) = row {
@@ -271,6 +561,50 @@ fn join_lines(mut input: Vec<Paragraph>, gap: f64) -> Vec<Paragraph> {
             rows.push(vec![p]);
         }
     }
+    // A raised glyph can arrive before the words of its base line. Once those
+    // words have assembled, reattach the orphan rather than treating it as a
+    // separate paragraph/column and consuming another line of page height.
+    for i in 0..rows.len() {
+        let count = rows[i]
+            .iter()
+            .flat_map(|p| &p.runs)
+            .map(|r| r.text.chars().count())
+            .sum::<usize>();
+        if count == 0 || count > 3 {
+            continue;
+        }
+        let Some(bounds) = rows[i].iter().map(|p| p.rect).reduce(union) else {
+            continue;
+        };
+        let size = rows[i]
+            .iter()
+            .flat_map(|p| &p.runs)
+            .map(|r| r.size)
+            .fold(1., f64::max);
+        let candidate = (i.saturating_sub(12)..(i + 13).min(rows.len()))
+            .filter(|j| *j != i)
+            .filter_map(|j| {
+                let other = rows[j].iter().map(|p| p.rect).reduce(union)?;
+                let max = rows[j]
+                    .iter()
+                    .flat_map(|p| &p.runs)
+                    .map(|r| r.size)
+                    .fold(1., f64::max);
+                let dy = ((other[1] + other[3] - bounds[1] - bounds[3]) / 2.).abs();
+                (size <= max * 0.8
+                    && size >= max * 0.4
+                    && dy < max * 1.2
+                    && (bounds[0] - other[2]).max(other[0] - bounds[2]) < size * 0.75)
+                    .then_some((j, dy))
+            })
+            .min_by(|a, b| a.1.total_cmp(&b.1))
+            .map(|v| v.0);
+        if let Some(j) = candidate {
+            let extra = std::mem::take(&mut rows[i]);
+            rows[j].extend(extra);
+        }
+    }
+    rows.retain(|row| !row.is_empty());
     rows.into_iter()
         .map(|mut row| {
             row.sort_by(|a, b| a.rect[0].total_cmp(&b.rect[0]));
@@ -316,6 +650,15 @@ fn join_lines(mut input: Vec<Paragraph>, gap: f64) -> Vec<Paragraph> {
                 }
                 result.rect = union(result.rect, p.rect);
                 result.runs.extend(p.runs);
+            }
+            if result.runs.iter().any(|r| r.rise.is_some())
+                && result.runs.iter().all(|r| {
+                    r.rect.is_some() && !r.text.chars().any(|c| matches!(c as u32, 0x0590..=0x08ff))
+                })
+            {
+                result
+                    .runs
+                    .sort_by(|a, b| a.rect.unwrap()[0].total_cmp(&b.rect.unwrap()[0]));
             }
             if (0..result.runs.len()).any(|i| angle(&result.runs, i).is_some())
                 && let Some(bounds) = result
@@ -739,6 +1082,7 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
     let mut artwork = Vec::new();
     let mut fills = Vec::new();
     let mut decoration_targets = Vec::new();
+    let mut decoration_regions = Vec::new();
     let drawings = e.export_drawings(index)?;
     if drawings.len() > 4000 {
         return Err(format!(
@@ -805,22 +1149,64 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
                 continue;
             }
             let bounds = run.rect.unwrap_or(paragraph.rect);
-            if lines.iter().any(|l| {
+            let native_border = lines.iter().any(|l| {
                 let r = l.rect();
                 !l.vertical()
                     && (r[1] - bounds[3]).abs() < 2.5
                     && r[0] <= bounds[0] + 2.
                     && r[2] >= bounds[2] - 2.
                     && r[2] - r[0] < paragraph.rect[2] - paragraph.rect[0] + 12.
-            }) {
+            });
+            if native_border {
                 run.underline = true;
             }
         }
     }
     let mut items = Vec::new();
     for group in groups(&lines.iter().map(Line::rect).collect::<Vec<_>>()) {
-        let members: Vec<_> = group.iter().map(|&i| lines[i].clone()).collect();
-        if let Some(table) = grid(&members, &paragraphs, &fills) {
+        let mut members: Vec<_> = group.iter().map(|&i| lines[i].clone()).collect();
+        let mut detected = grid(&members, &paragraphs, &fills);
+        if let Some(t) = &detected
+            && t.ys.len() == 2
+            && t.xs.len() >= 4
+        {
+            let top = t.ys[0] - (t.ys[1] - t.ys[0]);
+            let native_border = lines.iter().any(|l| {
+                !l.vertical()
+                    && (l.a[1] - top).abs() < 2.
+                    && l.rect()[0] <= t.rect[0] + 2.
+                    && l.rect()[2] >= t.rect[2] - 2.
+            });
+            if native_border || visible_header(e, index, p, t, top) {
+                let frame = [t.rect[0] - 2., top - 2., t.rect[2] + 2., t.rect[3] + 2.];
+                members.extend(
+                    lines
+                        .iter()
+                        .filter(|l| {
+                            contains(frame, center(l.rect()))
+                                && l.rect()[0] >= frame[0]
+                                && l.rect()[2] <= frame[2]
+                        })
+                        .cloned(),
+                );
+                members.push(Line {
+                    a: [t.rect[0], top],
+                    b: [t.rect[2], top],
+                    width: t.border,
+                    color: t.color,
+                });
+                for x in &t.xs {
+                    members.push(Line {
+                        a: [*x, top],
+                        b: [*x, t.rect[1]],
+                        width: t.border,
+                        color: t.color,
+                    });
+                }
+                detected = grid(&members, &paragraphs, &fills);
+            }
+        }
+        if let Some(table) = detected {
             paragraphs.retain(|p| !contains(table.rect, center(p.rect)));
             items.push(Item::Table(table));
         } else {
@@ -837,6 +1223,7 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
             }
         }
     }
+    artwork.retain(|r| !items.iter().any(|i| matches!(i,Item::Table(t) if contains(t.rect,[r[0],r[1]]) && contains(t.rect,[r[2],r[3]]))));
     paragraphs = fractions(paragraphs, &lines);
     let mut bitmap_rects = Vec::new();
     for image in pdfcraft_edit::reading_images(&e.doc, index).map_err(|e| e.to_string())? {
@@ -851,10 +1238,38 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
             continue;
         }
         let r = view_rect(p, item.rect);
+        // A white page-sized fill is paper, not an illustration. Cropping the
+        // full rendered page here would flatten text and duplicate real tables.
+        if (r[2] - r[0]) * (r[3] - r[1]) >= p.width as f64 * p.height as f64 * 0.9
+            && (fills.iter().any(|(rect, color)| {
+                color.iter().all(|c| *c >= 0.99)
+                    && rect.iter().zip(r).all(|(a, b)| (a - b).abs() <= 1.)
+            }) || white_paper(e, index, item.target))
+        {
+            continue;
+        }
         if r[2] - r[0] <= 2. || r[3] - r[1] <= 2. {
             continue;
         }
         if items.iter().any(|item| matches!(item, Item::Table(t) if contains(t.rect, [r[0], r[1]]) && contains(t.rect, [r[2], r[3]]))) { continue; }
+        // Keep callouts attached to an editable table out of the text flow.
+        // Cropping the rendered page here would copy part of that table into
+        // an image and reserve its height for a second time.
+        let table_callout = items.iter().any(|i| {
+            matches!(i, Item::Table(t) if touches(
+                [t.rect[0]-12., t.rect[1]-12., t.rect[2]+12., t.rect[3]+12.], r))
+        });
+        let text_frame = paragraphs.iter().any(|p| {
+            let size = p.runs.iter().map(|r| r.size).fold(0., f64::max);
+            contains(r, center(p.rect))
+                && r[3] - r[1] <= size * 1.8
+                && r[2] - r[0] <= p.rect[2] - p.rect[0] + 24.
+        });
+        if table_callout || text_frame {
+            decoration_targets.push(item.target);
+            decoration_regions.push(r);
+            continue;
+        }
         // A wide, shallow decorative frame around native headings does not
         // turn those headings into an image.
         if r[2] - r[0] > (r[3] - r[1]) * 4.
@@ -866,18 +1281,40 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
                 >= 1
         {
             decoration_targets.push(item.target);
+            decoration_regions.push(r);
             continue;
         }
         artwork.push(r);
     }
-    for image in pdfcraft_edit::page_images(&e.doc, index).map_err(|e| e.to_string())? {
+    let decoration_bounds: Vec<_> = groups(&decoration_regions)
+        .into_iter()
+        .filter_map(|g| g.into_iter().map(|i| decoration_regions[i]).reduce(union))
+        .collect();
+    let is_decoration = |r: &[f64; 4]| {
+        decoration_bounds
+            .iter()
+            .any(|d| contains(*d, [r[0], r[1]]) && contains(*d, [r[2], r[3]]))
+    };
+    artwork.retain(|r| !is_decoration(r));
+    for (image_index, image) in pdfcraft_edit::page_images(&e.doc, index)
+        .map_err(|e| e.to_string())?
+        .into_iter()
+        .enumerate()
+    {
         if image.is_form {
-            let r = view_rect(p, image.visible_rect.unwrap_or(image.rect));
+            let mut r = view_rect(p, image.visible_rect.unwrap_or(image.rect));
+            if (r[2] - r[0]) * (r[3] - r[1]) >= p.width as f64 * p.height as f64 * 0.5
+                && image_index < 64
+                && let Some(ink) = form_ink_rect(e, index, image_index)
+            {
+                r = ink;
+            }
             if (r[2] - r[0]) * (r[3] - r[1]) < p.width as f64 * p.height as f64 * 0.5 {
                 artwork.push(r);
             }
         }
     }
+    artwork.retain(|r| !is_decoration(r));
     // Merge neighbouring components of one figure before taking a crop. Labels
     // inside it travel with the figure, avoiding a second copy in the text flow.
     if !artwork.is_empty() || !bitmap_rects.is_empty() {
@@ -923,7 +1360,7 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
                 ]);
             }
         }
-        let rects: Vec<_> = groups(&artwork)
+        let rects: Vec<_> = figure_groups(&artwork)
             .into_iter()
             .filter_map(|g| g.into_iter().map(|i| artwork[i]).reduce(union))
             .collect();
@@ -994,6 +1431,21 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
                         ..((y * raster.width + x1) * 4) as usize],
                 );
             }
+            // The crop's white margin can include the end of a prose line
+            // beside an irregular figure. That line stays native in the flow;
+            // do not paint its fragment a second time inside the illustration.
+            for text in paragraphs.iter().filter(|p| !contains(r, center(p.rect))) {
+                let b = text.rect;
+                let left = ((b[0] * sx).floor().max(x0 as f64) as u32).min(x1);
+                let right = ((b[2] * sx).ceil().max(x0 as f64) as u32).min(x1);
+                let top = ((b[1] * sy).floor().max(y0 as f64) as u32).min(y1);
+                let bottom = ((b[3] * sy).ceil().max(y0 as f64) as u32).min(y1);
+                for y in top..bottom {
+                    for x in left..right {
+                        rgba[(((y - y0) * (x1 - x0) + (x - x0)) * 4 + 3) as usize] = 0;
+                    }
+                }
+            }
             if !rgba
                 .as_chunks::<4>()
                 .0
@@ -1016,6 +1468,7 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
         }
         items.push(Item::Paragraph(paragraph));
     }
+    preserve_complex_math(e, index, &mut items)?;
     items.sort_by(|a, b| {
         a.rect()[1]
             .total_cmp(&b.rect()[1])
@@ -1027,10 +1480,23 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
         p.width as f64 - 36.,
         p.height as f64 - 36.,
     ]);
+    // A tight glyph bound is not a Word line limit. Font-unit rounding and
+    // kerning differences need a small allowance to avoid an extra wrapped row.
+    let max_size = items
+        .iter()
+        .filter_map(|i| {
+            if let Item::Paragraph(p) = i {
+                Some(p.runs.iter().map(|r| r.size).fold(1., f64::max))
+            } else {
+                None
+            }
+        })
+        .fold(1., f64::max);
+    let line_slack = (max_size * 0.5).clamp(2., 20.);
     let margin = [
         bounds[0].clamp(0., 54.),
         bounds[1].clamp(0., 54.),
-        (p.width as f64 - bounds[2]).clamp(0., 54.),
+        (p.width as f64 - bounds[2] - line_slack).clamp(0., 54.),
         // Reserve no artificial footer area: tall construction/table cells
         // must be allowed to fit on their source page after font substitution.
         0.,
@@ -1073,6 +1539,21 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
             bytes: crate::ocr::encode_png(&rgba, raster.width, raster.height)?,
         });
     }
+    // A PDF figure can have an irregular silhouette with prose beside its
+    // bounding rectangle. Inline placement would stack those overlapping
+    // rectangles and push the rest of the page down. Word/Writer support real
+    // page-anchored illustrations; the text remains ordinary flowing paragraphs.
+    // Keep image-only pages inline so they retain a real page carrier.
+    if items.iter().any(|i| !matches!(i, Item::Picture(_))) {
+        items.retain(|item| {
+            if let Item::Picture(picture) = item {
+                decorations.push(picture.clone());
+                false
+            } else {
+                true
+            }
+        });
+    }
     let fonts = super::fonts::preserve(e, index, &mut items)?;
     Ok(Page {
         width: p.width as f64,
@@ -1087,6 +1568,232 @@ pub(super) fn page(e: &Editor, index: usize) -> Result<Page> {
 #[cfg(test)]
 mod fraction_tests {
     use super::*;
+    #[test]
+    fn simple_fraction_stays_native_while_complex_math_requires_source_preservation() {
+        let small = sample("1", false).remove(0);
+        assert!(!complex_math(&small, false));
+        assert!(complex_math(&small, true));
+        assert!(complex_math(&sample("123", false).remove(0), false));
+    }
+    #[test]
+    fn preserved_math_pixels_match_source_and_prose_and_tables_stay_native() {
+        use pdfcraft_cos::{Dict, Object, Stream};
+        let mut doc = pdfcraft_create::blank(200., 200., 1).unwrap();
+        let mut font = Dict::new();
+        font.set(b"Type".to_vec(), Object::name("Font"));
+        font.set(b"Subtype".to_vec(), Object::name("Type1"));
+        font.set(b"BaseFont".to_vec(), Object::name("Helvetica"));
+        let mut fonts = Dict::new();
+        fonts.set(b"F1".to_vec(), Object::Ref(doc.add(font)));
+        let mut resources = Dict::new();
+        resources.set(b"Font".to_vec(), Object::Dict(fonts));
+        let stream=doc.add(Stream::flate(Dict::new(),b"BT /F1 12 Tf 20 170 Td (Editable prose) Tj ET BT /F1 12 Tf 20 130 Td (123) Tj ET BT /F1 12 Tf 20 100 Td (4) Tj ET 19 125 m 44 125 l S"));
+        let page = pdfcraft_model::pages(&doc)[0].obj;
+        doc.update_dict(page, |p| {
+            p.set(b"Resources".to_vec(), Object::Dict(resources));
+            p.set(b"Contents".to_vec(), Object::Ref(stream));
+        })
+        .unwrap();
+        let editor =
+            Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap())
+                .unwrap();
+        let before = editor.bytes.clone();
+        let mut math = sample("123", false).remove(0);
+        math.rect = [18., 58., 50., 105.];
+        math.runs[0].rect = Some(math.rect);
+        if let Some(f) = &mut math.runs[0].fraction {
+            f.numerator[0].rect = Some([20., 58., 40., 70.]);
+            f.denominator[0].rect = Some([20., 88., 26., 100.]);
+        }
+        let mut items = vec![
+            Item::Paragraph(paragraph("Editable prose", [20., 18., 130., 30.])),
+            Item::Paragraph(math),
+            Item::Table(Table {
+                rect: [100., 100., 180., 180.],
+                xs: vec![],
+                ys: vec![],
+                rows: vec![],
+                border: 1.,
+                color: [0.; 3],
+            }),
+        ];
+        preserve_complex_math(&editor, 0, &mut items).unwrap();
+        assert_eq!(
+            items
+                .iter()
+                .filter(|i| matches!(i, Item::Paragraph(_)))
+                .count(),
+            1
+        );
+        assert!(items.iter().any(|i| matches!(i, Item::Table(_))));
+        let picture = items
+            .iter()
+            .find_map(|i| {
+                if let Item::Picture(p) = i {
+                    Some(p)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        let mut reader = png::Decoder::new(std::io::Cursor::new(&picture.bytes))
+            .read_info()
+            .unwrap();
+        let mut rgba = vec![0; reader.output_buffer_size().unwrap()];
+        let output = reader.next_frame(&mut rgba).unwrap();
+        let mut renderer =
+            pdfcraft_render::PageRenderer::new(editor.bytes.clone(), Default::default());
+        let source = renderer.render(pdfcraft_render::RenderRequest {
+            page: 0,
+            scale: 3.,
+            ..Default::default()
+        });
+        let x = (picture.rect[0] * 3.).floor() as u32;
+        let y = (picture.rect[1] * 3.).floor() as u32;
+        for row in 0..output.height {
+            let start = (((y + row) * source.width + x) * 4) as usize;
+            assert_eq!(
+                &rgba[(row * output.width * 4) as usize..((row + 1) * output.width * 4) as usize],
+                &source.rgba[start..start + (output.width * 4) as usize]
+            );
+        }
+        assert_eq!(before, editor.bytes);
+    }
+    #[test]
+    fn neighbouring_figure_parts_stay_together_without_joining_distant_figures() {
+        let rects = [
+            [20., 40., 60., 100.],
+            [70., 30., 80., 120.],
+            [180., 40., 220., 100.],
+        ];
+        assert_eq!(figure_groups(&rects), vec![vec![0, 1], vec![2]]);
+    }
+    #[test]
+    fn oversized_form_bbox_uses_its_visible_ink_for_export() {
+        use pdfcraft_cos::{Dict, Object, Stream};
+        let mut doc = pdfcraft_create::blank(200., 200., 1).unwrap();
+        let mut form = Dict::new();
+        form.set(b"Type".to_vec(), Object::name("XObject"));
+        form.set(b"Subtype".to_vec(), Object::name("Form"));
+        form.set(
+            b"BBox".to_vec(),
+            Object::Array(vec![0.into(), 0.into(), 1000.into(), 1000.into()]),
+        );
+        let object = doc.add(Stream::flate(form, b"0 G 2 w 20 20 m 80 20 l 50 80 l h S"));
+        let mut xobjects = Dict::new();
+        xobjects.set(b"Figure".to_vec(), Object::Ref(object));
+        let mut resources = Dict::new();
+        resources.set(b"XObject".to_vec(), Object::Dict(xobjects));
+        let stream = doc.add(Stream::flate(Dict::new(), b"/Figure Do"));
+        let page = pdfcraft_model::pages(&doc)[0].obj;
+        doc.update_dict(page, |d| {
+            d.set(b"Resources".to_vec(), Object::Dict(resources));
+            d.set(b"Contents".to_vec(), Object::Ref(stream));
+        })
+        .unwrap();
+        let editor =
+            Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap())
+                .unwrap();
+        let rect = form_ink_rect(&editor, 0, 0).unwrap();
+        assert!(rect[0] < 21. && rect[0] > 16. && rect[2] > 79. && rect[2] < 84.);
+        assert!(rect[1] > 116. && rect[3] < 184.);
+        let page = super::page(&editor, 0).unwrap();
+        assert!(
+            page.items
+                .iter()
+                .any(|i| matches!(i, Item::Picture(p) if p.rect[2]-p.rect[0] < 100.))
+        );
+    }
+    #[test]
+    fn missing_header_geometry_requires_visible_borders_in_the_pdf() {
+        use pdfcraft_cos::{Dict, Object, Stream};
+        let mut doc = pdfcraft_create::blank(200., 200., 1).unwrap();
+        let page = pdfcraft_model::pages(&doc)[0].obj;
+        let stream=doc.add(Stream::flate(Dict::new(),b"0 G 1 w 20 50 160 80 re S 20 90 m 180 90 l S 60 50 m 60 130 l S 100 50 m 100 130 l S 140 50 m 140 130 l S"));
+        doc.update_dict(page, |d| d.set(b"Contents".to_vec(), Object::Ref(stream)))
+            .unwrap();
+        let editor =
+            Editor::from_bytes(pdfcraft_cos::write_full(&doc, &Default::default()).unwrap())
+                .unwrap();
+        let table = Table {
+            rect: [20., 110., 180., 150.],
+            xs: vec![20., 60., 100., 140., 180.],
+            ys: vec![110., 150.],
+            rows: vec![],
+            border: 1.,
+            color: [0.; 3],
+        };
+        assert!(visible_header(
+            &editor,
+            0,
+            &editor.info.pages[0],
+            &table,
+            70.
+        ));
+        let blank = Editor::from_bytes(
+            pdfcraft_cos::write_full(
+                &pdfcraft_create::blank(200., 200., 1).unwrap(),
+                &Default::default(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        assert!(!visible_header(
+            &blank,
+            0,
+            &blank.info.pages[0],
+            &table,
+            70.
+        ));
+    }
+    #[test]
+    fn raised_glyph_arriving_before_separate_base_words_is_reattached() {
+        let mut words = vec![
+            paragraph("Classe ", [0., 20., 30., 32.]),
+            paragraph("la ", [35., 20., 60., 32.]),
+            paragraph("4", [65., 20., 90., 32.]),
+        ];
+        for p in &mut words {
+            p.runs[0].baseline = Some(29.);
+        }
+        let mut script = paragraph("e", [90., 13., 95., 19.]);
+        script.runs[0].size = 8.;
+        script.runs[0].baseline = Some(21.);
+        words.push(script);
+        let joined = join_lines(words, 1.5);
+        assert_eq!(joined.len(), 1);
+        assert_eq!(
+            joined[0]
+                .runs
+                .iter()
+                .map(|r| r.text.as_str())
+                .collect::<String>(),
+            "Classe la 4e"
+        );
+    }
+    #[test]
+    fn footer_superscript_joins_its_base_without_becoming_an_extra_line() {
+        let mut base = paragraph("Classe 4", [0., 20., 45., 32.]);
+        base.runs[0].baseline = Some(29.);
+        let mut suffix = paragraph(" suite", [52., 20., 100., 32.]);
+        suffix.runs[0].baseline = Some(29.);
+        base.runs.extend(suffix.runs);
+        base.rect[2] = 100.;
+        let mut script = paragraph("e", [46., 13., 51., 19.]);
+        script.runs[0].size = 8.;
+        script.runs[0].baseline = Some(21.);
+        let joined = join_lines(vec![base, script], 1.5);
+        assert_eq!(joined.len(), 1);
+        assert_eq!(
+            joined[0]
+                .runs
+                .iter()
+                .map(|r| r.text.as_str())
+                .collect::<String>(),
+            "Classe 4e suite"
+        );
+        assert_eq!(joined[0].runs[1].rise, Some(8.));
+    }
     fn paragraph(text: &str, rect: [f64; 4]) -> Paragraph {
         Paragraph {
             rect,
